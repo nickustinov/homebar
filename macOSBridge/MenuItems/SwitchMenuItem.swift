@@ -2,7 +2,7 @@
 //  SwitchMenuItem.swift
 //  macOSBridge
 //
-//  Menu item for simple on/off switches and outlets
+//  Menu item for controlling switches and outlets
 //
 
 import AppKit
@@ -18,49 +18,58 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
     private let containerView: NSView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
-    private let toggleButton: NSButton
+    private let toggleSwitch: ToggleSwitch
 
     var characteristicIdentifiers: [UUID] {
-        if let id = powerCharacteristicId { return [id] }
-        return []
+        var ids: [UUID] = []
+        if let id = powerCharacteristicId { ids.append(id) }
+        return ids
     }
 
     init(serviceData: ServiceData, bridge: Mac2iOS?) {
         self.serviceData = serviceData
         self.bridge = bridge
 
-        // Extract characteristic UUID from ServiceData
+        // Extract characteristic UUIDs from ServiceData
         self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
-        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b" : "switch.2"
-        iconView = NSImageView(frame: NSRect(x: 10, y: 5, width: 20, height: 20))
+        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
+        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b" : "power"
         iconView.image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
         // Name label
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelWidth = DS.ControlSize.menuItemWidth - labelX - DS.ControlSize.switchWidth - DS.Spacing.lg - DS.Spacing.md
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 6, width: 160, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
         // Toggle switch
-        toggleButton = NSButton(frame: NSRect(x: 200, y: 2, width: 40, height: 26))
-        toggleButton.setButtonType(.switch)
-        toggleButton.title = ""
-        containerView.addSubview(toggleButton)
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+        let switchY = (DS.ControlSize.menuItemHeight - DS.ControlSize.switchHeight) / 2
+        toggleSwitch = ToggleSwitch()
+        toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
+        containerView.addSubview(toggleSwitch)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
 
         // Set up action
-        toggleButton.target = self
-        toggleButton.action = #selector(togglePower(_:))
+        toggleSwitch.target = self
+        toggleSwitch.action = #selector(togglePower(_:))
     }
 
     required init(coder: NSCoder) {
@@ -68,22 +77,27 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
     }
 
     func updateValue(for characteristicId: UUID, value: Any) {
-        if characteristicId == powerCharacteristicId, let boolValue = value as? Bool {
-            isOn = boolValue
-            updateUI()
-        } else if characteristicId == powerCharacteristicId, let intValue = value as? Int {
-            isOn = intValue != 0
-            updateUI()
+        if characteristicId == powerCharacteristicId {
+            if let boolValue = value as? Bool {
+                isOn = boolValue
+                updateUI()
+            } else if let intValue = value as? Int {
+                isOn = intValue != 0
+                updateUI()
+            }
         }
     }
 
     private func updateUI() {
-        toggleButton.state = isOn ? .on : .off
-        iconView.contentTintColor = isOn ? .systemGreen : .secondaryLabelColor
+        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b.fill" : "power"
+        let iconNameOff = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b" : "power"
+        iconView.image = NSImage(systemSymbolName: isOn ? iconName : iconNameOff, accessibilityDescription: nil)
+        iconView.contentTintColor = isOn ? DS.Colors.success : DS.Colors.mutedForeground
+        toggleSwitch.setOn(isOn, animated: false)
     }
 
-    @objc private func togglePower(_ sender: NSButton) {
-        isOn = sender.state == .on
+    @objc private func togglePower(_ sender: ToggleSwitch) {
+        isOn = sender.isOn
         if let id = powerCharacteristicId {
             bridge?.writeCharacteristic(identifier: id, value: isOn)
         }

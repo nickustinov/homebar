@@ -23,8 +23,8 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private let containerView: NSView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
-    private let tempLabel: NSTextField
-    private let stepper: NSStepper
+    private let currentTempLabel: NSTextField
+    private let targetSlider: ModernSlider
     private let targetLabel: NSTextField
 
     var characteristicIdentifiers: [UUID] {
@@ -44,50 +44,71 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.targetTempCharacteristicId = serviceData.targetTemperatureId.flatMap { UUID(uuidString: $0) }
         self.modeCharacteristicId = serviceData.heatingCoolingStateId.flatMap { UUID(uuidString: $0) }
 
+        let height: CGFloat = DS.ControlSize.menuItemHeightLarge + 8
+
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: 50))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 15, width: 20, height: 20))
+        let iconY = height - DS.Spacing.lg - DS.ControlSize.iconMedium
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
+        // Target label position (right-aligned)
+        let targetWidth: CGFloat = 50
+        let targetX = DS.ControlSize.menuItemWidth - DS.Spacing.md - targetWidth
+
+        // Current temp label position (before target)
+        let tempWidth: CGFloat = 50
+        let tempX = targetX - tempWidth - DS.Spacing.xs
+
+        // Name label (fills space up to temp label)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = height - DS.Spacing.lg - 17
+        let labelWidth = tempX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 28, width: 120, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
-        // Current temp
-        tempLabel = NSTextField(labelWithString: "--°C")
-        tempLabel.frame = NSRect(x: 160, y: 28, width: 50, height: 17)
-        tempLabel.font = NSFont.systemFont(ofSize: 13)
-        tempLabel.alignment = .right
-        containerView.addSubview(tempLabel)
+        // Current temp label
+        currentTempLabel = NSTextField(labelWithString: "--°C")
+        currentTempLabel.frame = NSRect(x: tempX, y: labelY, width: tempWidth, height: 17)
+        currentTempLabel.font = DS.Typography.labelSmall
+        currentTempLabel.textColor = DS.Colors.mutedForeground
+        currentTempLabel.alignment = .right
+        containerView.addSubview(currentTempLabel)
 
         // Target label
-        targetLabel = NSTextField(labelWithString: "Target: 20°C")
-        targetLabel.frame = NSRect(x: 38, y: 5, width: 100, height: 17)
-        targetLabel.font = NSFont.systemFont(ofSize: 11)
-        targetLabel.textColor = .secondaryLabelColor
+        targetLabel = NSTextField(labelWithString: "20.0°C")
+        targetLabel.frame = NSRect(x: targetX, y: labelY, width: targetWidth, height: 17)
+        targetLabel.font = DS.Typography.labelSmall
+        targetLabel.textColor = DS.Colors.primary
+        targetLabel.alignment = .right
         containerView.addSubview(targetLabel)
 
-        // Stepper for target temp
-        stepper = NSStepper(frame: NSRect(x: 200, y: 5, width: 40, height: 20))
-        stepper.minValue = 10
-        stepper.maxValue = 30
-        stepper.increment = 0.5
-        stepper.doubleValue = 20
-        containerView.addSubview(stepper)
+        // Target temperature slider
+        let sliderX = labelX
+        let sliderWidth = DS.ControlSize.menuItemWidth - sliderX - DS.Spacing.md
+        targetSlider = ModernSlider(minValue: 10, maxValue: 30)
+        targetSlider.frame = NSRect(x: sliderX, y: DS.Spacing.sm, width: sliderWidth, height: DS.ControlSize.sliderThumbSize)
+        targetSlider.doubleValue = 20
+        targetSlider.progressTintColor = DS.Colors.thermostatHeat
+        targetSlider.isContinuous = false
+        containerView.addSubview(targetSlider)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
 
         // Set up action
-        stepper.target = self
-        stepper.action = #selector(stepperChanged(_:))
+        targetSlider.target = self
+        targetSlider.action = #selector(sliderChanged(_:))
     }
 
     required init(coder: NSCoder) {
@@ -98,46 +119,50 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         if characteristicId == currentTempCharacteristicId {
             if let temp = value as? Double {
                 currentTemp = temp
-                tempLabel.stringValue = String(format: "%.1f°C", temp)
+                currentTempLabel.stringValue = String(format: "%.1f°C", temp)
             } else if let temp = value as? Int {
                 currentTemp = Double(temp)
-                tempLabel.stringValue = String(format: "%.1f°C", currentTemp)
+                currentTempLabel.stringValue = String(format: "%.1f°C", currentTemp)
             }
         } else if characteristicId == targetTempCharacteristicId {
             if let temp = value as? Double {
                 targetTemp = temp
-                stepper.doubleValue = temp
-                targetLabel.stringValue = String(format: "Target: %.1f°C", temp)
+                targetSlider.doubleValue = temp
+                targetLabel.stringValue = String(format: "%.1f°C", temp)
             } else if let temp = value as? Int {
                 targetTemp = Double(temp)
-                stepper.doubleValue = targetTemp
-                targetLabel.stringValue = String(format: "Target: %.1f°C", targetTemp)
+                targetSlider.doubleValue = targetTemp
+                targetLabel.stringValue = String(format: "%.1f°C", targetTemp)
             }
         } else if characteristicId == modeCharacteristicId {
             if let m = value as? Int {
                 mode = m
-                updateModeIcon()
+                updateModeUI()
             }
         }
     }
 
-    private func updateModeIcon() {
-        let (symbolName, color): (String, NSColor) = switch mode {
-        case 1: ("flame", .systemOrange)
-        case 2: ("snowflake", .systemBlue)
-        default: ("thermometer", .secondaryLabelColor)
+    private func updateModeUI() {
+        let (symbolName, color, sliderColor): (String, NSColor, NSColor) = switch mode {
+        case 1: ("flame", DS.Colors.thermostatHeat, DS.Colors.thermostatHeat)
+        case 2: ("snowflake", DS.Colors.thermostatCool, DS.Colors.thermostatCool)
+        default: ("thermometer", DS.Colors.mutedForeground, DS.Colors.primary)
         }
         iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
         iconView.contentTintColor = color
+        targetSlider.progressTintColor = sliderColor
     }
 
-    @objc private func stepperChanged(_ sender: NSStepper) {
-        let value = sender.doubleValue
-        targetTemp = value
-        targetLabel.stringValue = String(format: "Target: %.1f°C", value)
+    @objc private func sliderChanged(_ sender: ModernSlider) {
+        // Round to nearest 0.5
+        let rawValue = sender.doubleValue
+        let roundedValue = (rawValue * 2).rounded() / 2
+        targetTemp = roundedValue
+        targetSlider.doubleValue = roundedValue
+        targetLabel.stringValue = String(format: "%.1f°C", roundedValue)
 
         if let id = targetTempCharacteristicId {
-            bridge?.writeCharacteristic(identifier: id, value: Float(value))
+            bridge?.writeCharacteristic(identifier: id, value: Float(roundedValue))
         }
     }
 }

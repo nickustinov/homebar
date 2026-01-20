@@ -41,7 +41,7 @@ class SensorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Determine icon based on service type
         let iconName: String = {
@@ -58,22 +58,28 @@ class SensorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         }()
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 5, width: 20, height: 20))
+        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
         // Name label
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 6, width: 140, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: 140, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
         // Value label
         valueLabel = NSTextField(labelWithString: "--")
-        valueLabel.frame = NSRect(x: 180, y: 6, width: 60, height: 17)
-        valueLabel.font = NSFont.systemFont(ofSize: 13)
-        valueLabel.textColor = .secondaryLabelColor
+        valueLabel.frame = NSRect(x: DS.ControlSize.menuItemWidth - DS.Spacing.md - 65, y: labelY, width: 65, height: 17)
+        valueLabel.font = DS.Typography.label
+        valueLabel.textColor = DS.Colors.mutedForeground
         valueLabel.alignment = .right
         containerView.addSubview(valueLabel)
 
@@ -109,11 +115,13 @@ class SensorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         case ServiceTypes.motionSensor:
             if let motion = value as? Bool {
                 valueLabel.stringValue = motion ? "Motion" : "Clear"
-                iconView.contentTintColor = motion ? .systemOrange : .secondaryLabelColor
+                valueLabel.textColor = motion ? DS.Colors.warning : DS.Colors.mutedForeground
+                iconView.contentTintColor = motion ? DS.Colors.warning : DS.Colors.mutedForeground
             } else if let motion = value as? Int {
                 let detected = motion != 0
                 valueLabel.stringValue = detected ? "Motion" : "Clear"
-                iconView.contentTintColor = detected ? .systemOrange : .secondaryLabelColor
+                valueLabel.textColor = detected ? DS.Colors.warning : DS.Colors.mutedForeground
+                iconView.contentTintColor = detected ? DS.Colors.warning : DS.Colors.mutedForeground
             }
         default:
             valueLabel.stringValue = "\(value)"

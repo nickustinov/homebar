@@ -15,13 +15,17 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
     private var activeId: UUID?
     private var rotationSpeedId: UUID?
     private var isActive: Bool = false
-    private var speed: Double = 100
+    private var speed: Double = 1
 
     private let containerView: NSView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
-    private let speedSlider: NSSlider
-    private let toggleButton: NSButton
+    private let speedSlider: ModernSlider
+    private let toggleSwitch: ToggleSwitch
+
+    private let hasSpeed: Bool
+    private let speedMin: Double
+    private let speedMax: Double
 
     var characteristicIdentifiers: [UUID] {
         var ids: [UUID] = []
@@ -38,44 +42,56 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
         self.rotationSpeedId = serviceData.rotationSpeedId.flatMap { UUID(uuidString: $0) }
 
-        let hasSpeed = rotationSpeedId != nil
+        self.hasSpeed = rotationSpeedId != nil
+        self.speedMin = serviceData.rotationSpeedMin ?? 0
+        self.speedMax = serviceData.rotationSpeedMax ?? 100
+
+        // Single row height
+        let height: CGFloat = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: hasSpeed ? 50 : 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        let iconY = hasSpeed ? 15 : 5
-        iconView = NSImageView(frame: NSRect(x: 10, y: iconY, width: 20, height: 20))
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
-        let labelY = hasSpeed ? 28 : 6
+        // Toggle switch (rightmost)
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+        let switchY = (height - DS.ControlSize.switchHeight) / 2
+        toggleSwitch = ToggleSwitch()
+        toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
+        containerView.addSubview(toggleSwitch)
+
+        // Name label (full width when off, truncated when on with slider)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (height - 17) / 2
+        let fullLabelWidth = switchX - labelX - DS.Spacing.sm
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: labelY, width: 170, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: fullLabelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
-        // Speed slider (only if supported)
-        speedSlider = NSSlider(frame: NSRect(x: 38, y: 5, width: 160, height: 20))
-        speedSlider.minValue = 0
-        speedSlider.maxValue = 100
-        speedSlider.doubleValue = 100
-        speedSlider.isContinuous = false
-        speedSlider.isHidden = !hasSpeed
+        // Speed slider (fixed width, positioned before toggle)
+        let sliderWidth: CGFloat = 80
+        let sliderX = switchX - sliderWidth - DS.Spacing.sm
+        let sliderY = (height - 12) / 2
+
+        // Speed slider with actual min/max from characteristic
+        speedSlider = ModernSlider(minValue: speedMin, maxValue: speedMax)
+        speedSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
+        speedSlider.doubleValue = speedMax
+        speedSlider.isContinuous = false  // Only send value on release to reduce errors
+        speedSlider.isHidden = true  // Hidden by default, shown when active
         if hasSpeed {
             containerView.addSubview(speedSlider)
         }
-
-        // Toggle button
-        let buttonY = hasSpeed ? 12 : 2
-        toggleButton = NSButton(frame: NSRect(x: 210, y: buttonY, width: 30, height: 26))
-        toggleButton.bezelStyle = .inline
-        toggleButton.setButtonType(.toggle)
-        toggleButton.title = ""
-        toggleButton.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        containerView.addSubview(toggleButton)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
@@ -85,8 +101,8 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         speedSlider.target = self
         speedSlider.action = #selector(sliderChanged(_:))
 
-        toggleButton.target = self
-        toggleButton.action = #selector(togglePower(_:))
+        toggleSwitch.target = self
+        toggleSwitch.action = #selector(togglePower(_:))
     }
 
     required init(coder: NSCoder) {
@@ -118,14 +134,31 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
 
     private func updateUI() {
         iconView.image = NSImage(systemSymbolName: isActive ? "fan.fill" : "fan", accessibilityDescription: nil)
-        iconView.contentTintColor = isActive ? .systemCyan : .secondaryLabelColor
-        toggleButton.state = isActive ? .on : .off
+        iconView.contentTintColor = isActive ? DS.Colors.fanOn : DS.Colors.mutedForeground
+        toggleSwitch.setOn(isActive, animated: false)
+
+        let showSlider = isActive && hasSpeed
+        speedSlider.isHidden = !showSlider
+
+        // Adjust name label width based on slider visibility
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let sliderWidth: CGFloat = 80
+        if showSlider {
+            nameLabel.frame.size.width = switchX - sliderWidth - DS.Spacing.sm * 2 - labelX
+        } else {
+            nameLabel.frame.size.width = switchX - labelX - DS.Spacing.sm
+        }
     }
 
-    @objc private func sliderChanged(_ sender: NSSlider) {
-        let value = sender.doubleValue
+    @objc private func sliderChanged(_ sender: ModernSlider) {
+        // Round to nearest integer step
+        let roundedValue = round(sender.doubleValue)
+        sender.doubleValue = roundedValue  // Snap slider to position
+
+        let value = Float(roundedValue)
         if let id = rotationSpeedId {
-            bridge?.writeCharacteristic(identifier: id, value: Float(value))
+            bridge?.writeCharacteristic(identifier: id, value: value)
         }
 
         // Also turn on if setting speed > 0 and fan is off
@@ -136,8 +169,8 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         }
     }
 
-    @objc private func togglePower(_ sender: NSButton) {
-        isActive = sender.state == .on
+    @objc private func togglePower(_ sender: ToggleSwitch) {
+        isActive = sender.isOn
         if let id = activeId {
             bridge?.writeCharacteristic(identifier: id, value: isActive ? 1 : 0)
         }

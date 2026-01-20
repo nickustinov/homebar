@@ -2,7 +2,7 @@
 //  LockMenuItem.swift
 //  macOSBridge
 //
-//  Menu item for door locks
+//  Menu item for door locks with confirmation for unlock
 //
 
 import AppKit
@@ -20,7 +20,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let statusLabel: NSTextField
-    private let actionButton: NSButton
+    private let toggleSwitch: ToggleSwitch
 
     var characteristicIdentifiers: [UUID] {
         var ids: [UUID] = []
@@ -37,42 +37,56 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         self.targetStateCharacteristicId = serviceData.lockTargetStateId.flatMap { UUID(uuidString: $0) }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 5, width: 20, height: 20))
+        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)
-        iconView.contentTintColor = .systemGreen
+        iconView.contentTintColor = DS.Colors.success
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
+        // Toggle switch position (calculate first for alignment)
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+
+        // Status label position (right-aligned before toggle)
+        let statusWidth: CGFloat = 55
+        let statusX = switchX - statusWidth - DS.Spacing.sm
+
+        // Name label (fills space up to status label)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelWidth = statusX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 6, width: 100, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
         // Status label
         statusLabel = NSTextField(labelWithString: "Locked")
-        statusLabel.frame = NSRect(x: 140, y: 6, width: 50, height: 17)
-        statusLabel.font = NSFont.systemFont(ofSize: 11)
-        statusLabel.textColor = .secondaryLabelColor
+        statusLabel.frame = NSRect(x: statusX, y: labelY, width: statusWidth, height: 17)
+        statusLabel.font = DS.Typography.labelSmall
+        statusLabel.textColor = DS.Colors.mutedForeground
         statusLabel.alignment = .right
         containerView.addSubview(statusLabel)
 
-        // Action button
-        actionButton = NSButton(frame: NSRect(x: 195, y: 2, width: 50, height: 26))
-        actionButton.bezelStyle = .inline
-        actionButton.title = "Unlock"
-        actionButton.font = NSFont.systemFont(ofSize: 11)
-        containerView.addSubview(actionButton)
+        // Toggle switch (on = locked, off = unlocked)
+        let switchY = (DS.ControlSize.menuItemHeight - DS.ControlSize.switchHeight) / 2
+        toggleSwitch = ToggleSwitch()
+        toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
+        toggleSwitch.isOn = true  // Locked = on
+        containerView.addSubview(toggleSwitch)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
 
         // Set up action
-        actionButton.target = self
-        actionButton.action = #selector(toggleLock(_:))
+        toggleSwitch.target = self
+        toggleSwitch.action = #selector(toggleLock(_:))
     }
 
     required init(coder: NSCoder) {
@@ -91,27 +105,15 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
 
     private func updateUI() {
         iconView.image = NSImage(systemSymbolName: isLocked ? "lock.fill" : "lock.open", accessibilityDescription: nil)
-        iconView.contentTintColor = isLocked ? .systemGreen : .systemOrange
+        iconView.contentTintColor = DS.Colors.mutedForeground
         statusLabel.stringValue = isLocked ? "Locked" : "Unlocked"
-        actionButton.title = isLocked ? "Unlock" : "Lock"
+        statusLabel.textColor = DS.Colors.mutedForeground
+        toggleSwitch.setOn(isLocked, animated: false)  // ON = locked, OFF = unlocked
     }
 
-    @objc private func toggleLock(_ sender: NSButton) {
-        if isLocked {
-            // Show confirmation before unlocking
-            let alert = NSAlert()
-            alert.messageText = "Unlock \(serviceData.name)?"
-            alert.informativeText = "Are you sure you want to unlock this door?"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "Unlock")
-            alert.addButton(withTitle: "Cancel")
-
-            if alert.runModal() == .alertFirstButtonReturn {
-                setLockState(locked: false)
-            }
-        } else {
-            setLockState(locked: true)
-        }
+    @objc private func toggleLock(_ sender: ToggleSwitch) {
+        // ON = locked, OFF = unlocked
+        setLockState(locked: sender.isOn)
     }
 
     private func setLockState(locked: Bool) {

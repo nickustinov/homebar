@@ -2,7 +2,7 @@
 //  GarageDoorMenuItem.swift
 //  macOSBridge
 //
-//  Menu item for controlling garage doors with confirmation
+//  Menu item for controlling garage doors with toggle switch
 //
 
 import AppKit
@@ -23,8 +23,8 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private let containerView: NSView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
-    private let stateLabel: NSTextField
-    private let actionButton: NSButton
+    private let statusLabel: NSTextField
+    private let toggleSwitch: ToggleSwitch
 
     var characteristicIdentifiers: [UUID] {
         var ids: [UUID] = []
@@ -44,41 +44,56 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.obstructionDetectedId = serviceData.obstructionDetectedId.flatMap { UUID(uuidString: $0) }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 40))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 10, width: 20, height: 20))
+        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
+        // Toggle switch position (calculate first for alignment)
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+
+        // Status label position (right-aligned before toggle)
+        let statusWidth: CGFloat = 55
+        let statusX = switchX - statusWidth - DS.Spacing.sm
+
+        // Name label (fills space up to status label)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelWidth = statusX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 20, width: 130, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
-        // State label
-        stateLabel = NSTextField(labelWithString: "Closed")
-        stateLabel.frame = NSRect(x: 38, y: 4, width: 130, height: 14)
-        stateLabel.font = NSFont.systemFont(ofSize: 11)
-        stateLabel.textColor = .secondaryLabelColor
-        containerView.addSubview(stateLabel)
+        // Status label
+        statusLabel = NSTextField(labelWithString: "Closed")
+        statusLabel.frame = NSRect(x: statusX, y: labelY, width: statusWidth, height: 17)
+        statusLabel.font = DS.Typography.labelSmall
+        statusLabel.textColor = DS.Colors.mutedForeground
+        statusLabel.alignment = .right
+        containerView.addSubview(statusLabel)
 
-        // Action button
-        actionButton = NSButton(frame: NSRect(x: 175, y: 7, width: 95, height: 26))
-        actionButton.bezelStyle = .inline
-        actionButton.title = "Open"
-        actionButton.font = NSFont.systemFont(ofSize: 11)
-        containerView.addSubview(actionButton)
+        // Toggle switch (on = closed, off = open)
+        let switchY = (DS.ControlSize.menuItemHeight - DS.ControlSize.switchHeight) / 2
+        toggleSwitch = ToggleSwitch()
+        toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
+        toggleSwitch.isOn = true  // Closed = on
+        containerView.addSubview(toggleSwitch)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
 
         // Set up action
-        actionButton.target = self
-        actionButton.action = #selector(toggleDoor(_:))
+        toggleSwitch.target = self
+        toggleSwitch.action = #selector(toggleDoor(_:))
     }
 
     required init(coder: NSCoder) {
@@ -101,68 +116,40 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     private func updateUI() {
-        let (symbolName, stateText, buttonTitle, tintColor): (String, String, String, NSColor) = {
+        let (symbolName, stateText, isOpen): (String, String, Bool) = {
             if isObstructed {
-                return ("exclamationmark.triangle", "Obstructed", "—", .systemRed)
+                return ("exclamationmark.triangle", "Obstructed", false)
             }
             switch currentState {
             case 0:  // Open
-                return ("door.garage.open", "Open", "Close", .systemGreen)
+                return ("door.garage.open", "Open", true)
             case 1:  // Closed
-                return ("door.garage.closed", "Closed", "Open", .secondaryLabelColor)
+                return ("door.garage.closed", "Closed", false)
             case 2:  // Opening
-                return ("door.garage.open", "Opening...", "Stop", .systemOrange)
+                return ("door.garage.open", "Opening...", true)
             case 3:  // Closing
-                return ("door.garage.closed", "Closing...", "Stop", .systemOrange)
+                return ("door.garage.closed", "Closing...", false)
             case 4:  // Stopped
-                return ("door.garage.open", "Stopped", "Close", .systemYellow)
+                return ("door.garage.open", "Stopped", true)
             default:
-                return ("door.garage.closed", "Unknown", "—", .secondaryLabelColor)
+                return ("door.garage.closed", "Unknown", false)
             }
         }()
 
         iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
-        iconView.contentTintColor = tintColor
-        stateLabel.stringValue = stateText
-        actionButton.title = buttonTitle
-        actionButton.isEnabled = !isObstructed && buttonTitle != "—"
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        statusLabel.stringValue = stateText
+        statusLabel.textColor = DS.Colors.mutedForeground
+        toggleSwitch.setOn(!isOpen, animated: false)  // ON = closed, OFF = open
+        toggleSwitch.isEnabled = !isObstructed
     }
 
-    @objc private func toggleDoor(_ sender: NSButton) {
-        // Determine action based on current state
-        let targetState: Int
-        let actionDescription: String
+    @objc private func toggleDoor(_ sender: ToggleSwitch) {
+        // Closed = ON (target 1), Open = OFF (target 0)
+        let targetState = sender.isOn ? 1 : 0
 
-        switch currentState {
-        case 0:  // Open -> Close
-            targetState = 1
-            actionDescription = "close"
-        case 1:  // Closed -> Open
-            targetState = 0
-            actionDescription = "open"
-        case 2, 3:  // Opening/Closing -> Stop (toggle)
-            // When in motion, toggling usually stops or reverses
-            targetState = currentState == 2 ? 1 : 0
-            actionDescription = "stop"
-        case 4:  // Stopped -> Close
-            targetState = 1
-            actionDescription = "close"
-        default:
-            return
-        }
-
-        // Show confirmation alert
-        let alert = NSAlert()
-        alert.messageText = "Garage door"
-        alert.informativeText = "Are you sure you want to \(actionDescription) \(serviceData.name)?"
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: actionDescription.capitalized)
-        alert.addButton(withTitle: "Cancel")
-
-        if alert.runModal() == .alertFirstButtonReturn {
-            if let id = targetDoorStateId {
-                bridge?.writeCharacteristic(identifier: id, value: targetState)
-            }
+        if let id = targetDoorStateId {
+            bridge?.writeCharacteristic(identifier: id, value: targetState)
         }
     }
 }

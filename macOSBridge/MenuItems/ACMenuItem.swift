@@ -30,10 +30,17 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let tempLabel: NSTextField
-    private let modePopup: NSPopUpButton
+    private let powerToggle: ToggleSwitch
+
+    // Controls row (shown when active)
+    private let controlsRow: NSView
+    private let modeSegment: NSSegmentedControl
+    private let minusButton: NSButton
     private let targetLabel: NSTextField
-    private let stepper: NSStepper
-    private let powerButton: NSButton
+    private let plusButton: NSButton
+
+    private let collapsedHeight: CGFloat = DS.ControlSize.menuItemHeight
+    private let expandedHeight: CGFloat = DS.ControlSize.menuItemHeight + 36
 
     var characteristicIdentifiers: [UUID] {
         var ids: [UUID] = []
@@ -58,70 +65,109 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
         self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
 
-        // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 70))
+        // Create the custom view - start collapsed
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
+
+        // Row 1: Icon, name, current temp, power toggle (centered vertically)
+        let iconY = (collapsedHeight - DS.ControlSize.iconMedium) / 2
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 40, width: 20, height: 20))
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "air.conditioner.horizontal", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
+        // Power toggle position (calculate first for alignment)
+        let switchX = DS.ControlSize.menuItemWidth - DS.Spacing.md - DS.ControlSize.switchWidth
+
+        // Current temp position (right-aligned before toggle)
+        let tempWidth: CGFloat = 50
+        let tempX = switchX - tempWidth - DS.Spacing.sm
+
+        // Name label (fills space up to temp label)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (collapsedHeight - 17) / 2
+        let labelWidth = tempX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 45, width: 120, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
         // Current temp
         tempLabel = NSTextField(labelWithString: "--°C")
-        tempLabel.frame = NSRect(x: 160, y: 45, width: 50, height: 17)
-        tempLabel.font = NSFont.systemFont(ofSize: 13)
+        tempLabel.frame = NSRect(x: tempX, y: labelY, width: tempWidth, height: 17)
+        tempLabel.font = DS.Typography.labelSmall
+        tempLabel.textColor = DS.Colors.mutedForeground
         tempLabel.alignment = .right
         containerView.addSubview(tempLabel)
 
-        // Power button
-        powerButton = NSButton(frame: NSRect(x: 220, y: 40, width: 50, height: 26))
-        powerButton.bezelStyle = .inline
-        powerButton.setButtonType(.toggle)
-        powerButton.title = "Off"
-        powerButton.font = NSFont.systemFont(ofSize: 11)
-        containerView.addSubview(powerButton)
+        // Power toggle
+        let switchY = (collapsedHeight - DS.ControlSize.switchHeight) / 2
+        powerToggle = ToggleSwitch()
+        powerToggle.frame = NSRect(x: switchX,
+                                   y: switchY,
+                                   width: DS.ControlSize.switchWidth,
+                                   height: DS.ControlSize.switchHeight)
+        containerView.addSubview(powerToggle)
 
-        // Mode popup
-        modePopup = NSPopUpButton(frame: NSRect(x: 38, y: 22, width: 80, height: 20))
-        modePopup.addItems(withTitles: ["Auto", "Heat", "Cool"])
-        modePopup.font = NSFont.systemFont(ofSize: 11)
-        containerView.addSubview(modePopup)
+        // Controls row (initially hidden, with bottom padding)
+        controlsRow = NSView(frame: NSRect(x: 0, y: DS.Spacing.sm, width: DS.ControlSize.menuItemWidth, height: 26))
+        controlsRow.isHidden = true
 
-        // Target label
-        targetLabel = NSTextField(labelWithString: "Target: --°C")
-        targetLabel.frame = NSRect(x: 125, y: 25, width: 90, height: 17)
-        targetLabel.font = NSFont.systemFont(ofSize: 11)
-        targetLabel.textColor = .secondaryLabelColor
-        containerView.addSubview(targetLabel)
+        // Mode segment
+        modeSegment = NSSegmentedControl(labels: ["Auto", "Heat", "Cool"], trackingMode: .selectOne, target: nil, action: nil)
+        modeSegment.frame = NSRect(x: labelX, y: 4, width: 110, height: 20)
+        modeSegment.font = NSFont.systemFont(ofSize: 10)
+        modeSegment.selectedSegment = 0
+        modeSegment.segmentStyle = .capsule
+        controlsRow.addSubview(modeSegment)
 
-        // Stepper for target temp
-        stepper = NSStepper(frame: NSRect(x: 220, y: 22, width: 40, height: 20))
-        stepper.minValue = 16
-        stepper.maxValue = 30
-        stepper.increment = 0.5
-        stepper.doubleValue = 24
-        containerView.addSubview(stepper)
+        // Temperature controls: - | temp | +
+        let tempControlsX = DS.ControlSize.menuItemWidth - DS.Spacing.md - 90
+
+        // Minus button
+        minusButton = NSButton(frame: NSRect(x: tempControlsX, y: 4, width: 22, height: 20))
+        minusButton.bezelStyle = .inline
+        minusButton.title = "−"
+        minusButton.font = NSFont.systemFont(ofSize: 14, weight: .medium)
+        controlsRow.addSubview(minusButton)
+
+        // Target temp label
+        targetLabel = NSTextField(labelWithString: "24°C")
+        targetLabel.frame = NSRect(x: tempControlsX + 24, y: 5, width: 42, height: 17)
+        targetLabel.font = DS.Typography.labelSmall
+        targetLabel.textColor = DS.Colors.foreground
+        targetLabel.alignment = .center
+        controlsRow.addSubview(targetLabel)
+
+        // Plus button
+        plusButton = NSButton(frame: NSRect(x: tempControlsX + 68, y: 4, width: 22, height: 20))
+        plusButton.bezelStyle = .inline
+        plusButton.title = "+"
+        plusButton.font = NSFont.systemFont(ofSize: 14, weight: .medium)
+        controlsRow.addSubview(plusButton)
+
+        containerView.addSubview(controlsRow)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
 
         // Set up actions
-        powerButton.target = self
-        powerButton.action = #selector(togglePower(_:))
+        powerToggle.target = self
+        powerToggle.action = #selector(togglePower(_:))
 
-        modePopup.target = self
-        modePopup.action = #selector(modeChanged(_:))
+        modeSegment.target = self
+        modeSegment.action = #selector(modeChanged(_:))
 
-        stepper.target = self
-        stepper.action = #selector(stepperChanged(_:))
+        minusButton.target = self
+        minusButton.action = #selector(decreaseTemp(_:))
+
+        plusButton.target = self
+        plusButton.action = #selector(increaseTemp(_:))
     }
 
     required init(coder: NSCoder) {
@@ -153,7 +199,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         } else if characteristicId == targetStateId {
             if let state = value as? Int {
                 targetState = state
-                modePopup.selectItem(at: state)
+                modeSegment.selectedSegment = state
                 updateTargetDisplay()
             }
         } else if characteristicId == coolingThresholdId {
@@ -176,22 +222,35 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     }
 
     private func updateUI() {
-        powerButton.state = isActive ? .on : .off
-        powerButton.title = isActive ? "On" : "Off"
-        modePopup.isEnabled = isActive
-        stepper.isEnabled = isActive
+        powerToggle.setOn(isActive, animated: false)
+        controlsRow.isHidden = !isActive
+
+        // Resize container
+        let newHeight = isActive ? expandedHeight : collapsedHeight
+        containerView.frame.size.height = newHeight
+
+        // Reposition row 1 elements (centered in top collapsedHeight area)
+        let topAreaY = newHeight - collapsedHeight
+        let iconY = topAreaY + (collapsedHeight - DS.ControlSize.iconMedium) / 2
+        let labelY = topAreaY + (collapsedHeight - 17) / 2
+        let switchY = topAreaY + (collapsedHeight - DS.ControlSize.switchHeight) / 2
+        iconView.frame.origin.y = iconY
+        nameLabel.frame.origin.y = labelY
+        tempLabel.frame.origin.y = labelY
+        powerToggle.frame.origin.y = switchY
+
         updateStateIcon()
     }
 
     private func updateStateIcon() {
         let (symbolName, color): (String, NSColor) = {
             if !isActive {
-                return ("air.conditioner.horizontal", .secondaryLabelColor)
+                return ("air.conditioner.horizontal", DS.Colors.mutedForeground)
             }
             switch currentState {
-            case 2: return ("flame", .systemOrange)      // heating
-            case 3: return ("snowflake", .systemBlue)   // cooling
-            default: return ("air.conditioner.horizontal", .systemGreen) // idle/inactive but on
+            case 2: return ("flame", DS.Colors.thermostatHeat)      // heating
+            case 3: return ("snowflake", DS.Colors.thermostatCool)  // cooling
+            default: return ("air.conditioner.horizontal", DS.Colors.success) // idle/inactive but on
             }
         }()
         iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
@@ -205,47 +264,56 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         case 2: targetTemp = coolingThreshold  // cool mode
         default: targetTemp = coolingThreshold // auto - show cooling threshold
         }
-        stepper.doubleValue = targetTemp
-        targetLabel.stringValue = String(format: "Target: %.1f°C", targetTemp)
+        targetLabel.stringValue = String(format: "%.0f°C", targetTemp)
     }
 
-    @objc private func togglePower(_ sender: NSButton) {
-        isActive = sender.state == .on
+    private func currentTargetTemp() -> Double {
+        switch targetState {
+        case 1: return heatingThreshold
+        case 2: return coolingThreshold
+        default: return coolingThreshold
+        }
+    }
+
+    private func setTargetTemp(_ temp: Double) {
+        let clamped = min(max(temp, 16), 30)
+
+        switch targetState {
+        case 1: // heat mode
+            heatingThreshold = clamped
+            if let id = heatingThresholdId {
+                bridge?.writeCharacteristic(identifier: id, value: Float(clamped))
+            }
+        default: // cool or auto
+            coolingThreshold = clamped
+            if let id = coolingThresholdId {
+                bridge?.writeCharacteristic(identifier: id, value: Float(clamped))
+            }
+        }
+        updateTargetDisplay()
+    }
+
+    @objc private func togglePower(_ sender: ToggleSwitch) {
+        isActive = sender.isOn
         if let id = activeId {
             bridge?.writeCharacteristic(identifier: id, value: isActive ? 1 : 0)
         }
         updateUI()
     }
 
-    @objc private func modeChanged(_ sender: NSPopUpButton) {
-        targetState = sender.indexOfSelectedItem
+    @objc private func modeChanged(_ sender: NSSegmentedControl) {
+        targetState = sender.selectedSegment
         if let id = targetStateId {
             bridge?.writeCharacteristic(identifier: id, value: targetState)
         }
         updateTargetDisplay()
     }
 
-    @objc private func stepperChanged(_ sender: NSStepper) {
-        let value = sender.doubleValue
-        targetLabel.stringValue = String(format: "Target: %.1f°C", value)
+    @objc private func decreaseTemp(_ sender: NSButton) {
+        setTargetTemp(currentTargetTemp() - 1)
+    }
 
-        // Update the appropriate threshold based on mode
-        switch targetState {
-        case 1: // heat mode
-            heatingThreshold = value
-            if let id = heatingThresholdId {
-                bridge?.writeCharacteristic(identifier: id, value: Float(value))
-            }
-        case 2: // cool mode
-            coolingThreshold = value
-            if let id = coolingThresholdId {
-                bridge?.writeCharacteristic(identifier: id, value: Float(value))
-            }
-        default: // auto - update cooling threshold
-            coolingThreshold = value
-            if let id = coolingThresholdId {
-                bridge?.writeCharacteristic(identifier: id, value: Float(value))
-            }
-        }
+    @objc private func increaseTemp(_ sender: NSButton) {
+        setTargetTemp(currentTargetTemp() + 1)
     }
 }

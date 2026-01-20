@@ -58,7 +58,9 @@ public struct ServiceData: Codable {
     public let coolingThresholdTemperatureId: String?  // AC cooling target temp
     public let heatingThresholdTemperatureId: String?  // AC heating target temp
     // Fan characteristics
-    public let rotationSpeedId: String?        // Fan speed (0-100)
+    public let rotationSpeedId: String?        // Fan speed
+    public let rotationSpeedMin: Double?       // Min speed value
+    public let rotationSpeedMax: Double?       // Max speed value
     // Garage door characteristics
     public let currentDoorStateId: String?     // 0=open, 1=closed, 2=opening, 3=closing, 4=stopped
     public let targetDoorStateId: String?      // 0=open, 1=closed
@@ -90,6 +92,8 @@ public struct ServiceData: Codable {
         coolingThresholdTemperatureId: UUID? = nil,
         heatingThresholdTemperatureId: UUID? = nil,
         rotationSpeedId: UUID? = nil,
+        rotationSpeedMin: Double? = nil,
+        rotationSpeedMax: Double? = nil,
         currentDoorStateId: UUID? = nil,
         targetDoorStateId: UUID? = nil,
         obstructionDetectedId: UUID? = nil,
@@ -118,6 +122,8 @@ public struct ServiceData: Codable {
         self.coolingThresholdTemperatureId = coolingThresholdTemperatureId?.uuidString
         self.heatingThresholdTemperatureId = heatingThresholdTemperatureId?.uuidString
         self.rotationSpeedId = rotationSpeedId?.uuidString
+        self.rotationSpeedMin = rotationSpeedMin
+        self.rotationSpeedMax = rotationSpeedMax
         self.currentDoorStateId = currentDoorStateId?.uuidString
         self.targetDoorStateId = targetDoorStateId?.uuidString
         self.obstructionDetectedId = obstructionDetectedId?.uuidString

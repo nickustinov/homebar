@@ -170,7 +170,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         // Group accessories by room
         var accessoriesByRoom: [String: [AccessoryData]] = [:]
         var noRoomAccessories: [AccessoryData] = []
-        
+
         for accessory in accessories {
             if let roomId = accessory.roomIdentifier {
                 accessoriesByRoom[roomId, default: []].append(accessory)
@@ -178,43 +178,109 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
                 noRoomAccessories.append(accessory)
             }
         }
-        
+
         // Add rooms
         for room in rooms {
             guard let roomAccessories = accessoriesByRoom[room.uniqueIdentifier], !roomAccessories.isEmpty else {
                 continue
             }
-            
+
             let roomItem = NSMenuItem(title: room.name, action: nil, keyEquivalent: "")
             roomItem.image = iconForRoom(room.name)
-            
+
             let submenu = NSMenu()
-            for accessory in roomAccessories.sorted(by: { $0.name < $1.name }) {
-                addAccessoryItems(to: submenu, accessory: accessory)
-            }
+            addServicesGroupedByType(to: submenu, accessories: roomAccessories)
             roomItem.submenu = submenu
             mainMenu.addItem(roomItem)
         }
-        
+
         // Add accessories without room
         if !noRoomAccessories.isEmpty {
             let otherItem = NSMenuItem(title: "Other", action: nil, keyEquivalent: "")
             otherItem.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
-            
+
             let submenu = NSMenu()
-            for accessory in noRoomAccessories.sorted(by: { $0.name < $1.name }) {
-                addAccessoryItems(to: submenu, accessory: accessory)
-            }
+            addServicesGroupedByType(to: submenu, accessories: noRoomAccessories)
             otherItem.submenu = submenu
             mainMenu.addItem(otherItem)
         }
     }
-    
-    private func addAccessoryItems(to menu: NSMenu, accessory: AccessoryData) {
-        for service in accessory.services {
-            if let item = createMenuItemForService(service) {
-                menu.addItem(item)
+
+    private func addServicesGroupedByType(to menu: NSMenu, accessories: [AccessoryData]) {
+        // Collect all services from all accessories
+        var servicesByType: [String: [ServiceData]] = [:]
+        var temperatureSensors: [ServiceData] = []
+        var humiditySensors: [ServiceData] = []
+
+        // Types to exclude from main list (sensors shown in footer, motion/smoke not supported)
+        let excludedTypes: Set<String> = [
+            ServiceTypes.temperatureSensor,
+            ServiceTypes.humiditySensor,
+            ServiceTypes.motionSensor
+        ]
+
+        for accessory in accessories {
+            for service in accessory.services {
+                if service.serviceType == ServiceTypes.temperatureSensor {
+                    temperatureSensors.append(service)
+                } else if service.serviceType == ServiceTypes.humiditySensor {
+                    humiditySensors.append(service)
+                } else if !excludedTypes.contains(service.serviceType) {
+                    servicesByType[service.serviceType, default: []].append(service)
+                }
             }
+        }
+
+        // Define type order priority
+        let typeOrder: [String] = [
+            ServiceTypes.lightbulb,
+            ServiceTypes.switch,
+            ServiceTypes.outlet,
+            ServiceTypes.fan,
+            ServiceTypes.heaterCooler,
+            ServiceTypes.thermostat,
+            ServiceTypes.windowCovering,
+            ServiceTypes.lock,
+            ServiceTypes.garageDoorOpener,
+            ServiceTypes.contactSensor
+        ]
+
+        // Sort types by priority (known types first, then unknown)
+        let sortedTypes = servicesByType.keys.sorted { type1, type2 in
+            let index1 = typeOrder.firstIndex(of: type1) ?? Int.max
+            let index2 = typeOrder.firstIndex(of: type2) ?? Int.max
+            return index1 < index2
+        }
+
+        var isFirstGroup = true
+        for serviceType in sortedTypes {
+            guard let services = servicesByType[serviceType] else { continue }
+
+            // Add separator between groups
+            if !isFirstGroup {
+                menu.addItem(NSMenuItem.separator())
+            }
+            isFirstGroup = false
+
+            // Sort services by name within group
+            let sortedServices = services.sorted { $0.name < $1.name }
+
+            for service in sortedServices {
+                if let item = createMenuItemForService(service) {
+                    menu.addItem(item)
+                }
+            }
+        }
+
+        // Add sensor summary footer if there are any sensors
+        if !temperatureSensors.isEmpty || !humiditySensors.isEmpty {
+            menu.addItem(NSMenuItem.separator())
+            let sensorItem = SensorSummaryMenuItem(
+                temperatureSensors: temperatureSensors,
+                humiditySensors: humiditySensors,
+                bridge: iOSBridge
+            )
+            menu.addItem(sensorItem)
         }
     }
 
@@ -237,9 +303,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         case ServiceTypes.windowCovering:
             return BlindMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.temperatureSensor, ServiceTypes.humiditySensor, ServiceTypes.motionSensor:
-            return SensorMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.fan:
             return FanMenuItem(serviceData: service, bridge: iOSBridge)

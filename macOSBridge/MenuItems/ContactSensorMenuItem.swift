@@ -36,26 +36,32 @@ class ContactSensorMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
         self.contactSensorStateId = serviceData.contactSensorStateId.flatMap { UUID(uuidString: $0) }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
-        iconView = NSImageView(frame: NSRect(x: 10, y: 5, width: 20, height: 20))
+        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.success
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
         // Name label
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: 6, width: 140, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: 140, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
         // State label
         stateLabel = NSTextField(labelWithString: "Closed")
-        stateLabel.frame = NSRect(x: 180, y: 6, width: 60, height: 17)
-        stateLabel.font = NSFont.systemFont(ofSize: 13)
+        stateLabel.frame = NSRect(x: DS.ControlSize.menuItemWidth - DS.Spacing.md - 60, y: labelY, width: 60, height: 17)
+        stateLabel.font = DS.Typography.label
         stateLabel.alignment = .right
-        stateLabel.textColor = .secondaryLabelColor
+        stateLabel.textColor = DS.Colors.success
         containerView.addSubview(stateLabel)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
@@ -83,14 +89,14 @@ class ContactSensorMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
     private func updateUI() {
         if isOpen {
             iconView.image = NSImage(systemSymbolName: "door.left.hand.open", accessibilityDescription: nil)
-            iconView.contentTintColor = .systemOrange
+            iconView.contentTintColor = DS.Colors.warning
             stateLabel.stringValue = "Open"
-            stateLabel.textColor = .systemOrange
+            stateLabel.textColor = DS.Colors.warning
         } else {
             iconView.image = NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
-            iconView.contentTintColor = .systemGreen
+            iconView.contentTintColor = DS.Colors.success
             stateLabel.stringValue = "Closed"
-            stateLabel.textColor = .systemGreen
+            stateLabel.textColor = DS.Colors.success
         }
     }
 }

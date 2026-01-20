@@ -20,8 +20,10 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private let containerView: NSView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
-    private let brightnessSlider: NSSlider
-    private let toggleButton: NSButton
+    private let brightnessSlider: ModernSlider
+    private let toggleSwitch: ToggleSwitch
+
+    private let hasBrightness: Bool
 
     var characteristicIdentifiers: [UUID] {
         var ids: [UUID] = []
@@ -38,44 +40,54 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
         self.brightnessCharacteristicId = serviceData.brightnessId.flatMap { UUID(uuidString: $0) }
 
-        let hasBrightness = brightnessCharacteristicId != nil
+        self.hasBrightness = brightnessCharacteristicId != nil
+
+        // Single row height
+        let height: CGFloat = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: 250, height: hasBrightness ? 50 : 30))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        let iconY = hasBrightness ? 15 : 5
-        iconView = NSImageView(frame: NSRect(x: 10, y: iconY, width: 20, height: 20))
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
+        iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
-        iconView.contentTintColor = .secondaryLabelColor
+        iconView.contentTintColor = DS.Colors.mutedForeground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
 
-        // Name label
-        let labelY = hasBrightness ? 28 : 6
+        // Toggle switch (rightmost)
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+        let switchY = (height - DS.ControlSize.switchHeight) / 2
+        toggleSwitch = ToggleSwitch()
+        toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
+        containerView.addSubview(toggleSwitch)
+
+        // Name label (full width when off, truncated when on with slider)
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (height - 17) / 2
+        let fullLabelWidth = switchX - labelX - DS.Spacing.sm
         nameLabel = NSTextField(labelWithString: serviceData.name)
-        nameLabel.frame = NSRect(x: 38, y: labelY, width: 170, height: 17)
-        nameLabel.font = NSFont.systemFont(ofSize: 13)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: fullLabelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
 
-        // Brightness slider (only if dimmable)
-        brightnessSlider = NSSlider(frame: NSRect(x: 38, y: 5, width: 160, height: 20))
-        brightnessSlider.minValue = 0
-        brightnessSlider.maxValue = 100
+        // Brightness slider (fixed width, positioned before toggle)
+        let sliderWidth: CGFloat = 80
+        let sliderX = switchX - sliderWidth - DS.Spacing.sm
+        let sliderY = (height - 12) / 2
+
+        // Brightness slider
+        brightnessSlider = ModernSlider(minValue: 0, maxValue: 100)
+        brightnessSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
         brightnessSlider.doubleValue = 100
-        brightnessSlider.isContinuous = false
-        brightnessSlider.isHidden = !hasBrightness
+        brightnessSlider.isContinuous = false  // Only send value on release to reduce errors
+        brightnessSlider.isHidden = true  // Hidden by default, shown when on
         if hasBrightness {
             containerView.addSubview(brightnessSlider)
         }
-
-        // Toggle button
-        let buttonY = hasBrightness ? 12 : 2
-        toggleButton = NSButton(frame: NSRect(x: 210, y: buttonY, width: 30, height: 26))
-        toggleButton.bezelStyle = .inline
-        toggleButton.setButtonType(.toggle)
-        toggleButton.title = ""
-        toggleButton.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        containerView.addSubview(toggleButton)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
@@ -85,8 +97,8 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         brightnessSlider.target = self
         brightnessSlider.action = #selector(sliderChanged(_:))
 
-        toggleButton.target = self
-        toggleButton.action = #selector(togglePower(_:))
+        toggleSwitch.target = self
+        toggleSwitch.action = #selector(togglePower(_:))
     }
 
     required init(coder: NSCoder) {
@@ -111,11 +123,24 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
     private func updateUI() {
         iconView.image = NSImage(systemSymbolName: isOn ? "lightbulb.fill" : "lightbulb", accessibilityDescription: nil)
-        iconView.contentTintColor = isOn ? .systemYellow : .secondaryLabelColor
-        toggleButton.state = isOn ? .on : .off
+        iconView.contentTintColor = isOn ? DS.Colors.lightOn : DS.Colors.mutedForeground
+        toggleSwitch.setOn(isOn, animated: false)
+
+        let showSlider = isOn && hasBrightness
+        brightnessSlider.isHidden = !showSlider
+
+        // Adjust name label width based on slider visibility
+        let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let sliderWidth: CGFloat = 80
+        if showSlider {
+            nameLabel.frame.size.width = switchX - sliderWidth - DS.Spacing.sm * 2 - labelX
+        } else {
+            nameLabel.frame.size.width = switchX - labelX - DS.Spacing.sm
+        }
     }
 
-    @objc private func sliderChanged(_ sender: NSSlider) {
+    @objc private func sliderChanged(_ sender: ModernSlider) {
         let value = sender.doubleValue
         if let id = brightnessCharacteristicId {
             bridge?.writeCharacteristic(identifier: id, value: Int(value))
@@ -129,8 +154,8 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         }
     }
 
-    @objc private func togglePower(_ sender: NSButton) {
-        isOn = sender.state == .on
+    @objc private func togglePower(_ sender: ToggleSwitch) {
+        isOn = sender.isOn
         if let id = powerCharacteristicId {
             bridge?.writeCharacteristic(identifier: id, value: isOn)
         }

@@ -164,10 +164,20 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
     
     func readCharacteristic(identifier: UUID) {
         guard let characteristic = findCharacteristic(identifier: identifier) else { return }
-        
+
+        // Check if characteristic is readable
+        guard characteristic.properties.contains(HMCharacteristicPropertyReadable) else {
+            return
+        }
+
+        // Check if accessory is reachable
+        guard characteristic.service?.accessory?.isReachable == true else {
+            return
+        }
+
         characteristic.readValue { error in
-            if let error = error {
-                logger.error("Failed to read characteristic: \(error.localizedDescription)")
+            if error != nil {
+                // Silently ignore read failures - device may be temporarily unreachable
                 return
             }
             if let value = characteristic.value {
@@ -179,12 +189,82 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
     }
     
     func writeCharacteristic(identifier: UUID, value: Any) {
-        guard let characteristic = findCharacteristic(identifier: identifier) else { return }
-        
-        characteristic.writeValue(value) { error in
+        guard let characteristic = findCharacteristic(identifier: identifier) else {
+            logger.error("Characteristic not found: \(identifier)")
+            return
+        }
+
+        // Log characteristic info
+        let metadata = characteristic.metadata
+        logger.info("""
+            WRITE REQUEST:
+            - Characteristic: \(characteristic.characteristicType, privacy: .public)
+            - Format: \(metadata?.format ?? "nil", privacy: .public)
+            - Min: \(String(describing: metadata?.minimumValue))
+            - Max: \(String(describing: metadata?.maximumValue))
+            - Step: \(String(describing: metadata?.stepValue))
+            - Input value: \(String(describing: value)) (type: \(type(of: value)))
+            - Writable: \(characteristic.properties.contains(HMCharacteristicPropertyWritable))
+            """)
+
+        // Convert value to the format expected by the characteristic
+        let convertedValue: Any
+        if let format = metadata?.format {
+            switch format {
+            case HMCharacteristicMetadataFormatFloat:
+                if let num = value as? NSNumber {
+                    convertedValue = num.floatValue
+                } else if let num = value as? Double {
+                    convertedValue = Float(num)
+                } else if let num = value as? Int {
+                    convertedValue = Float(num)
+                } else {
+                    convertedValue = value
+                }
+            case HMCharacteristicMetadataFormatInt,
+                 HMCharacteristicMetadataFormatUInt8,
+                 HMCharacteristicMetadataFormatUInt16,
+                 HMCharacteristicMetadataFormatUInt32,
+                 HMCharacteristicMetadataFormatUInt64:
+                if let num = value as? NSNumber {
+                    convertedValue = num.intValue
+                } else if let num = value as? Double {
+                    convertedValue = Int(num)
+                } else if let num = value as? Float {
+                    convertedValue = Int(num)
+                } else {
+                    convertedValue = value
+                }
+            case HMCharacteristicMetadataFormatBool:
+                if let num = value as? NSNumber {
+                    convertedValue = num.boolValue
+                } else if let num = value as? Int {
+                    convertedValue = num != 0
+                } else {
+                    convertedValue = value
+                }
+            default:
+                convertedValue = value
+            }
+        } else {
+            convertedValue = value
+        }
+
+        logger.info("Converted value: \(String(describing: convertedValue)) (type: \(type(of: convertedValue)))")
+
+        characteristic.writeValue(convertedValue) { error in
             if let error = error {
-                logger.error("Failed to write characteristic: \(error.localizedDescription)")
+                let nsError = error as NSError
+                logger.error("""
+                    WRITE FAILED:
+                    - Error: \(error.localizedDescription)
+                    - Code: \(nsError.code)
+                    - Domain: \(nsError.domain)
+                    - UserInfo: \(nsError.userInfo)
+                    """)
                 self.macOSDelegate?.showError(message: "Failed to update: \(error.localizedDescription)")
+            } else {
+                logger.info("WRITE SUCCESS for \(characteristic.characteristicType, privacy: .public)")
             }
         }
     }
@@ -244,6 +324,16 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             hmService.characteristics.first { $0.characteristicType == type }?.uniqueIdentifier
         }
 
+        // Helper to find characteristic by type
+        func findChar(_ type: String) -> HMCharacteristic? {
+            hmService.characteristics.first { $0.characteristicType == type }
+        }
+
+        // Get rotation speed min/max from metadata
+        let rotationSpeedChar = findChar(CharacteristicTypes.rotationSpeed)
+        let rotationSpeedMin = rotationSpeedChar?.metadata?.minimumValue?.doubleValue
+        let rotationSpeedMax = rotationSpeedChar?.metadata?.maximumValue?.doubleValue
+
         return ServiceData(
             uniqueIdentifier: svc.uniqueIdentifier,
             name: svc.name,
@@ -270,6 +360,8 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             heatingThresholdTemperatureId: charId(CharacteristicTypes.heatingThresholdTemperature),
             // Fan characteristics
             rotationSpeedId: charId(CharacteristicTypes.rotationSpeed),
+            rotationSpeedMin: rotationSpeedMin,
+            rotationSpeedMax: rotationSpeedMax,
             // Garage door characteristics
             currentDoorStateId: charId(CharacteristicTypes.currentDoorState),
             targetDoorStateId: charId(CharacteristicTypes.targetDoorState),

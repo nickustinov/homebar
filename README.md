@@ -1,4 +1,4 @@
-# ItsyHome
+# Itsyhome
 
 A native macOS menu bar app for controlling your HomeKit smart home devices.
 

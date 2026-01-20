@@ -131,13 +131,27 @@ public struct ServiceData: Codable {
     }
 }
 
+public struct SceneActionData: Codable {
+    public let characteristicId: String
+    public let characteristicType: String  // e.g., powerState, brightness, targetPosition
+    public let targetValue: Double  // Normalized to Double for comparison
+
+    public init(characteristicId: UUID, characteristicType: String, targetValue: Double) {
+        self.characteristicId = characteristicId.uuidString
+        self.characteristicType = characteristicType
+        self.targetValue = targetValue
+    }
+}
+
 public struct SceneData: Codable {
     public let uniqueIdentifier: String
     public let name: String
-    
-    public init(uniqueIdentifier: UUID, name: String) {
+    public let actions: [SceneActionData]
+
+    public init(uniqueIdentifier: UUID, name: String, actions: [SceneActionData] = []) {
         self.uniqueIdentifier = uniqueIdentifier.uuidString
         self.name = name
+        self.actions = actions
     }
 }
 
@@ -147,7 +161,7 @@ public struct AccessoryData: Codable {
     public let roomIdentifier: String?
     public let services: [ServiceData]
     public let isReachable: Bool
-    
+
     public init(uniqueIdentifier: UUID, name: String, roomIdentifier: UUID?, services: [ServiceData], isReachable: Bool) {
         self.uniqueIdentifier = uniqueIdentifier.uuidString
         self.name = name
@@ -163,7 +177,7 @@ public struct MenuData: Codable {
     public let accessories: [AccessoryData]
     public let scenes: [SceneData]
     public let selectedHomeId: String?
-    
+
     public init(homes: [HomeData], rooms: [RoomData], accessories: [AccessoryData], scenes: [SceneData], selectedHomeId: UUID?) {
         self.homes = homes
         self.rooms = rooms
@@ -249,7 +263,7 @@ public protocol Mac2iOS: NSObjectProtocol {
     var rooms: [RoomInfo] { get }
     var accessories: [AccessoryInfo] { get }
     var scenes: [SceneInfo] { get }
-    
+
     func reloadHomeKit()
     func executeScene(identifier: UUID)
     func readCharacteristic(identifier: UUID)
@@ -262,7 +276,7 @@ public protocol Mac2iOS: NSObjectProtocol {
 public protocol iOS2Mac: NSObjectProtocol {
     init()
     var iOSBridge: Mac2iOS? { get set }
-    
+
     func reloadMenuWithJSON(_ jsonString: String)
     func updateCharacteristic(identifier: UUID, value: Any)
     func setReachability(accessoryIdentifier: UUID, isReachable: Bool)

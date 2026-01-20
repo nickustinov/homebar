@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0CF24631B07B6C53173C6D61 /* ContactSensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73384376845470E4D0DADC67 /* ContactSensorMenuItem.swift */; };
 		181B264094104D4C2CC218B4 /* SensorSummaryMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1ED8A3607E42C3D9F5E0F0 /* SensorSummaryMenuItem.swift */; };
+		1B3C4D5E6F7A8B9C0D1E2F4B /* ScenesGridMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7A8B9C0D1E2F3A4B /* ScenesGridMenuItem.swift */; };
 		19F529AFE0AC86B54B800AA1 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F4371897120909C7579EAF5 /* DesignSystem.swift */; };
 		1EC671BC1ED92EB51EE5BD48 /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3073A412FDFBF8D6A0353005 /* ACMenuItem.swift */; };
 		24A8D74CC7F30CC9191475C8 /* macOSBridge.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3077902E08C2447E75C0B801 /* macOSBridge.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -62,6 +63,7 @@
 		7A1ED8A3607E42C3D9F5E0F0 /* SensorSummaryMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSummaryMenuItem.swift; sourceTree = "<group>"; };
 		806F6733E4514D2FE98FC8B0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9A35728D53D42D67EC70DFD0 /* LightMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightMenuItem.swift; sourceTree = "<group>"; };
+		3C4D5E6F7A8B9C0D1E2F3A4B /* ScenesGridMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenesGridMenuItem.swift; sourceTree = "<group>"; };
 		9B8379562D115B4638C7B64D /* SwitchMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchMenuItem.swift; sourceTree = "<group>"; };
 		9F4371897120909C7579EAF5 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		AE1CB5D2645EBFEE1ADBE83D /* GarageDoorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageDoorMenuItem.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				0DFBBFDDAA7CF51A5071A7ED /* LockMenuItem.swift */,
 				1CBC494E78D2C2258D170463 /* SensorMenuItem.swift */,
 				7A1ED8A3607E42C3D9F5E0F0 /* SensorSummaryMenuItem.swift */,
+				3C4D5E6F7A8B9C0D1E2F3A4B /* ScenesGridMenuItem.swift */,
 				9B8379562D115B4638C7B64D /* SwitchMenuItem.swift */,
 				182446EFDB860466676FAD69 /* ThermostatMenuItem.swift */,
 			);
@@ -299,6 +302,7 @@
 				FFF597DFEEC769AF71CF97FD /* ModernSlider.swift in Sources */,
 				2565DFE47E948EC966C47685 /* SensorMenuItem.swift in Sources */,
 				181B264094104D4C2CC218B4 /* SensorSummaryMenuItem.swift in Sources */,
+				1B3C4D5E6F7A8B9C0D1E2F4B /* ScenesGridMenuItem.swift in Sources */,
 				FA4E4836C48F0F6A325B9C1A /* SwitchMenuItem.swift in Sources */,
 				4CD187B590B0BC88F68F8D05 /* ThermostatMenuItem.swift in Sources */,
 				89F278F1C87B88D26B5E99BB /* ToggleSwitch.swift in Sources */,

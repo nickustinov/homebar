@@ -23,20 +23,3 @@ class HomeMenuItem: NSMenuItem {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-// MARK: - Scene Menu Item
-
-class SceneMenuItem: NSMenuItem {
-    let scene: SceneInfo
-    
-    init(scene: SceneInfo, target: AnyObject?, action: Selector?) {
-        self.scene = scene
-        super.init(title: scene.name, action: action, keyEquivalent: "")
-        self.target = target
-        self.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-    }
-    
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}

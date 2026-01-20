@@ -8,23 +8,24 @@
 import Foundation
 import HomeKit
 import os.log
+import UIKit
 
 private let logger = Logger(subsystem: "com.nickustinov.homebar", category: "HomeKitManager")
 
 class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
-    
+
     private var homeManager: HMHomeManager?
     private var currentHome: HMHome?
-    
+
     weak var macOSDelegate: iOS2Mac?
-    
+
     // MARK: - Cached data (stored properties for thread safety)
-    
+
     private(set) var homes: [HomeInfo] = []
     private(set) var rooms: [RoomInfo] = []
     private(set) var accessories: [AccessoryInfo] = []
     private(set) var scenes: [SceneInfo] = []
-    
+
     var selectedHomeIdentifier: UUID? {
         get { currentHome?.uniqueIdentifier }
         set {
@@ -133,7 +134,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             .sorted { $0.name < $1.name }
         
         logger.info("Data fetched - rooms: \(self.rooms.count), accessories: \(self.accessories.count), scenes: \(self.scenes.count)")
-        
+
         // Set up delegates
         home.delegate = self
         for accessory in home.accessories {
@@ -149,7 +150,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
     func reloadHomeKit() {
         fetchDataAndReloadMenu()
     }
-    
+
     func executeScene(identifier: UUID) {
         guard let home = currentHome,
               let actionSet = home.actionSets.first(where: { $0.uniqueIdentifier == identifier }) else { return }
@@ -194,18 +195,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             return
         }
 
-        // Log characteristic info
         let metadata = characteristic.metadata
-        logger.info("""
-            WRITE REQUEST:
-            - Characteristic: \(characteristic.characteristicType, privacy: .public)
-            - Format: \(metadata?.format ?? "nil", privacy: .public)
-            - Min: \(String(describing: metadata?.minimumValue))
-            - Max: \(String(describing: metadata?.maximumValue))
-            - Step: \(String(describing: metadata?.stepValue))
-            - Input value: \(String(describing: value)) (type: \(type(of: value)))
-            - Writable: \(characteristic.properties.contains(HMCharacteristicPropertyWritable))
-            """)
 
         // Convert value to the format expected by the characteristic
         let convertedValue: Any
@@ -250,21 +240,10 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             convertedValue = value
         }
 
-        logger.info("Converted value: \(String(describing: convertedValue)) (type: \(type(of: convertedValue)))")
-
         characteristic.writeValue(convertedValue) { error in
             if let error = error {
-                let nsError = error as NSError
-                logger.error("""
-                    WRITE FAILED:
-                    - Error: \(error.localizedDescription)
-                    - Code: \(nsError.code)
-                    - Domain: \(nsError.domain)
-                    - UserInfo: \(nsError.userInfo)
-                    """)
+                logger.error("Write failed for \(characteristic.characteristicType, privacy: .public): \(error.localizedDescription)")
                 self.macOSDelegate?.showError(message: "Failed to update: \(error.localizedDescription)")
-            } else {
-                logger.info("WRITE SUCCESS for \(characteristic.characteristicType, privacy: .public)")
             }
         }
     }
@@ -272,7 +251,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
     func getCharacteristicValue(identifier: UUID) -> Any? {
         return findCharacteristic(identifier: identifier)?.value
     }
-    
+
     // MARK: - Helper Methods
     
     private func sendMenuDataAsJSON() {
@@ -290,7 +269,9 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
                 isReachable: acc.isReachable
             )
         }
-        let sceneData = scenes.map { SceneData(uniqueIdentifier: $0.uniqueIdentifier, name: $0.name) }
+        let sceneData = scenes.map { scene -> SceneData in
+            buildSceneData(from: scene)
+        }
 
         let menuData = MenuData(homes: homeData, rooms: roomData, accessories: accessoryData, scenes: sceneData, selectedHomeId: selectedHomeIdentifier)
 
@@ -369,6 +350,49 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             // Contact sensor characteristics
             contactSensorStateId: charId(CharacteristicTypes.contactSensorState)
         )
+    }
+
+    private func buildSceneData(from scene: SceneInfo) -> SceneData {
+        // Find the original HMActionSet to extract actions
+        guard let home = currentHome,
+              let actionSet = home.actionSets.first(where: { $0.uniqueIdentifier == scene.uniqueIdentifier }) else {
+            return SceneData(uniqueIdentifier: scene.uniqueIdentifier, name: scene.name, actions: [])
+        }
+
+        // Extract characteristic write actions
+        let actions: [SceneActionData] = actionSet.actions.compactMap { action in
+            // HMCharacteristicWriteAction is generic, check class name
+            let className = String(describing: type(of: action))
+            guard className.contains("CharacteristicWriteAction") else { return nil }
+
+            // Use KVC to access characteristic and targetValue since it's a generic type
+            guard let characteristic = action.value(forKey: "characteristic") as? HMCharacteristic,
+                  let targetValueAny = action.value(forKey: "targetValue") else { return nil }
+
+            // Convert target value to Double for consistent comparison
+            let targetValue: Double
+            if let boolValue = targetValueAny as? Bool {
+                targetValue = boolValue ? 1.0 : 0.0
+            } else if let intValue = targetValueAny as? Int {
+                targetValue = Double(intValue)
+            } else if let doubleValue = targetValueAny as? Double {
+                targetValue = doubleValue
+            } else if let floatValue = targetValueAny as? Float {
+                targetValue = Double(floatValue)
+            } else if let numberValue = targetValueAny as? NSNumber {
+                targetValue = numberValue.doubleValue
+            } else {
+                return nil  // Unknown value type
+            }
+
+            return SceneActionData(
+                characteristicId: characteristic.uniqueIdentifier,
+                characteristicType: characteristic.characteristicType,
+                targetValue: targetValue
+            )
+        }
+
+        return SceneData(uniqueIdentifier: scene.uniqueIdentifier, name: scene.name, actions: actions)
     }
 
     private func findService(identifier: UUID) -> HMService? {
@@ -458,7 +482,7 @@ extension HomeKitManager: HMAccessoryDelegate {
     func accessoryDidUpdateReachability(_ accessory: HMAccessory) {
         macOSDelegate?.setReachability(accessoryIdentifier: accessory.uniqueIdentifier, isReachable: accessory.isReachable)
     }
-    
+
     func accessory(_ accessory: HMAccessory, service: HMService, didUpdateValueFor characteristic: HMCharacteristic) {
         if let value = characteristic.value {
             macOSDelegate?.updateCharacteristic(identifier: characteristic.uniqueIdentifier, value: value)

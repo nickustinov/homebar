@@ -12,12 +12,12 @@ import AppKit
 public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     
     // MARK: - Properties
-    
+
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let mainMenu = NSMenu()
-    
+
     @objc public weak var iOSBridge: Mac2iOS?
-    
+
     // MARK: - Initialization
     
     @objc public required override init() {
@@ -101,18 +101,18 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             alert.runModal()
         }
     }
-    
+
     // MARK: - Menu Building
     
     private func rebuildMenu(with data: MenuData) {
         mainMenu.removeAllItems()
-        
+
         // Home selector (if multiple homes)
         if data.homes.count > 1 {
             addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
             mainMenu.addItem(NSMenuItem.separator())
         }
-        
+
         // Scenes
         if data.scenes.count > 0 {
             addScenes(data.scenes)
@@ -151,19 +151,8 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
     
     private func addScenes(_ scenes: [SceneData]) {
-        let scenesItem = NSMenuItem(title: "Scenes", action: nil, keyEquivalent: "")
-        scenesItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-        
-        let submenu = NSMenu()
-        for scene in scenes {
-            let item = NSMenuItem(title: scene.name, action: #selector(executeScene(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = scene.uniqueIdentifier
-            item.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-            submenu.addItem(item)
-        }
-        scenesItem.submenu = submenu
-        mainMenu.addItem(scenesItem)
+        let gridItem = ScenesGridMenuItem(scenes: scenes, bridge: iOSBridge)
+        mainMenu.addItem(gridItem)
     }
     
     private func addRoomsAndAccessories(rooms: [RoomData], accessories: [AccessoryData]) {
@@ -391,12 +380,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     @objc private func selectHome(_ sender: NSMenuItem) {
         if let uuidString = sender.representedObject as? String, let uuid = UUID(uuidString: uuidString) {
             iOSBridge?.selectedHomeIdentifier = uuid
-        }
-    }
-    
-    @objc private func executeScene(_ sender: NSMenuItem) {
-        if let uuidString = sender.representedObject as? String, let uuid = UUID(uuidString: uuidString) {
-            iOSBridge?.executeScene(identifier: uuid)
         }
     }
     

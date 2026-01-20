@@ -125,7 +125,14 @@ This app requires the HomeKit entitlement. You'll need to:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License © 2026 Nick Ustinov - see [LICENSE](LICENSE) for details.
+
+## Author
+
+**Nick Ustinov**
+- Email: nickustinov@gmail.com
+- Website: [itsyhome.app](https://itsyhome.app)
+- GitHub: [@nickustinov](https://github.com/nickustinov)
 
 ## Links
 

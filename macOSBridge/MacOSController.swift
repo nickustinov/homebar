@@ -476,6 +476,17 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         favouritesItem.target = self
         settingsSubmenu.addItem(favouritesItem)
 
+        settingsSubmenu.addItem(NSMenuItem.separator())
+
+        // About
+        let aboutItem = NSMenuItem(
+            title: "About Itsyhome...",
+            action: #selector(showAbout(_:)),
+            keyEquivalent: ""
+        )
+        aboutItem.target = self
+        settingsSubmenu.addItem(aboutItem)
+
         settingsItem.submenu = settingsSubmenu
         mainMenu.addItem(settingsItem)
 
@@ -534,6 +545,36 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         }
         favouritesWindowController?.configure(with: data)
         favouritesWindowController?.showWindow()
+    }
+
+    @objc private func showAbout(_ sender: Any?) {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+
+        let alert = NSAlert()
+        alert.messageText = "Itsyhome"
+        alert.informativeText = """
+            Version \(version) (\(build))
+
+            A native macOS menu bar app for controlling your HomeKit smart home devices.
+
+            MIT License © 2026 Nick Ustinov
+
+            itsyhome.app
+            github.com/nickustinov/itsyhome-macos
+            """
+        alert.alertStyle = .informational
+        alert.icon = NSApp.applicationIconImage
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Visit Website")
+        alert.addButton(withTitle: "GitHub")
+
+        let response = alert.runModal()
+        if response == .alertSecondButtonReturn {
+            NSWorkspace.shared.open(URL(string: "https://itsyhome.app")!)
+        } else if response == .alertThirdButtonReturn {
+            NSWorkspace.shared.open(URL(string: "https://github.com/nickustinov/itsyhome-macos")!)
+        }
     }
 
     @objc private func quit(_ sender: Any?) {

@@ -52,11 +52,19 @@ public struct ServiceData: Codable {
     public let humidityId: String?             // Humidity sensors
     public let motionDetectedId: String?       // Motion sensors
     // HeaterCooler (AC) characteristics
-    public let activeId: String?               // AC on/off
+    public let activeId: String?               // AC/Fan on/off
     public let currentHeaterCoolerStateId: String?  // AC current state (inactive/idle/heating/cooling)
     public let targetHeaterCoolerStateId: String?   // AC target mode (auto/heat/cool)
     public let coolingThresholdTemperatureId: String?  // AC cooling target temp
     public let heatingThresholdTemperatureId: String?  // AC heating target temp
+    // Fan characteristics
+    public let rotationSpeedId: String?        // Fan speed (0-100)
+    // Garage door characteristics
+    public let currentDoorStateId: String?     // 0=open, 1=closed, 2=opening, 3=closing, 4=stopped
+    public let targetDoorStateId: String?      // 0=open, 1=closed
+    public let obstructionDetectedId: String?  // Bool
+    // Contact sensor characteristics
+    public let contactSensorStateId: String?   // 0=detected (closed), 1=not detected (open)
 
     public init(
         uniqueIdentifier: UUID,
@@ -80,7 +88,12 @@ public struct ServiceData: Codable {
         currentHeaterCoolerStateId: UUID? = nil,
         targetHeaterCoolerStateId: UUID? = nil,
         coolingThresholdTemperatureId: UUID? = nil,
-        heatingThresholdTemperatureId: UUID? = nil
+        heatingThresholdTemperatureId: UUID? = nil,
+        rotationSpeedId: UUID? = nil,
+        currentDoorStateId: UUID? = nil,
+        targetDoorStateId: UUID? = nil,
+        obstructionDetectedId: UUID? = nil,
+        contactSensorStateId: UUID? = nil
     ) {
         self.uniqueIdentifier = uniqueIdentifier.uuidString
         self.name = name
@@ -104,6 +117,11 @@ public struct ServiceData: Codable {
         self.targetHeaterCoolerStateId = targetHeaterCoolerStateId?.uuidString
         self.coolingThresholdTemperatureId = coolingThresholdTemperatureId?.uuidString
         self.heatingThresholdTemperatureId = heatingThresholdTemperatureId?.uuidString
+        self.rotationSpeedId = rotationSpeedId?.uuidString
+        self.currentDoorStateId = currentDoorStateId?.uuidString
+        self.targetDoorStateId = targetDoorStateId?.uuidString
+        self.obstructionDetectedId = obstructionDetectedId?.uuidString
+        self.contactSensorStateId = contactSensorStateId?.uuidString
     }
 }
 
@@ -258,6 +276,9 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let temperatureSensor = "0000008A-0000-1000-8000-0026BB765291"
     @objc public static let humiditySensor = "00000082-0000-1000-8000-0026BB765291"
     @objc public static let motionSensor = "00000085-0000-1000-8000-0026BB765291"
+    @objc public static let fan = "00000040-0000-1000-8000-0026BB765291"
+    @objc public static let garageDoorOpener = "00000041-0000-1000-8000-0026BB765291"
+    @objc public static let contactSensor = "00000080-0000-1000-8000-0026BB765291"
 }
 
 // MARK: - Characteristic type constants
@@ -283,4 +304,13 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let targetHeaterCoolerState = "000000B2-0000-1000-8000-0026BB765291"
     @objc public static let coolingThresholdTemperature = "0000000D-0000-1000-8000-0026BB765291"
     @objc public static let heatingThresholdTemperature = "00000012-0000-1000-8000-0026BB765291"
+    // Fan characteristics
+    @objc public static let rotationSpeed = "00000029-0000-1000-8000-0026BB765291"
+    @objc public static let rotationDirection = "00000028-0000-1000-8000-0026BB765291"
+    // Garage door characteristics
+    @objc public static let currentDoorState = "0000000E-0000-1000-8000-0026BB765291"
+    @objc public static let targetDoorState = "00000032-0000-1000-8000-0026BB765291"
+    @objc public static let obstructionDetected = "00000024-0000-1000-8000-0026BB765291"
+    // Contact sensor characteristics
+    @objc public static let contactSensorState = "0000006A-0000-1000-8000-0026BB765291"
 }

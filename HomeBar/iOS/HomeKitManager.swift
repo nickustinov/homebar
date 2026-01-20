@@ -94,7 +94,10 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
                     HMServiceTypeWindowCovering,
                     HMServiceTypeTemperatureSensor,
                     HMServiceTypeHumiditySensor,
-                    HMServiceTypeMotionSensor
+                    HMServiceTypeMotionSensor,
+                    HMServiceTypeFan,
+                    HMServiceTypeGarageDoorOpener,
+                    HMServiceTypeContactSensor
                 ]
                 guard supportedTypes.contains(service.serviceType) else { return nil }
 
@@ -264,7 +267,15 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             currentHeaterCoolerStateId: charId(CharacteristicTypes.currentHeaterCoolerState),
             targetHeaterCoolerStateId: charId(CharacteristicTypes.targetHeaterCoolerState),
             coolingThresholdTemperatureId: charId(CharacteristicTypes.coolingThresholdTemperature),
-            heatingThresholdTemperatureId: charId(CharacteristicTypes.heatingThresholdTemperature)
+            heatingThresholdTemperatureId: charId(CharacteristicTypes.heatingThresholdTemperature),
+            // Fan characteristics
+            rotationSpeedId: charId(CharacteristicTypes.rotationSpeed),
+            // Garage door characteristics
+            currentDoorStateId: charId(CharacteristicTypes.currentDoorState),
+            targetDoorStateId: charId(CharacteristicTypes.targetDoorState),
+            obstructionDetectedId: charId(CharacteristicTypes.obstructionDetected),
+            // Contact sensor characteristics
+            contactSensorStateId: charId(CharacteristicTypes.contactSensorState)
         )
     }
 

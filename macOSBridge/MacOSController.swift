@@ -241,6 +241,15 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         case ServiceTypes.temperatureSensor, ServiceTypes.humiditySensor, ServiceTypes.motionSensor:
             return SensorMenuItem(serviceData: service, bridge: iOSBridge)
 
+        case ServiceTypes.fan:
+            return FanMenuItem(serviceData: service, bridge: iOSBridge)
+
+        case ServiceTypes.garageDoorOpener:
+            return GarageDoorMenuItem(serviceData: service, bridge: iOSBridge)
+
+        case ServiceTypes.contactSensor:
+            return ContactSensorMenuItem(serviceData: service, bridge: iOSBridge)
+
         default:
             // Fallback to basic menu item for unknown types
             let item = NSMenuItem(title: service.name, action: nil, keyEquivalent: "")
@@ -269,6 +278,12 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             return NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
         case ServiceTypes.motionSensor:
             return NSImage(systemSymbolName: "figure.walk.motion", accessibilityDescription: nil)
+        case ServiceTypes.fan:
+            return NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
+        case ServiceTypes.garageDoorOpener:
+            return NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
+        case ServiceTypes.contactSensor:
+            return NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
         default:
             return NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: nil)
         }

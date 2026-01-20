@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CF24631B07B6C53173C6D61 /* ContactSensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73384376845470E4D0DADC67 /* ContactSensorMenuItem.swift */; };
 		1EC671BC1ED92EB51EE5BD48 /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3073A412FDFBF8D6A0353005 /* ACMenuItem.swift */; };
 		24A8D74CC7F30CC9191475C8 /* macOSBridge.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3077902E08C2447E75C0B801 /* macOSBridge.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2565DFE47E948EC966C47685 /* SensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBC494E78D2C2258D170463 /* SensorMenuItem.swift */; };
 		354D1C0CBA568D00917FFFDD /* LightMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A35728D53D42D67EC70DFD0 /* LightMenuItem.swift */; };
+		38737DB32576B47995FA3CAF /* GarageDoorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1CB5D2645EBFEE1ADBE83D /* GarageDoorMenuItem.swift */; };
 		3CF1F3A98A39E560685EFEC6 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFBBFDDAA7CF51A5071A7ED /* LockMenuItem.swift */; };
 		4CD187B590B0BC88F68F8D05 /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182446EFDB860466676FAD69 /* ThermostatMenuItem.swift */; };
 		50A3F9C230C93573396D86D4 /* HomeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75604ECFC3AB4432ED7FAE22 /* HomeKit.framework */; };
@@ -19,6 +21,7 @@
 		A887C59FDF71A8AD3E9AD642 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF32A3FAF57D0DDDD65E08B8 /* BridgeProtocols.swift */; };
 		AB68B5D750603BEEED54EF6C /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF32A3FAF57D0DDDD65E08B8 /* BridgeProtocols.swift */; };
 		AF27EAE4A7E87F58A356A028 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BA6C0831C3CBC237D3EC0CA /* SceneDelegate.swift */; };
+		B1C8EEBD683989BCB803D449 /* FanMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A20BCE7E3D72419407902D /* FanMenuItem.swift */; };
 		C3F308A6A026013ABCFC6744 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E51009B97D866959165F67 /* AppDelegate.swift */; };
 		CD608CD2981E275869775A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 806F6733E4514D2FE98FC8B0 /* Assets.xcassets */; };
 		DE726F40251B6254C347DBD4 /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 609E8A737A4CD60BDB209D87 /* BaseMenuItems.swift */; };
@@ -48,10 +51,13 @@
 		414A7F7C413FD9357089E212 /* MacOSController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacOSController.swift; sourceTree = "<group>"; };
 		543EC33F3F55DF3D8FF567F3 /* HomeKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKitManager.swift; sourceTree = "<group>"; };
 		609E8A737A4CD60BDB209D87 /* BaseMenuItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMenuItems.swift; sourceTree = "<group>"; };
+		73384376845470E4D0DADC67 /* ContactSensorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSensorMenuItem.swift; sourceTree = "<group>"; };
 		75604ECFC3AB4432ED7FAE22 /* HomeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HomeKit.framework; path = System/Library/Frameworks/HomeKit.framework; sourceTree = SDKROOT; };
+		77A20BCE7E3D72419407902D /* FanMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanMenuItem.swift; sourceTree = "<group>"; };
 		806F6733E4514D2FE98FC8B0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9A35728D53D42D67EC70DFD0 /* LightMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightMenuItem.swift; sourceTree = "<group>"; };
 		9B8379562D115B4638C7B64D /* SwitchMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchMenuItem.swift; sourceTree = "<group>"; };
+		AE1CB5D2645EBFEE1ADBE83D /* GarageDoorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageDoorMenuItem.swift; sourceTree = "<group>"; };
 		AFD9AB50B95AE106FAEF1FCA /* HomeBar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HomeBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF32A3FAF57D0DDDD65E08B8 /* BridgeProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeProtocols.swift; sourceTree = "<group>"; };
 		DDD73D2770871DAF00442160 /* BlindMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlindMenuItem.swift; sourceTree = "<group>"; };
@@ -105,6 +111,9 @@
 				3073A412FDFBF8D6A0353005 /* ACMenuItem.swift */,
 				609E8A737A4CD60BDB209D87 /* BaseMenuItems.swift */,
 				DDD73D2770871DAF00442160 /* BlindMenuItem.swift */,
+				73384376845470E4D0DADC67 /* ContactSensorMenuItem.swift */,
+				77A20BCE7E3D72419407902D /* FanMenuItem.swift */,
+				AE1CB5D2645EBFEE1ADBE83D /* GarageDoorMenuItem.swift */,
 				9A35728D53D42D67EC70DFD0 /* LightMenuItem.swift */,
 				0DFBBFDDAA7CF51A5071A7ED /* LockMenuItem.swift */,
 				1CBC494E78D2C2258D170463 /* SensorMenuItem.swift */,
@@ -260,6 +269,9 @@
 				DE726F40251B6254C347DBD4 /* BaseMenuItems.swift in Sources */,
 				DF5B661C6E8298EF95656C25 /* BlindMenuItem.swift in Sources */,
 				A887C59FDF71A8AD3E9AD642 /* BridgeProtocols.swift in Sources */,
+				0CF24631B07B6C53173C6D61 /* ContactSensorMenuItem.swift in Sources */,
+				B1C8EEBD683989BCB803D449 /* FanMenuItem.swift in Sources */,
+				38737DB32576B47995FA3CAF /* GarageDoorMenuItem.swift in Sources */,
 				354D1C0CBA568D00917FFFDD /* LightMenuItem.swift in Sources */,
 				3CF1F3A98A39E560685EFEC6 /* LockMenuItem.swift in Sources */,
 				9CD50BD97A90999AAB7611CC /* MacOSController.swift in Sources */,

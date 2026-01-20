@@ -87,8 +87,8 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         speedSlider = ModernSlider(minValue: speedMin, maxValue: speedMax)
         speedSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
         speedSlider.doubleValue = speedMax
-        speedSlider.isContinuous = false  // Only send value on release to reduce errors
-        speedSlider.isHidden = true  // Hidden by default, shown when active
+        speedSlider.isContinuous = false
+        speedSlider.isHidden = true
         if hasSpeed {
             containerView.addSubview(speedSlider)
         }
@@ -154,7 +154,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
     @objc private func sliderChanged(_ sender: ModernSlider) {
         // Round to nearest integer step
         let roundedValue = round(sender.doubleValue)
-        sender.doubleValue = roundedValue  // Snap slider to position
+        sender.doubleValue = roundedValue
 
         let value = Float(roundedValue)
         if let id = rotationSpeedId {

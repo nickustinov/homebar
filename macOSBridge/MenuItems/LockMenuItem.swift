@@ -36,11 +36,13 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         self.lockStateCharacteristicId = serviceData.lockCurrentStateId.flatMap { UUID(uuidString: $0) }
         self.targetStateCharacteristicId = serviceData.lockTargetStateId.flatMap { UUID(uuidString: $0) }
 
+        let height = DS.ControlSize.menuItemHeight
+
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)
         iconView.contentTintColor = DS.Colors.success
@@ -56,7 +58,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
 
         // Name label (fills space up to status label)
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
-        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelY = (height - 17) / 2
         let labelWidth = statusX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
         nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
@@ -74,10 +76,10 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         containerView.addSubview(statusLabel)
 
         // Toggle switch (on = locked, off = unlocked)
-        let switchY = (DS.ControlSize.menuItemHeight - DS.ControlSize.switchHeight) / 2
+        let switchY = (height - DS.ControlSize.switchHeight) / 2
         toggleSwitch = ToggleSwitch()
         toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
-        toggleSwitch.isOn = true  // Locked = on
+        toggleSwitch.isOn = true
         containerView.addSubview(toggleSwitch)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
@@ -95,7 +97,6 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
 
     func updateValue(for characteristicId: UUID, value: Any) {
         if characteristicId == lockStateCharacteristicId {
-            // 0 = unsecured, 1 = secured
             if let state = value as? Int {
                 isLocked = state == 1
                 updateUI()
@@ -108,11 +109,10 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         iconView.contentTintColor = DS.Colors.mutedForeground
         statusLabel.stringValue = isLocked ? "Locked" : "Unlocked"
         statusLabel.textColor = DS.Colors.mutedForeground
-        toggleSwitch.setOn(isLocked, animated: false)  // ON = locked, OFF = unlocked
+        toggleSwitch.setOn(isLocked, animated: false)
     }
 
     @objc private func toggleLock(_ sender: ToggleSwitch) {
-        // ON = locked, OFF = unlocked
         setLockState(locked: sender.isOn)
     }
 

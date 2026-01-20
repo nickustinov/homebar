@@ -83,8 +83,8 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         brightnessSlider = ModernSlider(minValue: 0, maxValue: 100)
         brightnessSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
         brightnessSlider.doubleValue = 100
-        brightnessSlider.isContinuous = false  // Only send value on release to reduce errors
-        brightnessSlider.isHidden = true  // Hidden by default, shown when on
+        brightnessSlider.isContinuous = false
+        brightnessSlider.isHidden = true
         if hasBrightness {
             containerView.addSubview(brightnessSlider)
         }

@@ -65,7 +65,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
         self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
 
-        // Create the custom view - start collapsed
+        // Create wrapper view (full width for menu sizing) - start collapsed
         containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
 
         // Row 1: Icon, name, current temp, power toggle (centered vertically)

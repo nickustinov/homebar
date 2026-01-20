@@ -43,11 +43,13 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.targetDoorStateId = serviceData.targetDoorStateId.flatMap { UUID(uuidString: $0) }
         self.obstructionDetectedId = serviceData.obstructionDetectedId.flatMap { UUID(uuidString: $0) }
 
+        let height = DS.ControlSize.menuItemHeight
+
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
         iconView.contentTintColor = DS.Colors.mutedForeground
@@ -63,7 +65,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
         // Name label (fills space up to status label)
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
-        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelY = (height - 17) / 2
         let labelWidth = statusX - labelX - DS.Spacing.xs
         nameLabel = NSTextField(labelWithString: serviceData.name)
         nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
@@ -81,7 +83,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         containerView.addSubview(statusLabel)
 
         // Toggle switch (on = closed, off = open)
-        let switchY = (DS.ControlSize.menuItemHeight - DS.ControlSize.switchHeight) / 2
+        let switchY = (height - DS.ControlSize.switchHeight) / 2
         toggleSwitch = ToggleSwitch()
         toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
         toggleSwitch.isOn = true  // Closed = on

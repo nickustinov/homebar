@@ -15,6 +15,9 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let mainMenu = NSMenu()
+    private var sceneMenuItems: [SceneMenuItem] = []
+    private var currentMenuData: MenuData?
+    private var favouritesWindowController: FavouritesWindowController?
 
     @objc public weak var iOSBridge: Mac2iOS?
 
@@ -24,6 +27,22 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         super.init()
         setupStatusItem()
         setupMenu()
+        setupNotifications()
+    }
+
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(preferencesDidChange),
+            name: PreferencesManager.preferencesChangedNotification,
+            object: nil
+        )
+    }
+
+    @objc private func preferencesDidChange() {
+        if let data = currentMenuData {
+            rebuildMenu(with: data)
+        }
     }
     
     private func setupStatusItem() {
@@ -105,11 +124,21 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     // MARK: - Menu Building
     
     private func rebuildMenu(with data: MenuData) {
+        currentMenuData = data
         mainMenu.removeAllItems()
+        sceneMenuItems = []
 
         // Home selector (if multiple homes)
         if data.homes.count > 1 {
             addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
+            mainMenu.addItem(NSMenuItem.separator())
+        }
+
+        // Favourites section (before Scenes)
+        let favouriteScenes = collectFavouriteScenes(from: data)
+        let favouriteServices = collectFavouriteServices(from: data)
+        if !favouriteScenes.isEmpty || !favouriteServices.isEmpty {
+            addFavouritesSection(scenes: favouriteScenes, services: favouriteServices)
             mainMenu.addItem(NSMenuItem.separator())
         }
 
@@ -118,17 +147,77 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             addScenes(data.scenes)
             mainMenu.addItem(NSMenuItem.separator())
         }
-        
-        if data.rooms.count == 0 && data.accessories.count == 0 {
+
+        // Filter hidden services from accessories
+        let filteredAccessories = filterHiddenServices(from: data.accessories)
+
+        if data.rooms.count == 0 && filteredAccessories.count == 0 {
             let emptyItem = NSMenuItem(title: "No devices found", action: nil, keyEquivalent: "")
             emptyItem.isEnabled = false
             mainMenu.addItem(emptyItem)
         } else {
-            addRoomsAndAccessories(rooms: data.rooms, accessories: data.accessories)
+            addRoomsAndAccessories(rooms: data.rooms, accessories: filteredAccessories)
         }
-        
+
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
+    }
+
+    // MARK: - Favourites
+
+    private func collectFavouriteScenes(from data: MenuData) -> [SceneData] {
+        let preferences = PreferencesManager.shared
+        return data.scenes.filter { preferences.isFavourite(sceneId: $0.uniqueIdentifier) }
+    }
+
+    private func collectFavouriteServices(from data: MenuData) -> [ServiceData] {
+        let preferences = PreferencesManager.shared
+        var services: [ServiceData] = []
+        for accessory in data.accessories {
+            for service in accessory.services {
+                if preferences.isFavourite(serviceId: service.uniqueIdentifier) {
+                    services.append(service)
+                }
+            }
+        }
+        return services
+    }
+
+    private func filterHiddenServices(from accessories: [AccessoryData]) -> [AccessoryData] {
+        let preferences = PreferencesManager.shared
+        return accessories.map { accessory in
+            let filteredServices = accessory.services.filter { service in
+                !preferences.isHidden(serviceId: service.uniqueIdentifier)
+            }
+            return AccessoryData(
+                uniqueIdentifier: UUID(uuidString: accessory.uniqueIdentifier)!,
+                name: accessory.name,
+                roomIdentifier: accessory.roomIdentifier.flatMap { UUID(uuidString: $0) },
+                services: filteredServices,
+                isReachable: accessory.isReachable
+            )
+        }
+    }
+
+    private func addFavouritesSection(scenes: [SceneData], services: [ServiceData]) {
+        // Add favourite scenes directly to main menu
+        for scene in scenes.sorted(by: { $0.name < $1.name }) {
+            let item = SceneMenuItem(sceneData: scene, bridge: iOSBridge)
+            mainMenu.addItem(item)
+            sceneMenuItems.append(item)
+        }
+
+        // Add separator if we have both scenes and services
+        if !scenes.isEmpty && !services.isEmpty {
+            mainMenu.addItem(NSMenuItem.separator())
+        }
+
+        // Add favourite services directly to main menu
+        for service in services.sorted(by: { $0.name < $1.name }) {
+            if let item = createMenuItemForService(service) {
+                mainMenu.addItem(item)
+            }
+        }
     }
     
     private func addHomeSelector(homes: [HomeData], selectedId: String?) {
@@ -151,8 +240,23 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
     
     private func addScenes(_ scenes: [SceneData]) {
-        let gridItem = ScenesGridMenuItem(scenes: scenes, bridge: iOSBridge)
-        mainMenu.addItem(gridItem)
+        let preferences = PreferencesManager.shared
+        let visibleScenes = scenes.filter { !preferences.isHidden(sceneId: $0.uniqueIdentifier) }
+
+        guard !visibleScenes.isEmpty else { return }
+
+        let scenesItem = NSMenuItem(title: "Scenes", action: nil, keyEquivalent: "")
+        scenesItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+
+        let submenu = NSMenu()
+        for scene in visibleScenes {
+            let item = SceneMenuItem(sceneData: scene, bridge: iOSBridge)
+            submenu.addItem(item)
+            sceneMenuItems.append(item)
+        }
+
+        scenesItem.submenu = submenu
+        mainMenu.addItem(scenesItem)
     }
     
     private func addRoomsAndAccessories(rooms: [RoomData], accessories: [AccessoryData]) {
@@ -342,13 +446,38 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
     
     private func addFooterItems() {
-        let reloadItem = NSMenuItem(title: "Reload", action: #selector(reload(_:)), keyEquivalent: "r")
-        reloadItem.target = self
-        reloadItem.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
-        mainMenu.addItem(reloadItem)
-        
+        // Settings submenu
+        let settingsItem = NSMenuItem(title: "Settings", action: nil, keyEquivalent: "")
+        settingsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
+
+        let settingsSubmenu = NSMenu()
+
+        // Launch at login checkbox
+        let launchAtLoginItem = NSMenuItem(
+            title: "Launch at login",
+            action: #selector(toggleLaunchAtLogin(_:)),
+            keyEquivalent: ""
+        )
+        launchAtLoginItem.target = self
+        launchAtLoginItem.state = PreferencesManager.shared.launchAtLogin ? .on : .off
+        settingsSubmenu.addItem(launchAtLoginItem)
+
+        settingsSubmenu.addItem(NSMenuItem.separator())
+
+        // Accessories dialog
+        let favouritesItem = NSMenuItem(
+            title: "Accessories...",
+            action: #selector(openFavourites(_:)),
+            keyEquivalent: ""
+        )
+        favouritesItem.target = self
+        settingsSubmenu.addItem(favouritesItem)
+
+        settingsItem.submenu = settingsSubmenu
+        mainMenu.addItem(settingsItem)
+
         mainMenu.addItem(NSMenuItem.separator())
-        
+
         let quitItem = NSMenuItem(title: "Quit HomeBar", action: #selector(quit(_:)), keyEquivalent: "q")
         quitItem.target = self
         mainMenu.addItem(quitItem)
@@ -358,6 +487,11 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     
     private func updateMenuItems(for characteristicId: UUID, value: Any) {
         updateMenuItemsRecursively(in: mainMenu, characteristicId: characteristicId, value: value)
+
+        // Directly update scene items (submenu items may not be traversed correctly)
+        for sceneItem in sceneMenuItems {
+            sceneItem.updateValue(for: characteristicId, value: value)
+        }
     }
     
     private func updateMenuItemsRecursively(in menu: NSMenu, characteristicId: UUID, value: Any) {
@@ -382,11 +516,23 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             iOSBridge?.selectedHomeIdentifier = uuid
         }
     }
-    
-    @objc private func reload(_ sender: Any?) {
-        iOSBridge?.reloadHomeKit()
+
+    @objc private func toggleLaunchAtLogin(_ sender: NSMenuItem) {
+        let preferences = PreferencesManager.shared
+        preferences.launchAtLogin.toggle()
+        sender.state = preferences.launchAtLogin ? .on : .off
     }
-    
+
+    @objc private func openFavourites(_ sender: Any?) {
+        guard let data = currentMenuData else { return }
+
+        if favouritesWindowController == nil {
+            favouritesWindowController = FavouritesWindowController()
+        }
+        favouritesWindowController?.configure(with: data)
+        favouritesWindowController?.showWindow()
+    }
+
     @objc private func quit(_ sender: Any?) {
         NSApplication.shared.terminate(nil)
     }

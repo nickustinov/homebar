@@ -101,6 +101,7 @@ enum DS {
         static let thermostatCool = NSColor(red: 0.30, green: 0.60, blue: 0.95, alpha: 1) // Blue
         static let lockLocked = NSColor(red: 0.22, green: 0.78, blue: 0.45, alpha: 1) // Green
         static let lockUnlocked = NSColor(red: 0.95, green: 0.68, blue: 0.25, alpha: 1) // Orange
+
     }
 
     // MARK: - Spacing
@@ -185,7 +186,7 @@ enum DS {
         static let iconLarge: CGFloat = 22
 
         // Menu item
-        static let menuItemHeight: CGFloat = 32
+        static let menuItemHeight: CGFloat = 28
         static let menuItemHeightLarge: CGFloat = 52
         static let menuItemWidth: CGFloat = 260
     }

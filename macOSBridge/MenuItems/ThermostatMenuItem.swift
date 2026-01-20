@@ -98,7 +98,6 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         targetSlider = ModernSlider(minValue: 10, maxValue: 30)
         targetSlider.frame = NSRect(x: sliderX, y: DS.Spacing.sm, width: sliderWidth, height: DS.ControlSize.sliderThumbSize)
         targetSlider.doubleValue = 20
-        targetSlider.progressTintColor = DS.Colors.thermostatHeat
         targetSlider.isContinuous = false
         containerView.addSubview(targetSlider)
 
@@ -143,14 +142,13 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     private func updateModeUI() {
-        let (symbolName, color, sliderColor): (String, NSColor, NSColor) = switch mode {
-        case 1: ("flame", DS.Colors.thermostatHeat, DS.Colors.thermostatHeat)
-        case 2: ("snowflake", DS.Colors.thermostatCool, DS.Colors.thermostatCool)
-        default: ("thermometer", DS.Colors.mutedForeground, DS.Colors.primary)
+        let (symbolName, color): (String, NSColor) = switch mode {
+        case 1: ("flame", DS.Colors.thermostatHeat)
+        case 2: ("snowflake", DS.Colors.thermostatCool)
+        default: ("thermometer", DS.Colors.mutedForeground)
         }
         iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
         iconView.contentTintColor = color
-        targetSlider.progressTintColor = sliderColor
     }
 
     @objc private func sliderChanged(_ sender: ModernSlider) {

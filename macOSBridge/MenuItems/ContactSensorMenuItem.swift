@@ -35,11 +35,13 @@ class ContactSensorMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
         // Extract characteristic UUID from ServiceData
         self.contactSensorStateId = serviceData.contactSensorStateId.flatMap { UUID(uuidString: $0) }
 
+        let height = DS.ControlSize.menuItemHeight
+
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
+        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
-        let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
         iconView.image = NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
         iconView.contentTintColor = DS.Colors.success
@@ -48,7 +50,7 @@ class ContactSensorMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
 
         // Name label
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
-        let labelY = (DS.ControlSize.menuItemHeight - 17) / 2
+        let labelY = (height - 17) / 2
         nameLabel = NSTextField(labelWithString: serviceData.name)
         nameLabel.frame = NSRect(x: labelX, y: labelY, width: 140, height: 17)
         nameLabel.font = DS.Typography.label

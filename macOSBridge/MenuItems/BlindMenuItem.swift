@@ -15,6 +15,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private var currentPositionCharacteristicId: UUID?
     private var targetPositionCharacteristicId: UUID?
     private var position: Int = 0
+    private var ignoreUpdatesUntil: Date?
 
     private let containerView: NSView
     private let iconView: NSImageView
@@ -86,9 +87,19 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == currentPositionCharacteristicId {
             if let pos = value as? Int {
+                // For local changes, set the ignore window (syncs all instances)
+                if isLocalChange {
+                    ignoreUpdatesUntil = Date().addingTimeInterval(60)
+                }
+
+                // Ignore HomeKit updates while waiting for blinds to reach target
+                if !isLocalChange, let ignoreUntil = ignoreUpdatesUntil, Date() < ignoreUntil {
+                    return
+                }
+
                 position = pos
                 positionSlider.doubleValue = Double(pos)
                 updateIcon()
@@ -115,6 +126,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         if let id = targetPositionCharacteristicId {
             bridge?.writeCharacteristic(identifier: id, value: value)
             // Notify with current position ID so other copies update their slider
+            // This also sets the ignore window for HomeKit updates on all instances
             if let currentId = currentPositionCharacteristicId {
                 notifyLocalChange(characteristicId: currentId, value: value)
             }

@@ -199,24 +199,36 @@ class ModernSlider: NSControl {
         guard isEnabled else { return }
         isDragging = true
         updateValueFromEvent(event)
-    }
 
-    override func mouseDragged(with event: NSEvent) {
-        guard isDragging, isEnabled else { return }
-        updateValueFromEvent(event)
-    }
+        // Use tracking loop for menu item compatibility - menus intercept normal mouseUp
+        guard let window = window else { return }
+        var keepTracking = true
 
-    override func mouseUp(with event: NSEvent) {
-        isDragging = false
-        if !isHovered {
-            animateThumbScale(scale: 1.0)
+        while keepTracking {
+            guard let nextEvent = window.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]) else {
+                continue
+            }
+
+            switch nextEvent.type {
+            case .leftMouseDragged:
+                updateValueFromEvent(nextEvent)
+            case .leftMouseUp:
+                updateValueFromEvent(nextEvent, force: true)
+                keepTracking = false
+                isDragging = false
+                if !isHovered {
+                    animateThumbScale(scale: 1.0)
+                }
+                if !isContinuous {
+                    sendAction(action, to: target)
+                }
+            default:
+                break
+            }
         }
-        if !isContinuous {
-            sendAction(action, to: target)
-        }
     }
 
-    private func updateValueFromEvent(_ event: NSEvent) {
+    private func updateValueFromEvent(_ event: NSEvent, force: Bool = false) {
         let location = convert(event.locationInWindow, from: nil)
         let thumbSize = DS.ControlSize.sliderThumbSize
         let trackWidth = bounds.width - thumbSize
@@ -226,8 +238,9 @@ class ModernSlider: NSControl {
         let progress = max(0, min(1, relativeX / trackWidth))
         let newValue = minValue + Double(progress) * (maxValue - minValue)
 
-        if newValue != doubleValue {
-            doubleValue = newValue
+        if newValue != doubleValue || force {
+            _doubleValue = min(max(newValue, minValue), maxValue)
+            updateThumbPosition()
             if isContinuous {
                 sendAction(action, to: target)
             }

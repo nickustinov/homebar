@@ -199,7 +199,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         }
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == powerCharacteristicId, let boolValue = value as? Bool {
             isOn = boolValue
             updateUI()

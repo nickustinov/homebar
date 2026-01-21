@@ -75,7 +75,7 @@ class ContactSensorMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == contactSensorStateId {
             // ContactSensorState: 0 = contact detected (closed), 1 = contact not detected (open)
             if let intValue = value as? Int {

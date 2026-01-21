@@ -70,7 +70,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             return
         }
         // Broadcast to all menu items (syncs favourites with room submenus)
-        updateMenuItems(for: characteristicId, value: value)
+        updateMenuItems(for: characteristicId, value: value, isLocalChange: true)
     }
 
     @objc private func preferencesDidChange() {
@@ -215,7 +215,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     
     @objc public func updateCharacteristic(identifier: UUID, value: Any) {
         DispatchQueue.main.async {
-            self.updateMenuItems(for: identifier, value: value)
+            self.updateMenuItems(for: identifier, value: value, isLocalChange: false)
         }
     }
     
@@ -595,22 +595,22 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     
     // MARK: - Menu Updates
     
-    private func updateMenuItems(for characteristicId: UUID, value: Any) {
-        updateMenuItemsRecursively(in: mainMenu, characteristicId: characteristicId, value: value)
+    private func updateMenuItems(for characteristicId: UUID, value: Any, isLocalChange: Bool) {
+        updateMenuItemsRecursively(in: mainMenu, characteristicId: characteristicId, value: value, isLocalChange: isLocalChange)
 
         // Directly update scene items (submenu items may not be traversed correctly)
         for sceneItem in sceneMenuItems {
-            sceneItem.updateValue(for: characteristicId, value: value)
+            sceneItem.updateValue(for: characteristicId, value: value, isLocalChange: isLocalChange)
         }
     }
-    
-    private func updateMenuItemsRecursively(in menu: NSMenu, characteristicId: UUID, value: Any) {
+
+    private func updateMenuItemsRecursively(in menu: NSMenu, characteristicId: UUID, value: Any, isLocalChange: Bool) {
         for item in menu.items {
             if let updatable = item as? CharacteristicUpdatable {
-                updatable.updateValue(for: characteristicId, value: value)
+                updatable.updateValue(for: characteristicId, value: value, isLocalChange: isLocalChange)
             }
             if let submenu = item.submenu {
-                updateMenuItemsRecursively(in: submenu, characteristicId: characteristicId, value: value)
+                updateMenuItemsRecursively(in: submenu, characteristicId: characteristicId, value: value, isLocalChange: isLocalChange)
             }
         }
     }
@@ -727,7 +727,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 // MARK: - Protocols for menu items
 
 protocol CharacteristicUpdatable {
-    func updateValue(for characteristicId: UUID, value: Any)
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool)
 }
 
 protocol CharacteristicRefreshable {

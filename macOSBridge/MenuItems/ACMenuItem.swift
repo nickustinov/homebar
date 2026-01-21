@@ -212,7 +212,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
             if let active = value as? Int {
                 isActive = active == 1

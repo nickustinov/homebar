@@ -110,7 +110,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
             if let intValue = value as? Int {
                 isActive = intValue == 1

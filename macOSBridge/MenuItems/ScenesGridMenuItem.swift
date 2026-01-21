@@ -60,7 +60,7 @@ class ScenesGridMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool) {
         for button in sceneButtons {
             button.updateValue(for: characteristicId, value: value)
         }

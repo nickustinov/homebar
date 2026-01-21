@@ -92,7 +92,7 @@ class SensorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateValue(for characteristicId: UUID, value: Any) {
+    func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == valueCharacteristicId {
             updateDisplay(value: value)
         }

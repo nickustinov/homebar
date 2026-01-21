@@ -195,7 +195,19 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             return
         }
 
+        // Silently skip if accessory is not reachable
+        let accessoryReachable = characteristic.service?.accessory?.isReachable ?? false
+        logger.info("writeCharacteristic: accessory isReachable=\(accessoryReachable)")
+        guard accessoryReachable else {
+            logger.info("Skipping write - accessory not reachable")
+            return
+        }
+
         let metadata = characteristic.metadata
+        let format = metadata?.format ?? "unknown"
+        let minValue = metadata?.minimumValue
+        let maxValue = metadata?.maximumValue
+        logger.info("Writing to \(characteristic.characteristicType, privacy: .public): input=\(String(describing: value)) (\(type(of: value))), format=\(format, privacy: .public), range=\(String(describing: minValue))-\(String(describing: maxValue))")
 
         // Convert value to the format expected by the characteristic
         let convertedValue: Any
@@ -240,10 +252,14 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             convertedValue = value
         }
 
+        logger.info("Converted value: \(String(describing: convertedValue)) (\(type(of: convertedValue)))")
+
         characteristic.writeValue(convertedValue) { error in
             if let error = error {
+                // Log the error but don't show dialog - device may be temporarily unreachable
                 logger.error("Write failed for \(characteristic.characteristicType, privacy: .public): \(error.localizedDescription)")
-                self.macOSDelegate?.showError(message: "Failed to update: \(error.localizedDescription)")
+            } else {
+                logger.info("Write succeeded for \(characteristic.characteristicType, privacy: .public)")
             }
         }
     }
@@ -296,9 +312,13 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
                 name: svc.name,
                 serviceType: svc.serviceType,
                 accessoryName: svc.accessoryName,
-                roomIdentifier: svc.roomIdentifier
+                roomIdentifier: svc.roomIdentifier,
+                isReachable: false
             )
         }
+
+        let isReachable = hmService.accessory?.isReachable ?? false
+        logger.info("Building service \(svc.name, privacy: .public): accessory isReachable=\(isReachable)")
 
         // Helper to find characteristic UUID by type (using our constants for unavailable HMCharacteristicType*)
         func charId(_ type: String) -> UUID? {
@@ -315,14 +335,25 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
         let rotationSpeedMin = rotationSpeedChar?.metadata?.minimumValue?.doubleValue
         let rotationSpeedMax = rotationSpeedChar?.metadata?.maximumValue?.doubleValue
 
+        // Get color temperature min/max from metadata
+        let colorTempChar = findChar(CharacteristicTypes.colorTemperature)
+        let colorTempMin = colorTempChar?.metadata?.minimumValue?.doubleValue
+        let colorTempMax = colorTempChar?.metadata?.maximumValue?.doubleValue
+
         return ServiceData(
             uniqueIdentifier: svc.uniqueIdentifier,
             name: svc.name,
             serviceType: svc.serviceType,
             accessoryName: svc.accessoryName,
             roomIdentifier: svc.roomIdentifier,
+            isReachable: isReachable,
             powerStateId: charId(HMCharacteristicTypePowerState),
             brightnessId: charId(HMCharacteristicTypeBrightness),
+            hueId: charId(CharacteristicTypes.hue),
+            saturationId: charId(CharacteristicTypes.saturation),
+            colorTemperatureId: charId(CharacteristicTypes.colorTemperature),
+            colorTemperatureMin: colorTempMin,
+            colorTemperatureMax: colorTempMax,
             currentTemperatureId: charId(HMCharacteristicTypeCurrentTemperature),
             targetTemperatureId: charId(HMCharacteristicTypeTargetTemperature),
             heatingCoolingStateId: charId(HMCharacteristicTypeCurrentHeatingCooling),

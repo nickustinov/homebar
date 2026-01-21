@@ -8,13 +8,25 @@
 import Foundation
 import AppKit
 
+final class StayOpenMenu: NSMenu {
+
+    var isTrackingSuspended = false
+
+    override func cancelTracking() {
+        if isTrackingSuspended {
+            return
+        }
+        super.cancelTracking()
+    }
+}
+
 @objc(MacOSController)
 public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     
     // MARK: - Properties
 
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-    let mainMenu = NSMenu()
+    let mainMenu = StayOpenMenu()
     private var sceneMenuItems: [SceneMenuItem] = []
     private var currentMenuData: MenuData?
 
@@ -302,7 +314,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         let homeItem = NSMenuItem(title: "Home", action: nil, keyEquivalent: "")
         homeItem.image = NSImage(systemSymbolName: "house", accessibilityDescription: nil)
         
-        let submenu = NSMenu()
+        let submenu = StayOpenMenu()
         for home in homes {
             let item = NSMenuItem(title: home.name, action: #selector(selectHome(_:)), keyEquivalent: "")
             item.target = self
@@ -332,7 +344,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             let scenesItem = NSMenuItem(title: "Scenes", action: nil, keyEquivalent: "")
             scenesItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
 
-            let submenu = NSMenu()
+            let submenu = StayOpenMenu()
             for scene in visibleScenes {
                 let item = SceneMenuItem(sceneData: scene, bridge: iOSBridge)
                 submenu.addItem(item)
@@ -366,7 +378,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             let roomItem = NSMenuItem(title: room.name, action: nil, keyEquivalent: "")
             roomItem.image = iconForRoom(room.name)
 
-            let submenu = NSMenu()
+            let submenu = StayOpenMenu()
             addServicesGroupedByType(to: submenu, accessories: roomAccessories)
             roomItem.submenu = submenu
             mainMenu.addItem(roomItem)
@@ -377,7 +389,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             let otherItem = NSMenuItem(title: "Other", action: nil, keyEquivalent: "")
             otherItem.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
 
-            let submenu = NSMenu()
+            let submenu = StayOpenMenu()
             addServicesGroupedByType(to: submenu, accessories: noRoomAccessories)
             otherItem.submenu = submenu
             mainMenu.addItem(otherItem)
@@ -586,7 +598,28 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
     
     private func updateAccessoryReachability(_ accessoryId: UUID, isReachable: Bool) {
-        // Update reachability state in menu items
+        // Find all service IDs for this accessory
+        guard let menuData = currentMenuData,
+              let accessory = menuData.accessories.first(where: { $0.uniqueIdentifier == accessoryId.uuidString }) else {
+            return
+        }
+
+        let serviceIds = Set(accessory.services.compactMap { UUID(uuidString: $0.uniqueIdentifier) })
+
+        // Update menu items for all services in this accessory
+        updateReachabilityRecursively(in: mainMenu, serviceIds: serviceIds, isReachable: isReachable)
+    }
+
+    private func updateReachabilityRecursively(in menu: NSMenu, serviceIds: Set<UUID>, isReachable: Bool) {
+        for item in menu.items {
+            if let reachabilityItem = item as? ReachabilityUpdatable,
+               serviceIds.contains(reachabilityItem.serviceIdentifier) {
+                reachabilityItem.setReachable(isReachable)
+            }
+            if let submenu = item.submenu {
+                updateReachabilityRecursively(in: submenu, serviceIds: serviceIds, isReachable: isReachable)
+            }
+        }
     }
     
     // MARK: - Actions
@@ -681,4 +714,9 @@ protocol CharacteristicUpdatable {
 
 protocol CharacteristicRefreshable {
     var characteristicIdentifiers: [UUID] { get }
+}
+
+protocol ReachabilityUpdatable {
+    var serviceIdentifier: UUID { get }
+    func setReachable(_ isReachable: Bool)
 }

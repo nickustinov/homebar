@@ -50,7 +50,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         containerView.addSubview(iconView)
 
         // Slider position (right-aligned)
-        let sliderWidth: CGFloat = 80
+        let sliderWidth = DS.ControlSize.sliderWidth
         let sliderX = DS.ControlSize.menuItemWidth - sliderWidth - DS.Spacing.md
 
         // Name label

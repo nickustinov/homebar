@@ -188,6 +188,7 @@ enum DS {
         // Slider
         static let sliderTrackHeight: CGFloat = 6
         static let sliderThumbSize: CGFloat = 16
+        static let sliderWidth: CGFloat = 60
 
         // Icon
         static let iconSmall: CGFloat = 14

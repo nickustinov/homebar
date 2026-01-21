@@ -37,10 +37,16 @@ public struct ServiceData: Codable {
     public let serviceType: String
     public let accessoryName: String
     public let roomIdentifier: String?
+    public let isReachable: Bool
 
     // Characteristic UUIDs - each service type uses different ones
     public let powerStateId: String?           // Lights, switches, outlets
     public let brightnessId: String?           // Dimmable lights
+    public let hueId: String?                  // RGB lights (0-360)
+    public let saturationId: String?           // RGB lights (0-100)
+    public let colorTemperatureId: String?     // Tunable white lights (Mired)
+    public let colorTemperatureMin: Double?    // Min Mired value
+    public let colorTemperatureMax: Double?    // Max Mired value
     public let currentTemperatureId: String?   // Thermostats, temperature sensors, AC
     public let targetTemperatureId: String?    // Thermostats
     public let heatingCoolingStateId: String?  // Thermostats (current mode)
@@ -74,8 +80,14 @@ public struct ServiceData: Codable {
         serviceType: String,
         accessoryName: String,
         roomIdentifier: UUID?,
+        isReachable: Bool = true,
         powerStateId: UUID? = nil,
         brightnessId: UUID? = nil,
+        hueId: UUID? = nil,
+        saturationId: UUID? = nil,
+        colorTemperatureId: UUID? = nil,
+        colorTemperatureMin: Double? = nil,
+        colorTemperatureMax: Double? = nil,
         currentTemperatureId: UUID? = nil,
         targetTemperatureId: UUID? = nil,
         heatingCoolingStateId: UUID? = nil,
@@ -104,8 +116,14 @@ public struct ServiceData: Codable {
         self.serviceType = serviceType
         self.accessoryName = accessoryName
         self.roomIdentifier = roomIdentifier?.uuidString
+        self.isReachable = isReachable
         self.powerStateId = powerStateId?.uuidString
         self.brightnessId = brightnessId?.uuidString
+        self.hueId = hueId?.uuidString
+        self.saturationId = saturationId?.uuidString
+        self.colorTemperatureId = colorTemperatureId?.uuidString
+        self.colorTemperatureMin = colorTemperatureMin
+        self.colorTemperatureMax = colorTemperatureMax
         self.currentTemperatureId = currentTemperatureId?.uuidString
         self.targetTemperatureId = targetTemperatureId?.uuidString
         self.heatingCoolingStateId = heatingCoolingStateId?.uuidString
@@ -308,6 +326,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let brightness = "00000008-0000-1000-8000-0026BB765291"
     @objc public static let hue = "00000013-0000-1000-8000-0026BB765291"
     @objc public static let saturation = "0000002F-0000-1000-8000-0026BB765291"
+    @objc public static let colorTemperature = "000000CE-0000-1000-8000-0026BB765291"
     @objc public static let currentTemperature = "00000011-0000-1000-8000-0026BB765291"
     @objc public static let targetTemperature = "00000035-0000-1000-8000-0026BB765291"
     @objc public static let heatingCoolingState = "0000000F-0000-1000-8000-0026BB765291"

@@ -79,7 +79,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         containerView.addSubview(nameLabel)
 
         // Speed slider (fixed width, positioned before toggle)
-        let sliderWidth: CGFloat = 80
+        let sliderWidth = DS.ControlSize.sliderWidth
         let sliderX = switchX - sliderWidth - DS.Spacing.sm
         let sliderY = (height - 12) / 2
 
@@ -144,7 +144,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         // Adjust name label width based on slider visibility
         let switchX = DS.ControlSize.menuItemWidth - DS.ControlSize.switchWidth - DS.Spacing.md
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
-        let sliderWidth: CGFloat = 80
+        let sliderWidth = DS.ControlSize.sliderWidth
         if showSlider {
             nameLabel.frame.size.width = switchX - sliderWidth - DS.Spacing.sm * 2 - labelX
         } else {

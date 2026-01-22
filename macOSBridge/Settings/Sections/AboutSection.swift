@@ -72,22 +72,12 @@ class AboutSection: SettingsCard {
 
         stackView.addArrangedSubview(linksStack)
 
-        // Spacer
-        let spacer3 = NSView()
-        spacer3.translatesAutoresizingMaskIntoConstraints = false
-        spacer3.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        stackView.addArrangedSubview(spacer3)
-
-        // Footer
-        let footerLabel = createLabel("Made with ❤️ by Nick Ustinov", style: .caption)
-        footerLabel.textColor = .tertiaryLabelColor
-        footerLabel.alignment = .center
-        stackView.addArrangedSubview(footerLabel)
     }
 
     private func createLinkButton(title: String, url: String) -> NSButton {
         let button = NSButton(title: title, target: self, action: #selector(openLink(_:)))
-        button.bezelStyle = .inline
+        button.bezelStyle = .rounded
+        button.controlSize = .regular
         button.toolTip = url
         return button
     }

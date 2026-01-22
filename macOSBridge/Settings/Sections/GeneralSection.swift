@@ -42,7 +42,7 @@ class GeneralSection: SettingsCard {
     private func setupContent() {
         // Launch at login box
         let launchBox = createCardBox()
-        launchSwitch.controlSize = .small
+        launchSwitch.controlSize = .mini
         launchSwitch.target = self
         launchSwitch.action = #selector(launchSwitchChanged)
         let launchRow = createSettingRow(label: "Launch Itsyhome at login", control: launchSwitch)
@@ -52,7 +52,7 @@ class GeneralSection: SettingsCard {
 
         // Grid view box
         let gridBox = createCardBox()
-        gridSwitch.controlSize = .small
+        gridSwitch.controlSize = .mini
         gridSwitch.target = self
         gridSwitch.action = #selector(gridSwitchChanged)
         let gridRow = createSettingRow(
@@ -184,7 +184,7 @@ class GeneralSection: SettingsCard {
     private func createCardBox() -> NSView {
         let box = NSView()
         box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor(white: 0.95, alpha: 1.0).cgColor
+        box.layer?.backgroundColor = NSColor(white: 0.97, alpha: 1.0).cgColor
         box.layer?.cornerRadius = 10
         box.translatesAutoresizingMaskIntoConstraints = false
         return box
@@ -194,10 +194,10 @@ class GeneralSection: SettingsCard {
         content.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(content)
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 6),
-            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
-            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -6)
+            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 4),
+            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -4)
         ])
     }
 

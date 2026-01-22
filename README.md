@@ -16,6 +16,10 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 - **Favourites** - Pin frequently used devices and scenes to the top of the menu
 - **Multi-home support** - Switch between multiple HomeKit homes
 - **Native experience** - Built with AppKit for a true macOS look and feel
+- **Device groups** - Create custom groups to control multiple devices at once *(Pro)*
+- **iCloud sync** - Sync favourites and settings across your Macs *(Pro)*
+- **Deeplinks** - Control devices from Shortcuts, Alfred, Raycast, Stream Deck *(Pro)*
+- **Webhooks/CLI** - Built-in HTTP server with a dedicated CLI tool *(Pro)*
 
 ## Supported devices
 
@@ -36,6 +40,14 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 | Temperature & Humidity sensors | Summary display per room |
 
 ## Itsyhome Pro
+
+### iCloud sync
+
+Sync your favourites, hidden items, device groups, and shortcuts across all your Macs.
+
+### Device groups
+
+Create custom groups of devices to control multiple devices at once. Groups appear in your menu bar and can be controlled via deeplinks and webhooks.
 
 ### Deeplinks
 

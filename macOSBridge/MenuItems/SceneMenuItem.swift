@@ -90,18 +90,7 @@ class SceneMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         }
 
         // Convert value to Double
-        let doubleValue: Double
-        if let boolValue = value as? Bool {
-            doubleValue = boolValue ? 1.0 : 0.0
-        } else if let intValue = value as? Int {
-            doubleValue = Double(intValue)
-        } else if let doubleVal = value as? Double {
-            doubleValue = doubleVal
-        } else if let floatValue = value as? Float {
-            doubleValue = Double(floatValue)
-        } else if let numberValue = value as? NSNumber {
-            doubleValue = numberValue.doubleValue
-        } else {
+        guard let doubleValue = ValueConversion.toDouble(value) else {
             return
         }
 
@@ -213,81 +202,7 @@ class SceneMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         }
     }
 
-    // Infer icon from scene name
     private static func inferIcon(for scene: SceneData) -> NSImage? {
-        let name = scene.name.lowercased()
-
-        if name.contains("night") || name.contains("sleep") || name.contains("goodnight") || name.contains("bed") {
-            return NSImage(systemSymbolName: "moon.fill", accessibilityDescription: nil)
-        }
-        if name.contains("morning") || name.contains("wake") || name.contains("sunrise") {
-            return NSImage(systemSymbolName: "sun.horizon.fill", accessibilityDescription: nil)
-        }
-        if name.contains("evening") || name.contains("sunset") {
-            return NSImage(systemSymbolName: "sun.haze.fill", accessibilityDescription: nil)
-        }
-        if name.contains("day") || name.contains("bright") {
-            return NSImage(systemSymbolName: "sun.max.fill", accessibilityDescription: nil)
-        }
-        if name.contains("movie") || name.contains("cinema") || name.contains("tv") {
-            return NSImage(systemSymbolName: "tv.fill", accessibilityDescription: nil)
-        }
-        if name.contains("party") || name.contains("disco") {
-            return NSImage(systemSymbolName: "party.popper.fill", accessibilityDescription: nil)
-        }
-        if name.contains("relax") || name.contains("chill") || name.contains("calm") {
-            return NSImage(systemSymbolName: "leaf.fill", accessibilityDescription: nil)
-        }
-        if name.contains("work") || name.contains("office") || name.contains("focus") {
-            return NSImage(systemSymbolName: "desktopcomputer", accessibilityDescription: nil)
-        }
-        if name.contains("away") || name.contains("leave") || name.contains("depart") || name.contains("goodbye") {
-            return NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)
-        }
-        if name.contains("home") || name.contains("arrive") || name.contains("welcome") {
-            return NSImage(systemSymbolName: "house.fill", accessibilityDescription: nil)
-        }
-        if name.contains("lock") || name.contains("secure") {
-            return NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)
-        }
-        if name.contains("unlock") || name.contains("open") {
-            return NSImage(systemSymbolName: "lock.open.fill", accessibilityDescription: nil)
-        }
-        if name.contains("gate") {
-            return NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
-        }
-        if name.contains("outdoor") || name.contains("outside") || name.contains("garden") || name.contains("terrace") || name.contains("patio") {
-            return NSImage(systemSymbolName: "tree.fill", accessibilityDescription: nil)
-        }
-        if name.contains("indoor") || name.contains("inside") {
-            return NSImage(systemSymbolName: "sofa.fill", accessibilityDescription: nil)
-        }
-        if name.contains("gym") || name.contains("workout") || name.contains("exercise") {
-            return NSImage(systemSymbolName: "dumbbell.fill", accessibilityDescription: nil)
-        }
-        if name.contains("pool") || name.contains("swim") {
-            return NSImage(systemSymbolName: "figure.pool.swim", accessibilityDescription: nil)
-        }
-        if name.contains("dinner") || name.contains("dining") || name.contains("eat") {
-            return NSImage(systemSymbolName: "fork.knife", accessibilityDescription: nil)
-        }
-        if name.contains("cook") || name.contains("kitchen") {
-            return NSImage(systemSymbolName: "frying.pan.fill", accessibilityDescription: nil)
-        }
-        if name.contains("reading") || name.contains("read") || name.contains("book") {
-            return NSImage(systemSymbolName: "book.fill", accessibilityDescription: nil)
-        }
-        if name.contains("romantic") || name.contains("date") || name.contains("love") {
-            return NSImage(systemSymbolName: "heart.fill", accessibilityDescription: nil)
-        }
-        if name.contains("off") || name.contains("all off") {
-            return NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        }
-        if name.contains("on") || name.contains("all on") {
-            return NSImage(systemSymbolName: "lightbulb.fill", accessibilityDescription: nil)
-        }
-
-        // Default: sparkles icon
-        return NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        SceneIconInference.icon(for: scene.name)
     }
 }

@@ -25,9 +25,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
     // MARK: - Properties
 
-    /// Set to true to show mock devices for UI testing (set to false before release)
-    private let showMockDevices = false
-
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let mainMenu = StayOpenMenu()
     private var sceneMenuItems: [SceneMenuItem] = []
@@ -260,21 +257,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         // Register global hotkeys for this home's shortcuts
         HotkeyManager.shared.registerShortcuts()
 
-        // Mock devices section for UI testing (before favourites)
-        if showMockDevices {
-            let mockHeader = NSMenuItem(title: "Mock devices (testing)", action: nil, keyEquivalent: "")
-            mockHeader.isEnabled = false
-            mainMenu.addItem(mockHeader)
-
-            let mockDevices = createMockDevices()
-            for mock in mockDevices {
-                if let menuItem = createMenuItemForService(mock) {
-                    mainMenu.addItem(menuItem)
-                }
-            }
-            mainMenu.addItem(NSMenuItem.separator())
-        }
-
         // Favourites section (before Scenes) - unified order
         let hasFavourites = addFavouritesSection(from: data)
         if hasFavourites {
@@ -302,65 +284,9 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
-    }
 
-    // MARK: - Mock devices for UI testing
-
-    private func createMockDevices() -> [ServiceData] {
-        // Create mock ServiceData objects for testing the new device types
-        // Using valid UUID format (hex characters only)
-        return [
-            // Mock Humidifier
-            ServiceData(
-                uniqueIdentifier: UUID(uuidString: "00000001-0000-0000-0000-000000000001")!,
-                name: "Living Room Humidifier",
-                serviceType: ServiceTypes.humidifierDehumidifier,
-                accessoryName: "Mock Humidifier",
-                roomIdentifier: nil,
-                isReachable: true,
-                activeId: UUID(uuidString: "00000001-0001-0000-0000-000000000001"),
-                currentHumidifierDehumidifierStateId: UUID(uuidString: "00000001-0002-0000-0000-000000000001"),
-                targetHumidifierDehumidifierStateId: UUID(uuidString: "00000001-0003-0000-0000-000000000001")
-            ),
-            // Mock Air Purifier
-            ServiceData(
-                uniqueIdentifier: UUID(uuidString: "00000002-0000-0000-0000-000000000002")!,
-                name: "Bedroom Air Purifier",
-                serviceType: ServiceTypes.airPurifier,
-                accessoryName: "Mock Air Purifier",
-                roomIdentifier: nil,
-                isReachable: true,
-                activeId: UUID(uuidString: "00000002-0001-0000-0000-000000000002"),
-                rotationSpeedId: UUID(uuidString: "00000002-0002-0000-0000-000000000002"),
-                rotationSpeedMin: 0,
-                rotationSpeedMax: 100,
-                currentAirPurifierStateId: UUID(uuidString: "00000002-0003-0000-0000-000000000002"),
-                targetAirPurifierStateId: UUID(uuidString: "00000002-0004-0000-0000-000000000002")
-            ),
-            // Mock Valve (irrigation)
-            ServiceData(
-                uniqueIdentifier: UUID(uuidString: "00000003-0000-0000-0000-000000000003")!,
-                name: "Garden Sprinkler",
-                serviceType: ServiceTypes.valve,
-                accessoryName: "Mock Valve",
-                roomIdentifier: nil,
-                isReachable: true,
-                activeId: UUID(uuidString: "00000003-0001-0000-0000-000000000003"),
-                inUseId: UUID(uuidString: "00000003-0002-0000-0000-000000000003"),
-                valveTypeValue: 1  // irrigation
-            ),
-            // Mock Security System
-            ServiceData(
-                uniqueIdentifier: UUID(uuidString: "00000004-0000-0000-0000-000000000004")!,
-                name: "Home Security",
-                serviceType: ServiceTypes.securitySystem,
-                accessoryName: "Mock Security",
-                roomIdentifier: nil,
-                isReachable: true,
-                securitySystemCurrentStateId: UUID(uuidString: "00000004-0001-0000-0000-000000000004"),
-                securitySystemTargetStateId: UUID(uuidString: "00000004-0002-0000-0000-000000000004")
-            )
-        ]
+        // Load initial characteristic values
+        refreshCharacteristics()
     }
 
     // MARK: - Favourites
@@ -504,11 +430,10 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         var temperatureSensors: [ServiceData] = []
         var humiditySensors: [ServiceData] = []
 
-        // Types to exclude from main list (sensors shown in footer, motion/smoke not supported)
+        // Types to exclude from main list (sensors shown in summary footer)
         let excludedTypes: Set<String> = [
             ServiceTypes.temperatureSensor,
-            ServiceTypes.humiditySensor,
-            ServiceTypes.motionSensor
+            ServiceTypes.humiditySensor
         ]
 
         for accessory in accessories {
@@ -537,8 +462,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             ServiceTypes.lock,
             ServiceTypes.garageDoorOpener,
             ServiceTypes.valve,
-            ServiceTypes.securitySystem,
-            ServiceTypes.contactSensor
+            ServiceTypes.securitySystem
         ]
 
         // Sort types by priority (known types first, then unknown)
@@ -581,52 +505,58 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     private func createMenuItemForService(_ service: ServiceData) -> NSMenuItem? {
+        let menuItem: NSMenuItem?
+
         switch service.serviceType {
         case ServiceTypes.lightbulb:
-            return LightMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = LightMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.switch, ServiceTypes.outlet:
-            return SwitchMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = SwitchMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.thermostat:
-            return ThermostatMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = ThermostatMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.heaterCooler:
-            return ACMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = ACMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.lock:
-            return LockMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = LockMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.windowCovering:
-            return BlindMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = BlindMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.fan:
-            return FanMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = FanMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.garageDoorOpener:
-            return GarageDoorMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.contactSensor:
-            return ContactSensorMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = GarageDoorMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.humidifierDehumidifier:
-            return HumidifierMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = HumidifierMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.airPurifier:
-            return AirPurifierMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = AirPurifierMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.valve:
-            return ValveMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = ValveMenuItem(serviceData: service, bridge: iOSBridge)
 
         case ServiceTypes.securitySystem:
-            return SecuritySystemMenuItem(serviceData: service, bridge: iOSBridge)
+            menuItem = SecuritySystemMenuItem(serviceData: service, bridge: iOSBridge)
 
         default:
             // Fallback to basic menu item for unknown types
             let item = NSMenuItem(title: service.name, action: nil, keyEquivalent: "")
             item.image = iconForServiceType(service.serviceType)
-            return item
+            menuItem = item
         }
+
+        // Apply initial reachability state
+        if let reachabilityItem = menuItem as? ReachabilityUpdatable {
+            reachabilityItem.setReachable(service.isReachable)
+        }
+
+        return menuItem
     }
     
     private func iconForServiceType(_ type: String) -> NSImage? {
@@ -647,14 +577,10 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             return NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
         case ServiceTypes.humiditySensor:
             return NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
-        case ServiceTypes.motionSensor:
-            return NSImage(systemSymbolName: "figure.walk.motion", accessibilityDescription: nil)
         case ServiceTypes.fan:
             return NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
         case ServiceTypes.garageDoorOpener:
             return NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
-        case ServiceTypes.contactSensor:
-            return NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
         case ServiceTypes.humidifierDehumidifier:
             return NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
         case ServiceTypes.airPurifier:

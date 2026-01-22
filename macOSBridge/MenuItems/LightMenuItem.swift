@@ -15,14 +15,10 @@ final class ClickableColorCircleView: NSView {
     }
 }
 
-class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, ReachabilityUpdatable, LocalChangeNotifiable {
+class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, ReachabilityUpdatableMenuItem, LocalChangeNotifiable {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
-
-    // ReachabilityUpdatable
-    var serviceIdentifier: UUID { UUID(uuidString: serviceData.uniqueIdentifier)! }
-    private(set) var isReachable: Bool = true
 
     private var powerCharacteristicId: UUID?
     private var brightnessCharacteristicId: UUID?
@@ -68,7 +64,6 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     init(serviceData: ServiceData, bridge: Mac2iOS?) {
         self.serviceData = serviceData
         self.bridge = bridge
-        self.isReachable = serviceData.isReachable
 
         self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
         self.brightnessCharacteristicId = serviceData.brightnessId.flatMap { UUID(uuidString: $0) }
@@ -200,60 +195,45 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     }
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
-        if characteristicId == powerCharacteristicId, let boolValue = value as? Bool {
-            isOn = boolValue
-            updateUI()
-        } else if characteristicId == powerCharacteristicId, let intValue = value as? Int {
-            isOn = intValue != 0
-            updateUI()
-        } else if characteristicId == brightnessCharacteristicId, let doubleValue = value as? Double {
-            brightness = doubleValue
-            brightnessSlider.doubleValue = doubleValue
-        } else if characteristicId == brightnessCharacteristicId, let intValue = value as? Int {
-            brightness = Double(intValue)
-            brightnessSlider.doubleValue = brightness
+        if characteristicId == powerCharacteristicId {
+            if let power = ValueConversion.toBool(value) {
+                isOn = power
+                updateUI()
+            }
+        } else if characteristicId == brightnessCharacteristicId {
+            if let newBrightness = ValueConversion.toDouble(value) {
+                brightness = newBrightness
+                brightnessSlider.doubleValue = newBrightness
+            }
         } else if characteristicId == hueCharacteristicId {
-            if let v = value as? Double { hue = v }
-            else if let v = value as? Int { hue = Double(v) }
-            else if let v = value as? Float { hue = Double(v) }
-            updateColorCircle()
-            (colorPickerView as? ColorWheelPickerView)?.updateColor(hue: hue, saturation: saturation)
+            if let newHue = ValueConversion.toDouble(value) {
+                hue = newHue
+                updateColorCircle()
+                (colorPickerView as? ColorWheelPickerView)?.updateColor(hue: hue, saturation: saturation)
+            }
         } else if characteristicId == saturationCharacteristicId {
-            if let v = value as? Double { saturation = v }
-            else if let v = value as? Int { saturation = Double(v) }
-            else if let v = value as? Float { saturation = Double(v) }
-            updateColorCircle()
-            (colorPickerView as? ColorWheelPickerView)?.updateColor(hue: hue, saturation: saturation)
+            if let newSaturation = ValueConversion.toDouble(value) {
+                saturation = newSaturation
+                updateColorCircle()
+                (colorPickerView as? ColorWheelPickerView)?.updateColor(hue: hue, saturation: saturation)
+            }
         } else if characteristicId == colorTempCharacteristicId {
-            if let v = value as? Double { colorTemp = v }
-            else if let v = value as? Int { colorTemp = Double(v) }
-            else if let v = value as? Float { colorTemp = Double(v) }
-            updateColorCircle()
-            (colorPickerView as? ColorTempPickerView)?.updateMired(colorTemp)
+            if let newColorTemp = ValueConversion.toDouble(value) {
+                colorTemp = newColorTemp
+                updateColorCircle()
+                (colorPickerView as? ColorTempPickerView)?.updateMired(colorTemp)
+            }
         }
     }
 
-    func setReachable(_ reachable: Bool) {
-        isReachable = reachable
-        updateUI()
-    }
-
     private func updateUI() {
-        let dimmed = !isReachable
-        let alpha: CGFloat = dimmed ? 0.4 : 1.0
-
         iconView.image = NSImage(systemSymbolName: isOn ? "lightbulb.fill" : "lightbulb", accessibilityDescription: nil)
         iconView.contentTintColor = isOn ? DS.Colors.lightOn : DS.Colors.mutedForeground
-        iconView.alphaValue = alpha
-        nameLabel.alphaValue = alpha
         toggleSwitch.setOn(isOn, animated: false)
-        toggleSwitch.isEnabled = isReachable
-        toggleSwitch.alphaValue = alpha
 
-        let showSlider = isOn && hasBrightness && isReachable
-        let showColorCircle = isOn && hasColor && isReachable
+        let showSlider = isOn && hasBrightness
+        let showColorCircle = isOn && hasColor
         brightnessSlider.isHidden = !showSlider
-        brightnessSlider.isEnabled = isReachable
         colorCircle.isHidden = !showColorCircle
         if !showColorCircle {
             isColorPickerExpanded = false
@@ -295,7 +275,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     }
 
     private func toggleColorPicker() {
-        guard hasColor, isOn, isReachable else { return }
+        guard hasColor, isOn else { return }
         isColorPickerExpanded.toggle()
         updateUI()
         if let menu = menu {

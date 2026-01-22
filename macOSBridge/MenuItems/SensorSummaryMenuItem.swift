@@ -126,17 +126,13 @@ class SensorSummaryMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if temperatureCharacteristicIds.contains(characteristicId) {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 temperatureValues[characteristicId] = temp
-            } else if let temp = value as? Int {
-                temperatureValues[characteristicId] = Double(temp)
             }
             updateTemperatureDisplay()
         } else if humidityCharacteristicIds.contains(characteristicId) {
-            if let humidity = value as? Double {
+            if let humidity = ValueConversion.toDouble(value) {
                 humidityValues[characteristicId] = humidity
-            } else if let humidity = value as? Int {
-                humidityValues[characteristicId] = Double(humidity)
             }
             updateHumidityDisplay()
         }

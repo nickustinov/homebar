@@ -7,7 +7,7 @@
 
 import AppKit
 
-class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -97,7 +97,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == lockStateCharacteristicId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 isLocked = state == 1
                 updateUI()
             }

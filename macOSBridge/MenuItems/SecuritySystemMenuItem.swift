@@ -7,7 +7,7 @@
 
 import AppKit
 
-class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -141,12 +141,12 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == currentStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 currentState = state
                 updateUI()
             }
         } else if characteristicId == targetStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 targetState = state
                 updateModeButtons()
             }

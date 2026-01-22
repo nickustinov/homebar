@@ -7,7 +7,7 @@
 
 import AppKit
 
-class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -172,42 +172,32 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
-            if let active = value as? Int {
-                isActive = active == 1
-                updateUI()
-            } else if let active = value as? Bool {
+            if let active = ValueConversion.toBool(value) {
                 isActive = active
                 updateUI()
             }
         } else if characteristicId == humidityId {
-            if let humidity = value as? Double {
+            if let humidity = ValueConversion.toDouble(value) {
                 currentHumidity = humidity
                 humidityLabel.stringValue = String(format: "%.0f%%", humidity)
-            } else if let humidity = value as? Int {
-                currentHumidity = Double(humidity)
-                humidityLabel.stringValue = String(format: "%.0f%%", currentHumidity)
             }
         } else if characteristicId == currentStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 currentState = state
                 updateStateIcon()
             }
         } else if characteristicId == targetStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 targetState = state
                 updateModeButtons()
             }
         } else if characteristicId == humidifierThresholdId {
-            if let threshold = value as? Double {
+            if let threshold = ValueConversion.toDouble(value) {
                 humidifierThreshold = threshold
-            } else if let threshold = value as? Int {
-                humidifierThreshold = Double(threshold)
             }
         } else if characteristicId == dehumidifierThresholdId {
-            if let threshold = value as? Double {
+            if let threshold = ValueConversion.toDouble(value) {
                 dehumidifierThreshold = threshold
-            } else if let threshold = value as? Int {
-                dehumidifierThreshold = Double(threshold)
             }
         }
     }

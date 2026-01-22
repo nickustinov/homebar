@@ -7,7 +7,7 @@
 
 import AppKit
 
-class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -104,23 +104,17 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == currentTempCharacteristicId {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 currentTemp = temp
                 currentTempLabel.stringValue = String(format: "%.0f°", temp)
-            } else if let temp = value as? Int {
-                currentTemp = Double(temp)
-                currentTempLabel.stringValue = String(format: "%.0f°", currentTemp)
             }
         } else if characteristicId == targetTempCharacteristicId {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 targetTemp = temp
                 targetSlider.doubleValue = temp
-            } else if let temp = value as? Int {
-                targetTemp = Double(temp)
-                targetSlider.doubleValue = targetTemp
             }
         } else if characteristicId == modeCharacteristicId {
-            if let m = value as? Int {
+            if let m = ValueConversion.toInt(value) {
                 mode = m
                 updateModeUI()
             }

@@ -7,7 +7,7 @@
 
 import AppKit
 
-class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -103,15 +103,14 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
-        if characteristicId == currentDoorStateId, let intValue = value as? Int {
-            currentState = intValue
-            updateUI()
-        } else if characteristicId == obstructionDetectedId {
-            if let boolValue = value as? Bool {
-                isObstructed = boolValue
+        if characteristicId == currentDoorStateId {
+            if let state = ValueConversion.toInt(value) {
+                currentState = state
                 updateUI()
-            } else if let intValue = value as? Int {
-                isObstructed = intValue != 0
+            }
+        } else if characteristicId == obstructionDetectedId {
+            if let obstructed = ValueConversion.toBool(value) {
+                isObstructed = obstructed
                 updateUI()
             }
         }

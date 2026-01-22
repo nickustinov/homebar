@@ -7,7 +7,7 @@
 
 import AppKit
 
-class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -89,7 +89,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == currentPositionCharacteristicId {
-            if let pos = value as? Int {
+            if let pos = ValueConversion.toInt(value) {
                 // For local changes, set the ignore window (syncs all instances)
                 if isLocalChange {
                     ignoreUpdatesUntil = Date().addingTimeInterval(60)

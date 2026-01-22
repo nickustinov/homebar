@@ -7,7 +7,7 @@
 
 import AppKit
 
-class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -109,19 +109,13 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
-            if let intValue = value as? Int {
-                isActive = intValue == 1
-                updateUI()
-            } else if let boolValue = value as? Bool {
-                isActive = boolValue
+            if let active = ValueConversion.toBool(value) {
+                isActive = active
                 updateUI()
             }
         } else if characteristicId == inUseId {
-            if let intValue = value as? Int {
-                isInUse = intValue == 1
-                updateUI()
-            } else if let boolValue = value as? Bool {
-                isInUse = boolValue
+            if let inUse = ValueConversion.toBool(value) {
+                isInUse = inUse
                 updateUI()
             }
         }

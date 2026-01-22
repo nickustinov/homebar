@@ -7,7 +7,7 @@
 
 import AppKit
 
-class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -78,11 +78,8 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == powerCharacteristicId {
-            if let boolValue = value as? Bool {
-                isOn = boolValue
-                updateUI()
-            } else if let intValue = value as? Int {
-                isOn = intValue != 0
+            if let power = ValueConversion.toBool(value) {
+                isOn = power
                 updateUI()
             }
         }

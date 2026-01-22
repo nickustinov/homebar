@@ -21,8 +21,6 @@
 		1539311789FA41246C3F438C /* ValveMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E64829BF9C061EB52A28437 /* ValveMenuItem.swift */; };
 		160978BDC19974A59FB1A4BB /* LightMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73072FCFE16311A3C25C1C2C /* LightMenuItem.swift */; };
 		16A327E2FD58F4B48606729C /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */; };
-		1F371D887A255246B1D0476A /* ContactSensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97294F841A6CCBC4B68DB7E2 /* ContactSensorMenuItem.swift */; };
-		213B0C0375DDBDB66B76CDB2 /* SensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DA790B8C69170774D51C97 /* SensorMenuItem.swift */; };
 		21F39E80DC3F5C5543037DD6 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39978B305FBE0EDCA33CCAFB /* SettingsWindowController.swift */; };
 		259E77A4CA92FB96D11ECD4C /* GarageDoorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */; };
 		280C74C7265950C9756B365E /* MacOSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D500F71D0EA63DEF283D8B /* MacOSController.swift */; };
@@ -31,11 +29,9 @@
 		3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */; };
 		4436CFEA7BA3F99DBA1BF890 /* LightMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73072FCFE16311A3C25C1C2C /* LightMenuItem.swift */; };
 		4959FC69F1F23C3ABA0365A1 /* SwitchMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */; };
-		4D254CB705D49D273EE1922F /* SensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DA790B8C69170774D51C97 /* SensorMenuItem.swift */; };
 		4DE21C1DE370423C77BB118D /* SensorSummaryMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */; };
 		51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7593F05E9EAB8871D43D8E8 /* ModeButton.swift */; };
 		52BED706E1E2183D364BA285 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88919649EAF34363518DE9FF /* BridgeProtocols.swift */; };
-		52D57DDBC763425D57606E8C /* ContactSensorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97294F841A6CCBC4B68DB7E2 /* ContactSensorMenuItem.swift */; };
 		530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */; };
 		538121CA4DBF8EEB27C242A1 /* ScenesGridMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33028C597EEA3DAE92520C3 /* ScenesGridMenuItem.swift */; };
 		54727DEB4A151CC024B9D31E /* ScenesGridMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33028C597EEA3DAE92520C3 /* ScenesGridMenuItem.swift */; };
@@ -115,7 +111,6 @@
 		4E64829BF9C061EB52A28437 /* ValveMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValveMenuItem.swift; sourceTree = "<group>"; };
 		51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchMenuItem.swift; sourceTree = "<group>"; };
 		5735B31C003BD03DE4B28206 /* macOSBridge.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSBridge.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		64DA790B8C69170774D51C97 /* SensorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorMenuItem.swift; sourceTree = "<group>"; };
 		6A6222EC075A53E4D9A33DEA /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
 		6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMenuItems.swift; sourceTree = "<group>"; };
 		71AB516B350323CC9A1DAEE4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -127,7 +122,6 @@
 		874AC367AE516CA50259C5B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		88919649EAF34363518DE9FF /* BridgeProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeProtocols.swift; sourceTree = "<group>"; };
 		8A88562EA2E11D2E4E9370E8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		97294F841A6CCBC4B68DB7E2 /* ContactSensorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSensorMenuItem.swift; sourceTree = "<group>"; };
 		9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleSwitch.swift; sourceTree = "<group>"; };
 		9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlindMenuItem.swift; sourceTree = "<group>"; };
 		A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
@@ -286,7 +280,6 @@
 				72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */,
 				6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */,
 				9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */,
-				97294F841A6CCBC4B68DB7E2 /* ContactSensorMenuItem.swift */,
 				F3AE776817A51695FBA936B1 /* FanMenuItem.swift */,
 				AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */,
 				2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */,
@@ -295,7 +288,6 @@
 				A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */,
 				B33028C597EEA3DAE92520C3 /* ScenesGridMenuItem.swift */,
 				FBD57CCBF703A5861D8AEFB0 /* SecuritySystemMenuItem.swift */,
-				64DA790B8C69170774D51C97 /* SensorMenuItem.swift */,
 				117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */,
 				51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */,
 				86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */,
@@ -460,7 +452,6 @@
 				3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */,
 				CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */,
 				0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */,
-				1F371D887A255246B1D0476A /* ContactSensorMenuItem.swift in Sources */,
 				DB962F06C77A87E8D2AAA55E /* DesignSystem.swift in Sources */,
 				80BA4CBB1ADDA67E5A9ABB5A /* FanMenuItem.swift in Sources */,
 				FC8D776A1F8F0E75A5D9222E /* FavouritesRowView.swift in Sources */,
@@ -479,7 +470,6 @@
 				0189B807373567481D495882 /* SceneMenuItem.swift in Sources */,
 				54727DEB4A151CC024B9D31E /* ScenesGridMenuItem.swift in Sources */,
 				680D90D25922D1D80083CFC7 /* SecuritySystemMenuItem.swift in Sources */,
-				213B0C0375DDBDB66B76CDB2 /* SensorMenuItem.swift in Sources */,
 				F0D475122112E46686ADF3C1 /* SensorSummaryMenuItem.swift in Sources */,
 				21F39E80DC3F5C5543037DD6 /* SettingsWindowController.swift in Sources */,
 				CAFADC7AC3708C1CF63E3E15 /* SwitchMenuItem.swift in Sources */,
@@ -499,7 +489,6 @@
 				16A327E2FD58F4B48606729C /* BaseMenuItems.swift in Sources */,
 				851260AF14FDF357AD88C04F /* BlindMenuItem.swift in Sources */,
 				67926ADF4BFE82DCEF6BB9D1 /* BridgeProtocols.swift in Sources */,
-				52D57DDBC763425D57606E8C /* ContactSensorMenuItem.swift in Sources */,
 				C8A37E1284E27AADA3A6906B /* DesignSystem.swift in Sources */,
 				73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */,
 				530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */,
@@ -513,7 +502,6 @@
 				874A311DF0D311BD252A5F4C /* SceneMenuItem.swift in Sources */,
 				538121CA4DBF8EEB27C242A1 /* ScenesGridMenuItem.swift in Sources */,
 				0D1340AA633BF40EC7B797C4 /* SecuritySystemMenuItem.swift in Sources */,
-				4D254CB705D49D273EE1922F /* SensorMenuItem.swift in Sources */,
 				4DE21C1DE370423C77BB118D /* SensorSummaryMenuItem.swift in Sources */,
 				4959FC69F1F23C3ABA0365A1 /* SwitchMenuItem.swift in Sources */,
 				9FBEDE4F029FFD689286563C /* SwitchMenuItemTests.swift in Sources */,

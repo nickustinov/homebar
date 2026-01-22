@@ -7,7 +7,7 @@
 
 import AppKit
 
-class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -170,33 +170,24 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
-            if let active = value as? Int {
-                isActive = active == 1
-                updateUI()
-            } else if let active = value as? Bool {
+            if let active = ValueConversion.toBool(value) {
                 isActive = active
                 updateUI()
             }
         } else if characteristicId == currentStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 currentState = state
                 updateStateIcon()
             }
         } else if characteristicId == targetStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 targetState = state
                 updateModeButtons()
             }
         } else if characteristicId == rotationSpeedId {
-            if let doubleValue = value as? Double {
-                speed = doubleValue
-                speedSlider.doubleValue = doubleValue
-            } else if let intValue = value as? Int {
-                speed = Double(intValue)
-                speedSlider.doubleValue = speed
-            } else if let floatValue = value as? Float {
-                speed = Double(floatValue)
-                speedSlider.doubleValue = speed
+            if let newSpeed = ValueConversion.toDouble(value) {
+                speed = newSpeed
+                speedSlider.doubleValue = newSpeed
             }
         }
     }

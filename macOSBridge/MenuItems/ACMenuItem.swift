@@ -7,7 +7,7 @@
 
 import AppKit
 
-class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable {
+class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, LocalChangeNotifiable, ReachabilityUpdatableMenuItem {
 
     let serviceData: ServiceData
     weak var bridge: Mac2iOS?
@@ -214,46 +214,34 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
     func updateValue(for characteristicId: UUID, value: Any, isLocalChange: Bool = false) {
         if characteristicId == activeId {
-            if let active = value as? Int {
-                isActive = active == 1
-                updateUI()
-            } else if let active = value as? Bool {
+            if let active = ValueConversion.toBool(value) {
                 isActive = active
                 updateUI()
             }
         } else if characteristicId == currentTempId {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 currentTemp = temp
                 tempLabel.stringValue = String(format: "%.1f°", temp)
-            } else if let temp = value as? Int {
-                currentTemp = Double(temp)
-                tempLabel.stringValue = String(format: "%.1f°", currentTemp)
             }
         } else if characteristicId == currentStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 currentState = state
                 updateStateIcon()
             }
         } else if characteristicId == targetStateId {
-            if let state = value as? Int {
+            if let state = ValueConversion.toInt(value) {
                 targetState = state
                 updateModeButtons()
                 updateTargetDisplay()
             }
         } else if characteristicId == coolingThresholdId {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 coolingThreshold = temp
-                updateTargetDisplay()
-            } else if let temp = value as? Int {
-                coolingThreshold = Double(temp)
                 updateTargetDisplay()
             }
         } else if characteristicId == heatingThresholdId {
-            if let temp = value as? Double {
+            if let temp = ValueConversion.toDouble(value) {
                 heatingThreshold = temp
-                updateTargetDisplay()
-            } else if let temp = value as? Int {
-                heatingThreshold = Double(temp)
                 updateTargetDisplay()
             }
         }

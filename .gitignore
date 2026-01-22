@@ -46,3 +46,6 @@ playground.xcworkspace
 *.xcconfig
 !*Debug.xcconfig
 !*Release.xcconfig
+
+# Project notes
+TODO.md

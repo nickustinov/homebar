@@ -6,7 +6,7 @@
 
 A native macOS menu bar app for controlling your HomeKit smart home devices.
 
-**[itsyhome.app](https://itsyhome.app)** · Free forever
+**[itsyhome.app](https://itsyhome.app)**
 
 ## Features
 

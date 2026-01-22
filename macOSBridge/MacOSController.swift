@@ -27,15 +27,16 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let mainMenu = StayOpenMenu()
-    private var sceneMenuItems: [SceneMenuItem] = []
+    private var menuBuilder: MenuBuilder!
     private var currentMenuData: MenuData?
 
     @objc public weak var iOSBridge: Mac2iOS?
 
     // MARK: - Initialization
-    
+
     @objc public required override init() {
         super.init()
+        menuBuilder = MenuBuilder(bridge: nil)
         setupStatusItem()
         setupMenu()
         setupNotifications()
@@ -49,7 +50,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             object: nil
         )
 
-        // Observe local characteristic changes to sync duplicate menu items
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleLocalCharacteristicChange(_:)),
@@ -57,7 +57,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             object: nil
         )
 
-        // Setup hotkey handler
         HotkeyManager.shared.onHotkeyTriggered = { [weak self] favouriteId in
             self?.handleHotkeyForFavourite(favouriteId)
         }
@@ -69,7 +68,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
               let value = userInfo["value"] else {
             return
         }
-        // Broadcast to all menu items (syncs favourites with room submenus)
         updateMenuItems(for: characteristicId, value: value, isLocalChange: true)
     }
 
@@ -77,21 +75,18 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         if let data = currentMenuData {
             rebuildMenu(with: data)
         }
-        // Re-register hotkeys when preferences change
         HotkeyManager.shared.registerShortcuts()
     }
 
     private func handleHotkeyForFavourite(_ favouriteId: String) {
         guard let data = currentMenuData else { return }
 
-        // Check if it's a scene
         if let scene = data.scenes.first(where: { $0.uniqueIdentifier == favouriteId }),
            let sceneUUID = UUID(uuidString: scene.uniqueIdentifier) {
             iOSBridge?.executeScene(identifier: sceneUUID)
             return
         }
 
-        // Check if it's a service - find and toggle it
         for accessory in data.accessories {
             for service in accessory.services {
                 if service.uniqueIdentifier == favouriteId {
@@ -103,92 +98,82 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     private func toggleService(_ service: ServiceData) {
-        // Lights, switches, outlets - use powerStateId (Bool)
         if let idString = service.powerStateId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Bool ?? false
             iOSBridge?.writeCharacteristic(identifier: id, value: !current)
             return
         }
 
-        // AC/HeaterCooler, Fan - use activeId (Int: 0=inactive, 1=active)
         if let idString = service.activeId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 0
             iOSBridge?.writeCharacteristic(identifier: id, value: current == 0 ? 1 : 0)
             return
         }
 
-        // Locks - use lockTargetStateId (Int: 0=unsecured, 1=secured)
         if let idString = service.lockTargetStateId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 1
             iOSBridge?.writeCharacteristic(identifier: id, value: current == 0 ? 1 : 0)
             return
         }
 
-        // Window coverings/blinds - use targetPositionId (Int: 0=closed, 100=open)
         if let idString = service.targetPositionId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 0
             iOSBridge?.writeCharacteristic(identifier: id, value: current > 50 ? 0 : 100)
             return
         }
 
-        // Garage doors - use targetDoorStateId (Int: 0=open, 1=closed)
         if let idString = service.targetDoorStateId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 1
             iOSBridge?.writeCharacteristic(identifier: id, value: current == 0 ? 1 : 0)
             return
         }
 
-        // Thermostats - use targetHeatingCoolingStateId (0=off, 1=heat, 2=cool, 3=auto)
         if let idString = service.targetHeatingCoolingStateId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 0
             iOSBridge?.writeCharacteristic(identifier: id, value: current == 0 ? 3 : 0)
             return
         }
 
-        // Dimmable lights without power state - toggle brightness
         if let idString = service.brightnessId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 0
             iOSBridge?.writeCharacteristic(identifier: id, value: current > 0 ? 0 : 100)
             return
         }
 
-        // Security system - use securitySystemTargetStateId (0=stay, 1=away, 2=night, 3=disarmed)
         if let idString = service.securitySystemTargetStateId, let id = UUID(uuidString: idString) {
             let current = iOSBridge?.getCharacteristicValue(identifier: id) as? Int ?? 3
-            iOSBridge?.writeCharacteristic(identifier: id, value: current == 3 ? 0 : 3)  // toggle between disarmed and stay
+            iOSBridge?.writeCharacteristic(identifier: id, value: current == 3 ? 0 : 3)
             return
         }
     }
-    
+
     private func setupStatusItem() {
         if let button = statusItem.button {
-            // Load custom icon from this plugin's bundle
             let pluginBundle = Bundle(for: MacOSController.self)
             if let icon = pluginBundle.image(forResource: "MenuBarIcon") {
                 icon.isTemplate = true
                 button.image = icon
             } else {
-                // Fallback to SF Symbol
                 button.image = NSImage(systemSymbolName: "house.fill", accessibilityDescription: "Itsyhome")
             }
         }
         statusItem.menu = mainMenu
         mainMenu.delegate = self
     }
-    
+
     private func setupMenu() {
         mainMenu.removeAllItems()
-        
+
         let loadingItem = NSMenuItem(title: "Loading HomeKit...", action: nil, keyEquivalent: "")
         loadingItem.isEnabled = false
         mainMenu.addItem(loadingItem)
-        
+
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
     }
-    
+
     // MARK: - iOS2Mac Protocol
-    
+
     @objc public func reloadMenuWithJSON(_ jsonString: String) {
         print("Received JSON (\(jsonString.count) chars)")
         guard let jsonData = jsonString.data(using: .utf8) else {
@@ -219,20 +204,19 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             print("Failed to decode menu JSON: \(error)")
         }
     }
-    
+
     @objc public func updateCharacteristic(identifier: UUID, value: Any) {
         DispatchQueue.main.async {
             self.updateMenuItems(for: identifier, value: value, isLocalChange: false)
         }
     }
-    
+
     @objc public func setReachability(accessoryIdentifier: UUID, isReachable: Bool) {
-        // Update menu items for this accessory's reachability
         DispatchQueue.main.async {
             self.updateAccessoryReachability(accessoryIdentifier, isReachable: isReachable)
         }
     }
-    
+
     @objc public func showError(message: String) {
         DispatchQueue.main.async {
             let alert = NSAlert()
@@ -245,103 +229,57 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     // MARK: - Menu Building
-    
+
     private func rebuildMenu(with data: MenuData) {
         currentMenuData = data
         mainMenu.removeAllItems()
-        sceneMenuItems = []
 
-        // Set current home context for per-home preferences
         PreferencesManager.shared.currentHomeId = data.selectedHomeId
-
-        // Register global hotkeys for this home's shortcuts
         HotkeyManager.shared.registerShortcuts()
 
-        // Favourites section (before Scenes) - unified order
-        let hasFavourites = addFavouritesSection(from: data)
-        if hasFavourites {
-            mainMenu.addItem(NSMenuItem.separator())
-        }
-
-        // Scenes (if not hidden)
-        let preferences = PreferencesManager.shared
-        if data.scenes.count > 0 && !preferences.hideScenesSection {
-            addScenes(data.scenes)
-            mainMenu.addItem(NSMenuItem.separator())
-        }
-
-        // Filter hidden services and rooms from accessories
-        let filteredAccessories = filterHiddenServices(from: data.accessories)
-        let visibleRooms = data.rooms.filter { !preferences.isHidden(roomId: $0.uniqueIdentifier) }
-
-        if visibleRooms.count == 0 && filteredAccessories.count == 0 {
-            let emptyItem = NSMenuItem(title: "No devices found", action: nil, keyEquivalent: "")
-            emptyItem.isEnabled = false
-            mainMenu.addItem(emptyItem)
-        } else {
-            addRoomsAndAccessories(rooms: visibleRooms, accessories: filteredAccessories)
-        }
+        menuBuilder.bridge = iOSBridge
+        menuBuilder.buildMenu(into: mainMenu, with: data)
 
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
 
-        // Load initial characteristic values
         refreshCharacteristics()
     }
 
-    // MARK: - Favourites
-
-    /// Add favourites in unified order (scenes and services mixed)
-    /// Returns true if any favourites were added
-    @discardableResult
-    private func addFavouritesSection(from data: MenuData) -> Bool {
-        let preferences = PreferencesManager.shared
-
-        // Build lookup maps
-        let sceneLookup = Dictionary(uniqueKeysWithValues: data.scenes.map { ($0.uniqueIdentifier, $0) })
-        let allServices = data.accessories.flatMap { $0.services }
-        let serviceLookup = Dictionary(uniqueKeysWithValues: allServices.map { ($0.uniqueIdentifier, $0) })
-
-        var addedAny = false
-
-        // Add items in unified order
-        for id in preferences.orderedFavouriteIds {
-            if let scene = sceneLookup[id] {
-                let item = SceneMenuItem(sceneData: scene, bridge: iOSBridge)
-                mainMenu.addItem(item)
-                sceneMenuItems.append(item)
-                addedAny = true
-            } else if let service = serviceLookup[id] {
-                if let item = createMenuItemForService(service) {
-                    mainMenu.addItem(item)
-                    addedAny = true
-                }
-            }
+    private func addFooterItems() {
+        if let data = currentMenuData, data.homes.count > 1 {
+            addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
         }
 
-        return addedAny
+        let settingsItem = NSMenuItem(
+            title: "Settings...",
+            action: #selector(openSettings(_:)),
+            keyEquivalent: ""
+        )
+        settingsItem.target = self
+        settingsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
+        mainMenu.addItem(settingsItem)
+
+        mainMenu.addItem(NSMenuItem.separator())
+
+        let refreshItem = NSMenuItem(
+            title: "Refresh",
+            action: #selector(refreshHomeKit(_:)),
+            keyEquivalent: ""
+        )
+        refreshItem.target = self
+        refreshItem.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
+        mainMenu.addItem(refreshItem)
+
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(quit(_:)), keyEquivalent: "")
+        quitItem.target = self
+        mainMenu.addItem(quitItem)
     }
 
-    private func filterHiddenServices(from accessories: [AccessoryData]) -> [AccessoryData] {
-        let preferences = PreferencesManager.shared
-        return accessories.map { accessory in
-            let filteredServices = accessory.services.filter { service in
-                !preferences.isHidden(serviceId: service.uniqueIdentifier)
-            }
-            return AccessoryData(
-                uniqueIdentifier: UUID(uuidString: accessory.uniqueIdentifier)!,
-                name: accessory.name,
-                roomIdentifier: accessory.roomIdentifier.flatMap { UUID(uuidString: $0) },
-                services: filteredServices,
-                isReachable: accessory.isReachable
-            )
-        }
-    }
-    
     private func addHomeSelector(homes: [HomeData], selectedId: String?) {
         let homeItem = NSMenuItem(title: "Home", action: nil, keyEquivalent: "")
         homeItem.image = NSImage(systemSymbolName: "house", accessibilityDescription: nil)
-        
+
         let submenu = StayOpenMenu()
         for home in homes {
             let item = NSMenuItem(title: home.name, action: #selector(selectHome(_:)), keyEquivalent: "")
@@ -356,284 +294,13 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         homeItem.submenu = submenu
         mainMenu.addItem(homeItem)
     }
-    
-    private func addScenes(_ scenes: [SceneData]) {
-        let preferences = PreferencesManager.shared
-        let visibleScenes = scenes.filter { !preferences.isHidden(sceneId: $0.uniqueIdentifier) }
 
-        guard !visibleScenes.isEmpty else { return }
-
-        if preferences.scenesDisplayMode == .grid {
-            // Grid view - use ScenesGridMenuItem
-            let gridItem = ScenesGridMenuItem(scenes: visibleScenes, bridge: iOSBridge)
-            mainMenu.addItem(gridItem)
-        } else {
-            // List view - use submenu with SceneMenuItems
-            let scenesItem = NSMenuItem(title: "Scenes", action: nil, keyEquivalent: "")
-            scenesItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-
-            let submenu = StayOpenMenu()
-            for scene in visibleScenes {
-                let item = SceneMenuItem(sceneData: scene, bridge: iOSBridge)
-                submenu.addItem(item)
-                sceneMenuItems.append(item)
-            }
-
-            scenesItem.submenu = submenu
-            mainMenu.addItem(scenesItem)
-        }
-    }
-    
-    private func addRoomsAndAccessories(rooms: [RoomData], accessories: [AccessoryData]) {
-        // Group accessories by room
-        var accessoriesByRoom: [String: [AccessoryData]] = [:]
-        var noRoomAccessories: [AccessoryData] = []
-
-        for accessory in accessories {
-            if let roomId = accessory.roomIdentifier {
-                accessoriesByRoom[roomId, default: []].append(accessory)
-            } else {
-                noRoomAccessories.append(accessory)
-            }
-        }
-
-        // Add rooms
-        for room in rooms {
-            guard let roomAccessories = accessoriesByRoom[room.uniqueIdentifier], !roomAccessories.isEmpty else {
-                continue
-            }
-
-            let roomItem = NSMenuItem(title: room.name, action: nil, keyEquivalent: "")
-            roomItem.image = iconForRoom(room.name)
-
-            let submenu = StayOpenMenu()
-            addServicesGroupedByType(to: submenu, accessories: roomAccessories)
-            roomItem.submenu = submenu
-            mainMenu.addItem(roomItem)
-        }
-
-        // Add accessories without room
-        if !noRoomAccessories.isEmpty {
-            let otherItem = NSMenuItem(title: "Other", action: nil, keyEquivalent: "")
-            otherItem.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
-
-            let submenu = StayOpenMenu()
-            addServicesGroupedByType(to: submenu, accessories: noRoomAccessories)
-            otherItem.submenu = submenu
-            mainMenu.addItem(otherItem)
-        }
-    }
-
-    private func addServicesGroupedByType(to menu: NSMenu, accessories: [AccessoryData]) {
-        // Collect all services from all accessories
-        var servicesByType: [String: [ServiceData]] = [:]
-        var temperatureSensors: [ServiceData] = []
-        var humiditySensors: [ServiceData] = []
-
-        // Types to exclude from main list (sensors shown in summary footer)
-        let excludedTypes: Set<String> = [
-            ServiceTypes.temperatureSensor,
-            ServiceTypes.humiditySensor
-        ]
-
-        for accessory in accessories {
-            for service in accessory.services {
-                if service.serviceType == ServiceTypes.temperatureSensor {
-                    temperatureSensors.append(service)
-                } else if service.serviceType == ServiceTypes.humiditySensor {
-                    humiditySensors.append(service)
-                } else if !excludedTypes.contains(service.serviceType) {
-                    servicesByType[service.serviceType, default: []].append(service)
-                }
-            }
-        }
-
-        // Define type order priority
-        let typeOrder: [String] = [
-            ServiceTypes.lightbulb,
-            ServiceTypes.switch,
-            ServiceTypes.outlet,
-            ServiceTypes.fan,
-            ServiceTypes.heaterCooler,
-            ServiceTypes.thermostat,
-            ServiceTypes.humidifierDehumidifier,
-            ServiceTypes.airPurifier,
-            ServiceTypes.windowCovering,
-            ServiceTypes.lock,
-            ServiceTypes.garageDoorOpener,
-            ServiceTypes.valve,
-            ServiceTypes.securitySystem
-        ]
-
-        // Sort types by priority (known types first, then unknown)
-        let sortedTypes = servicesByType.keys.sorted { type1, type2 in
-            let index1 = typeOrder.firstIndex(of: type1) ?? Int.max
-            let index2 = typeOrder.firstIndex(of: type2) ?? Int.max
-            return index1 < index2
-        }
-
-        var isFirstGroup = true
-        for serviceType in sortedTypes {
-            guard let services = servicesByType[serviceType] else { continue }
-
-            // Add separator between groups
-            if !isFirstGroup {
-                menu.addItem(NSMenuItem.separator())
-            }
-            isFirstGroup = false
-
-            // Sort services by name within group
-            let sortedServices = services.sorted { $0.name < $1.name }
-
-            for service in sortedServices {
-                if let item = createMenuItemForService(service) {
-                    menu.addItem(item)
-                }
-            }
-        }
-
-        // Add sensor summary footer if there are any sensors
-        if !temperatureSensors.isEmpty || !humiditySensors.isEmpty {
-            menu.addItem(NSMenuItem.separator())
-            let sensorItem = SensorSummaryMenuItem(
-                temperatureSensors: temperatureSensors,
-                humiditySensors: humiditySensors,
-                bridge: iOSBridge
-            )
-            menu.addItem(sensorItem)
-        }
-    }
-
-    private func createMenuItemForService(_ service: ServiceData) -> NSMenuItem? {
-        let menuItem: NSMenuItem?
-
-        switch service.serviceType {
-        case ServiceTypes.lightbulb:
-            menuItem = LightMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.switch, ServiceTypes.outlet:
-            menuItem = SwitchMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.thermostat:
-            menuItem = ThermostatMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.heaterCooler:
-            menuItem = ACMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.lock:
-            menuItem = LockMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.windowCovering:
-            menuItem = BlindMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.fan:
-            menuItem = FanMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.garageDoorOpener:
-            menuItem = GarageDoorMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.humidifierDehumidifier:
-            menuItem = HumidifierMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.airPurifier:
-            menuItem = AirPurifierMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.valve:
-            menuItem = ValveMenuItem(serviceData: service, bridge: iOSBridge)
-
-        case ServiceTypes.securitySystem:
-            menuItem = SecuritySystemMenuItem(serviceData: service, bridge: iOSBridge)
-
-        default:
-            // Fallback to basic menu item for unknown types
-            let item = NSMenuItem(title: service.name, action: nil, keyEquivalent: "")
-            item.image = iconForServiceType(service.serviceType)
-            menuItem = item
-        }
-
-        // Apply initial reachability state
-        if let reachabilityItem = menuItem as? ReachabilityUpdatable {
-            reachabilityItem.setReachable(service.isReachable)
-        }
-
-        return menuItem
-    }
-    
-    private func iconForServiceType(_ type: String) -> NSImage? {
-        switch type {
-        case ServiceTypes.lightbulb:
-            return NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
-        case ServiceTypes.switch, ServiceTypes.outlet:
-            return NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        case ServiceTypes.thermostat:
-            return NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
-        case ServiceTypes.heaterCooler:
-            return NSImage(systemSymbolName: "air.conditioner.horizontal", accessibilityDescription: nil)
-        case ServiceTypes.lock:
-            return NSImage(systemSymbolName: "lock", accessibilityDescription: nil)
-        case ServiceTypes.windowCovering:
-            return NSImage(systemSymbolName: "blinds.horizontal.closed", accessibilityDescription: nil)
-        case ServiceTypes.temperatureSensor:
-            return NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
-        case ServiceTypes.humiditySensor:
-            return NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
-        case ServiceTypes.fan:
-            return NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
-        case ServiceTypes.garageDoorOpener:
-            return NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
-        case ServiceTypes.humidifierDehumidifier:
-            return NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
-        case ServiceTypes.airPurifier:
-            return NSImage(systemSymbolName: "aqi.medium", accessibilityDescription: nil)
-        case ServiceTypes.valve:
-            return NSImage(systemSymbolName: "drop", accessibilityDescription: nil)
-        case ServiceTypes.securitySystem:
-            return NSImage(systemSymbolName: "lock.shield", accessibilityDescription: nil)
-        default:
-            return NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: nil)
-        }
-    }
-    
-    private func addFooterItems() {
-        // Home selector (if multiple homes)
-        if let data = currentMenuData, data.homes.count > 1 {
-            addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
-        }
-
-        // Settings menu item
-        let settingsItem = NSMenuItem(
-            title: "Settings...",
-            action: #selector(openSettings(_:)),
-            keyEquivalent: ""
-        )
-        settingsItem.target = self
-        settingsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
-        mainMenu.addItem(settingsItem)
-
-        mainMenu.addItem(NSMenuItem.separator())
-
-        // Refresh menu item
-        let refreshItem = NSMenuItem(
-            title: "Refresh",
-            action: #selector(refreshHomeKit(_:)),
-            keyEquivalent: ""
-        )
-        refreshItem.target = self
-        refreshItem.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
-        mainMenu.addItem(refreshItem)
-
-        let quitItem = NSMenuItem(title: "Quit", action: #selector(quit(_:)), keyEquivalent: "")
-        quitItem.target = self
-        mainMenu.addItem(quitItem)
-    }
-    
     // MARK: - Menu Updates
-    
+
     private func updateMenuItems(for characteristicId: UUID, value: Any, isLocalChange: Bool) {
         updateMenuItemsRecursively(in: mainMenu, characteristicId: characteristicId, value: value, isLocalChange: isLocalChange)
 
-        // Directly update scene items (submenu items may not be traversed correctly)
-        for sceneItem in sceneMenuItems {
+        for sceneItem in menuBuilder.sceneMenuItems {
             sceneItem.updateValue(for: characteristicId, value: value, isLocalChange: isLocalChange)
         }
     }
@@ -648,17 +315,14 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             }
         }
     }
-    
+
     private func updateAccessoryReachability(_ accessoryId: UUID, isReachable: Bool) {
-        // Find all service IDs for this accessory
         guard let menuData = currentMenuData,
               let accessory = menuData.accessories.first(where: { $0.uniqueIdentifier == accessoryId.uuidString }) else {
             return
         }
 
         let serviceIds = Set(accessory.services.compactMap { UUID(uuidString: $0.uniqueIdentifier) })
-
-        // Update menu items for all services in this accessory
         updateReachabilityRecursively(in: mainMenu, serviceIds: serviceIds, isReachable: isReachable)
     }
 
@@ -673,12 +337,11 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             }
         }
     }
-    
+
     // MARK: - Actions
-    
+
     @objc private func selectHome(_ sender: NSMenuItem) {
         if let uuidString = sender.representedObject as? String, let uuid = UUID(uuidString: uuidString) {
-            // Close Settings window to avoid stale home context
             SettingsWindowController.shared.close()
             iOSBridge?.selectedHomeIdentifier = uuid
         }
@@ -698,21 +361,19 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     @objc private func quit(_ sender: Any?) {
         NSApplication.shared.terminate(nil)
     }
-    
+
     // MARK: - NSMenuDelegate
-    
+
     public func menuWillOpen(_ menu: NSMenu) {
         if menu == mainMenu {
-            // Refresh characteristic values when menu opens
             refreshCharacteristics()
         }
     }
-    
+
     private func refreshCharacteristics() {
-        // Request fresh values for visible characteristics
         refreshCharacteristicsRecursively(in: mainMenu)
     }
-    
+
     private func refreshCharacteristicsRecursively(in menu: NSMenu) {
         for item in menu.items {
             if let refreshable = item as? CharacteristicRefreshable {
@@ -725,36 +386,4 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             }
         }
     }
-    
-    // MARK: - Helpers
-    
-    private func iconForRoom(_ name: String) -> NSImage? {
-        let lowercased = name.lowercased()
-        
-        let symbolName: String
-        if lowercased.contains("living") {
-            symbolName = "sofa"
-        } else if lowercased.contains("bedroom") || lowercased.contains("bed") {
-            symbolName = "bed.double"
-        } else if lowercased.contains("kitchen") {
-            symbolName = "refrigerator"
-        } else if lowercased.contains("bath") {
-            symbolName = "shower"
-        } else if lowercased.contains("office") || lowercased.contains("study") {
-            symbolName = "desktopcomputer"
-        } else if lowercased.contains("garage") {
-            symbolName = "car"
-        } else if lowercased.contains("garden") || lowercased.contains("outdoor") {
-            symbolName = "leaf"
-        } else if lowercased.contains("dining") {
-            symbolName = "fork.knife"
-        } else if lowercased.contains("hall") || lowercased.contains("corridor") {
-            symbolName = "door.left.hand.open"
-        } else {
-            symbolName = "square.split.bottomrightquarter"
-        }
-        
-        return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
-    }
 }
-

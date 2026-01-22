@@ -7,369 +7,6 @@
 
 import AppKit
 
-// MARK: - Favourite item for drag/drop
-
-private struct FavouriteItem {
-    enum Kind {
-        case scene(SceneData)
-        case service(ServiceData)
-    }
-    let kind: Kind
-    let id: String
-    let name: String
-}
-
-// MARK: - Shortcut button
-
-private class ShortcutButton: NSButton {
-
-    var isRecording = false {
-        didSet { updateAppearance() }
-    }
-
-    var shortcut: PreferencesManager.ShortcutData? {
-        didSet { updateAppearance() }
-    }
-
-    var onShortcutRecorded: ((PreferencesManager.ShortcutData?) -> Void)?
-
-    private var localMonitor: Any?
-
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        setup()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setup()
-    }
-
-    private func setup() {
-        bezelStyle = .inline
-        isBordered = false
-        focusRingType = .none
-        font = NSFont.systemFont(ofSize: 11)
-        alignment = .right
-        target = self
-        action = #selector(clicked)
-        updateAppearance()
-    }
-
-    override func rightMouseDown(with event: NSEvent) {
-        // Right-click clears the shortcut
-        if shortcut != nil {
-            shortcut = nil
-            onShortcutRecorded?(nil)
-        }
-    }
-
-    private func updateAppearance() {
-        if isRecording {
-            title = "Press shortcut..."
-            contentTintColor = DS.Colors.primary
-        } else if let shortcut = shortcut {
-            title = shortcut.displayString
-            contentTintColor = DS.Colors.foreground
-        } else {
-            title = "Add shortcut"
-            contentTintColor = DS.Colors.mutedForeground
-        }
-    }
-
-    @objc private func clicked() {
-        if isRecording {
-            stopRecording()
-        } else {
-            startRecording()
-        }
-    }
-
-    private func startRecording() {
-        isRecording = true
-        window?.makeFirstResponder(self)
-
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.handleKeyEvent(event)
-            return nil  // Consume the event
-        }
-    }
-
-    private func stopRecording() {
-        isRecording = false
-        if let monitor = localMonitor {
-            NSEvent.removeMonitor(monitor)
-            localMonitor = nil
-        }
-    }
-
-    private func handleKeyEvent(_ event: NSEvent) {
-        // Escape cancels
-        if event.keyCode == 53 {
-            stopRecording()
-            return
-        }
-
-        // Delete/Backspace clears shortcut
-        if event.keyCode == 51 || event.keyCode == 117 {
-            stopRecording()
-            shortcut = nil
-            onShortcutRecorded?(nil)
-            return
-        }
-
-        // Require at least one modifier (Cmd, Ctrl, Option)
-        let modifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
-        if modifiers.isEmpty {
-            NSSound.beep()
-            return
-        }
-
-        let newShortcut = PreferencesManager.ShortcutData(keyCode: event.keyCode, modifiers: modifiers)
-        stopRecording()
-        shortcut = newShortcut
-        onShortcutRecorded?(newShortcut)
-    }
-
-    override func resignFirstResponder() -> Bool {
-        if isRecording {
-            stopRecording()
-        }
-        return super.resignFirstResponder()
-    }
-
-    override var acceptsFirstResponder: Bool { true }
-}
-
-// MARK: - ShortcutData display extension
-
-extension PreferencesManager.ShortcutData {
-    var displayString: String {
-        var result = ""
-
-        if modifierFlags.contains(.control) { result += "⌃" }
-        if modifierFlags.contains(.option) { result += "⌥" }
-        if modifierFlags.contains(.shift) { result += "⇧" }
-        if modifierFlags.contains(.command) { result += "⌘" }
-
-        result += keyCodeToString(keyCode)
-        return result
-    }
-
-    private func keyCodeToString(_ keyCode: UInt16) -> String {
-        let keyMap: [UInt16: String] = [
-            0: "A", 1: "S", 2: "D", 3: "F", 4: "H", 5: "G", 6: "Z", 7: "X",
-            8: "C", 9: "V", 11: "B", 12: "Q", 13: "W", 14: "E", 15: "R",
-            16: "Y", 17: "T", 18: "1", 19: "2", 20: "3", 21: "4", 22: "6",
-            23: "5", 24: "=", 25: "9", 26: "7", 27: "-", 28: "8", 29: "0",
-            30: "]", 31: "O", 32: "U", 33: "[", 34: "I", 35: "P", 37: "L",
-            38: "J", 39: "'", 40: "K", 41: ";", 42: "\\", 43: ",", 44: "/",
-            45: "N", 46: "M", 47: ".", 48: "Tab", 49: "Space", 50: "`",
-            51: "⌫", 53: "Esc", 96: "F5", 97: "F6", 98: "F7", 99: "F3",
-            100: "F8", 101: "F9", 103: "F11", 105: "F13", 107: "F14",
-            109: "F10", 111: "F12", 113: "F15", 118: "F4", 119: "F2",
-            120: "F1", 122: "F1", 123: "←", 124: "→", 125: "↓", 126: "↑"
-        ]
-        return keyMap[keyCode] ?? "?"
-    }
-}
-
-// MARK: - Draggable favourite row
-
-private class DraggableFavouriteRowView: NSView {
-
-    private let starButton: NSButton
-    private let dragHandle: NSImageView
-    private let typeIcon: NSImageView
-    private let nameLabel: NSTextField
-    private let shortcutButton: ShortcutButton
-
-    private let itemId: String
-    var onRemove: (() -> Void)?
-    var onShortcutChanged: ((PreferencesManager.ShortcutData?) -> Void)?
-
-    init(item: FavouriteItem) {
-        self.itemId = item.id
-        // Star button
-        starButton = NSButton(frame: .zero)
-        starButton.bezelStyle = .inline
-        starButton.isBordered = false
-        starButton.imagePosition = .imageOnly
-        starButton.imageScaling = .scaleProportionallyUpOrDown
-        starButton.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
-        starButton.contentTintColor = DS.Colors.warning
-
-        // Drag handle (NSImageView so it doesn't intercept mouse events for drag)
-        dragHandle = NSImageView()
-        dragHandle.imageScaling = .scaleProportionallyUpOrDown
-        dragHandle.image = NSImage(systemSymbolName: "line.3.horizontal", accessibilityDescription: nil)
-        dragHandle.contentTintColor = DS.Colors.mutedForeground
-
-        // Type icon
-        typeIcon = NSImageView()
-        typeIcon.imageScaling = .scaleProportionallyUpOrDown
-        typeIcon.contentTintColor = DS.Colors.mutedForeground
-
-        // Name label
-        nameLabel = NSTextField(labelWithString: item.name)
-        nameLabel.font = DS.Typography.label
-        nameLabel.textColor = DS.Colors.foreground
-        nameLabel.lineBreakMode = .byTruncatingTail
-
-        // Shortcut button
-        shortcutButton = ShortcutButton(frame: .zero)
-        shortcutButton.shortcut = PreferencesManager.shared.shortcut(for: item.id)
-
-        super.init(frame: NSRect(x: 0, y: 0, width: 360, height: FavouritesRowLayout.rowHeight))
-
-        addSubview(starButton)
-        addSubview(dragHandle)
-        addSubview(typeIcon)
-        addSubview(nameLabel)
-        addSubview(shortcutButton)
-
-        starButton.target = self
-        starButton.action = #selector(starClicked)
-
-        shortcutButton.onShortcutRecorded = { [weak self] shortcut in
-            guard let self = self else { return }
-            PreferencesManager.shared.setShortcut(shortcut, for: self.itemId)
-            self.onShortcutChanged?(shortcut)
-        }
-
-        // Set type icon based on item
-        switch item.kind {
-        case .scene(let scene):
-            typeIcon.image = inferSceneIcon(for: scene)
-        case .service(let service):
-            typeIcon.image = iconForServiceType(service.serviceType)
-        }
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    @objc private func starClicked() {
-        onRemove?()
-    }
-
-    override func layout() {
-        super.layout()
-
-        let buttonSize = FavouritesRowLayout.buttonSize
-        let iconSize = FavouritesRowLayout.iconSize
-        let spacing = FavouritesRowLayout.spacing
-        let rightPadding: CGFloat = 0
-        var x: CGFloat = 0
-
-        // Star button
-        starButton.frame = NSRect(
-            x: x,
-            y: (bounds.height - buttonSize) / 2,
-            width: buttonSize,
-            height: buttonSize
-        )
-        x += buttonSize + spacing
-
-        // Drag handle
-        dragHandle.frame = NSRect(
-            x: x,
-            y: (bounds.height - buttonSize) / 2,
-            width: buttonSize,
-            height: buttonSize
-        )
-        x += buttonSize + spacing
-
-        // Type icon on far right
-        typeIcon.frame = NSRect(
-            x: bounds.width - iconSize - rightPadding,
-            y: (bounds.height - iconSize) / 2,
-            width: iconSize,
-            height: iconSize
-        )
-
-        // Shortcut button to the left of type icon
-        let shortcutWidth: CGFloat = 110
-        let shortcutHeight: CGFloat = 20
-        shortcutButton.frame = NSRect(
-            x: bounds.width - iconSize - rightPadding - 16 - shortcutWidth,
-            y: (bounds.height - shortcutHeight) / 2,
-            width: shortcutWidth,
-            height: shortcutHeight
-        )
-
-        // Name label (fills space between drag handle and shortcut button)
-        nameLabel.frame = NSRect(
-            x: x,
-            y: (bounds.height - FavouritesRowLayout.labelHeight) / 2,
-            width: max(0, bounds.width - x - shortcutWidth - iconSize - rightPadding - 24),
-            height: FavouritesRowLayout.labelHeight
-        )
-    }
-
-    override var intrinsicContentSize: NSSize {
-        NSSize(width: NSView.noIntrinsicMetric, height: FavouritesRowLayout.rowHeight)
-    }
-
-    private func iconForServiceType(_ type: String) -> NSImage? {
-        switch type {
-        case ServiceTypes.lightbulb:
-            return NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
-        case ServiceTypes.switch, ServiceTypes.outlet:
-            return NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        case ServiceTypes.thermostat:
-            return NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
-        case ServiceTypes.heaterCooler:
-            return NSImage(systemSymbolName: "air.conditioner.horizontal", accessibilityDescription: nil)
-        case ServiceTypes.lock:
-            return NSImage(systemSymbolName: "lock", accessibilityDescription: nil)
-        case ServiceTypes.windowCovering:
-            return NSImage(systemSymbolName: "blinds.horizontal.closed", accessibilityDescription: nil)
-        case ServiceTypes.fan:
-            return NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
-        case ServiceTypes.garageDoorOpener:
-            return NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
-        case ServiceTypes.contactSensor:
-            return NSImage(systemSymbolName: "door.left.hand.closed", accessibilityDescription: nil)
-        default:
-            return NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: nil)
-        }
-    }
-
-    private func inferSceneIcon(for scene: SceneData) -> NSImage? {
-        let name = scene.name.lowercased()
-        if name.contains("night") || name.contains("sleep") || name.contains("goodnight") || name.contains("bed") {
-            return NSImage(systemSymbolName: "moon.fill", accessibilityDescription: nil)
-        }
-        if name.contains("morning") || name.contains("wake") || name.contains("sunrise") {
-            return NSImage(systemSymbolName: "sun.horizon.fill", accessibilityDescription: nil)
-        }
-        if name.contains("evening") || name.contains("sunset") {
-            return NSImage(systemSymbolName: "sun.haze.fill", accessibilityDescription: nil)
-        }
-        if name.contains("away") || name.contains("leave") || name.contains("depart") || name.contains("goodbye") {
-            return NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)
-        }
-        if name.contains("home") || name.contains("arrive") || name.contains("welcome") {
-            return NSImage(systemSymbolName: "house.fill", accessibilityDescription: nil)
-        }
-        if name.contains("off") || name.contains("all off") {
-            return NSImage(systemSymbolName: "power", accessibilityDescription: nil)
-        }
-        if name.contains("on") || name.contains("all on") {
-            return NSImage(systemSymbolName: "lightbulb.fill", accessibilityDescription: nil)
-        }
-        return NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-    }
-}
-
-// MARK: - Pasteboard type for drag/drop
-
-private extension NSPasteboard.PasteboardType {
-    static let favouriteItem = NSPasteboard.PasteboardType("com.itsyhome.favouriteItem")
-}
-
 // MARK: - Main view
 
 class AccessoriesSettingsView: NSView {
@@ -387,14 +24,12 @@ class AccessoriesSettingsView: NSView {
     private var favouriteItems: [FavouriteItem] = []
 
     override init(frame frameRect: NSRect) {
-        // Create scroll view
         scrollView = NSScrollView(frame: .zero)
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
 
-        // Create content view for scroll view
         contentView = NSView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.documentView = contentView
@@ -411,10 +46,8 @@ class AccessoriesSettingsView: NSView {
     override func layout() {
         super.layout()
 
-        // Scroll view fills the entire view
         scrollView.frame = bounds
 
-        // Rebuild content if needed (after layout so bounds are valid)
         if needsRebuild {
             needsRebuild = false
             rebuildContent()
@@ -423,7 +56,6 @@ class AccessoriesSettingsView: NSView {
 
     func configure(with data: MenuData) {
         self.menuData = data
-        // Set current home context for per-home preferences
         PreferencesManager.shared.currentHomeId = data.selectedHomeId
         needsRebuild = true
         shouldScrollToTop = true
@@ -438,11 +70,9 @@ class AccessoriesSettingsView: NSView {
 
         let preferences = PreferencesManager.shared
 
-        // Build lookup maps
         let sceneLookup = Dictionary(uniqueKeysWithValues: data.scenes.map { ($0.uniqueIdentifier, $0) })
         let serviceLookup = Dictionary(uniqueKeysWithValues: data.accessories.flatMap { $0.services }.map { ($0.uniqueIdentifier, $0) })
 
-        // Build ordered favourites list from unified list
         var items: [FavouriteItem] = []
 
         for id in preferences.orderedFavouriteIds {
@@ -457,10 +87,8 @@ class AccessoriesSettingsView: NSView {
     }
 
     private func rebuildContent() {
-        // Rebuild favourites first
         rebuildFavouritesList()
 
-        // Remove all subviews
         contentView.subviews.forEach { $0.removeFromSuperview() }
         favouritesTableView = nil
 
@@ -472,14 +100,11 @@ class AccessoriesSettingsView: NSView {
         let headerHeight: CGFloat = 32
         let sectionSpacing: CGFloat = 12
 
-        // Types to exclude (sensors)
         let excludedTypes: Set<String> = [
             ServiceTypes.temperatureSensor,
-            ServiceTypes.humiditySensor,
-            ServiceTypes.motionSensor
+            ServiceTypes.humiditySensor
         ]
 
-        // Service type order (same as menu)
         let typeOrder: [String] = [
             ServiceTypes.lightbulb,
             ServiceTypes.switch,
@@ -489,11 +114,9 @@ class AccessoriesSettingsView: NSView {
             ServiceTypes.thermostat,
             ServiceTypes.windowCovering,
             ServiceTypes.lock,
-            ServiceTypes.garageDoorOpener,
-            ServiceTypes.contactSensor
+            ServiceTypes.garageDoorOpener
         ]
 
-        // Collect services by room, following rooms order from data.rooms
         var servicesByRoom: [String: [ServiceData]] = [:]
         var noRoomServices: [ServiceData] = []
 
@@ -509,14 +132,13 @@ class AccessoriesSettingsView: NSView {
             }
         }
 
-        // Build views from bottom to top (flipped coordinate system in scroll view is false)
         var views: [(view: NSView, height: CGFloat)] = []
 
-        // Instructions card at top
+        // Instructions card
         let instructionsCard = createInstructionsCard()
         views.append((instructionsCard, 62))
 
-        views.append((NSView(), sectionSpacing)) // Spacer
+        views.append((NSView(), sectionSpacing))
 
         // Favourites section
         if !favouriteItems.isEmpty {
@@ -525,19 +147,17 @@ class AccessoriesSettingsView: NSView {
                 icon: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
             )
             views.append((favouritesHeader, headerHeight))
-            views.append((NSView(), 12)) // Small gap after header
+            views.append((NSView(), 12))
 
-            // Create embedded table view for favourites (supports drag-drop)
             let tableHeight = CGFloat(favouriteItems.count) * rowHeight
             let tableContainer = createFavouritesTable(width: scrollView.bounds.width - padding * 2, height: tableHeight)
             views.append((tableContainer, tableHeight))
 
-            views.append((NSView(), sectionSpacing * 2)) // Extra spacer before next section
+            views.append((NSView(), sectionSpacing * 2))
         }
 
-        // Add scenes section if there are scenes (keep original order, not alphabetical)
+        // Scenes section
         if !data.scenes.isEmpty {
-            // Section header
             let scenesHeader = FavouritesSectionHeader(
                 title: "Scenes",
                 icon: NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil),
@@ -551,7 +171,6 @@ class AccessoriesSettingsView: NSView {
             }
             views.append((scenesHeader, headerHeight))
 
-            // Scene rows (original order from data)
             let isScenesHidden = preferences.hideScenesSection
             for scene in data.scenes {
                 let isFavourite = preferences.isFavourite(sceneId: scene.uniqueIdentifier)
@@ -575,17 +194,16 @@ class AccessoriesSettingsView: NSView {
                 views.append((row, rowHeight))
             }
 
-            views.append((NSView(), sectionSpacing)) // Spacer
+            views.append((NSView(), sectionSpacing))
         }
 
-        // Add room sections following data.rooms order
+        // Room sections
         for room in data.rooms {
             guard let services = servicesByRoom[room.uniqueIdentifier], !services.isEmpty else { continue }
 
-            let roomIcon = iconForRoom(room.name)
+            let roomIcon = IconMapping.iconForRoom(room.name)
             let roomId = room.uniqueIdentifier
 
-            // Section header with eye button
             let header = FavouritesSectionHeader(
                 title: room.name,
                 icon: roomIcon,
@@ -599,7 +217,6 @@ class AccessoriesSettingsView: NSView {
             }
             views.append((header, headerHeight))
 
-            // Sort services by type order, then by name within type
             let sortedServices = services.sorted { s1, s2 in
                 let idx1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
                 let idx2 = typeOrder.firstIndex(of: s2.serviceType) ?? Int.max
@@ -609,7 +226,6 @@ class AccessoriesSettingsView: NSView {
                 return s1.name < s2.name
             }
 
-            // Service rows
             let isRoomHidden = preferences.isHidden(roomId: roomId)
             for service in sortedServices {
                 let isFavourite = preferences.isFavourite(serviceId: service.uniqueIdentifier)
@@ -633,10 +249,10 @@ class AccessoriesSettingsView: NSView {
                 views.append((row, rowHeight))
             }
 
-            views.append((NSView(), sectionSpacing)) // Spacer
+            views.append((NSView(), sectionSpacing))
         }
 
-        // Add "Other" section for services without room
+        // Other section
         if !noRoomServices.isEmpty {
             let header = FavouritesSectionHeader(
                 title: "Other",
@@ -674,17 +290,15 @@ class AccessoriesSettingsView: NSView {
                 views.append((row, rowHeight))
             }
 
-            views.append((NSView(), sectionSpacing)) // Spacer
+            views.append((NSView(), sectionSpacing))
         }
 
-        // Calculate total height
+        // Layout
         let totalHeight = views.reduce(0) { $0 + $1.height } + padding * 2
 
-        // Set content view size (use fixed width, actual scroll view width from bounds)
         let contentWidth = max(Self.contentWidth, scrollView.bounds.width)
         contentView.frame = NSRect(x: 0, y: 0, width: contentWidth, height: totalHeight)
 
-        // Layout views from top to bottom
         var currentY = totalHeight - padding
         for (view, height) in views {
             currentY -= height
@@ -697,7 +311,6 @@ class AccessoriesSettingsView: NSView {
             contentView.addSubview(view)
         }
 
-        // Scroll to top only on initial load
         if shouldScrollToTop {
             shouldScrollToTop = false
             DispatchQueue.main.async { [weak self] in
@@ -715,7 +328,6 @@ class AccessoriesSettingsView: NSView {
 
         let iconWidth: CGFloat = 24
 
-        // Line 1: star icon + text
         let star1 = NSImageView(frame: .zero)
         star1.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
         star1.contentTintColor = DS.Colors.warning
@@ -727,7 +339,6 @@ class AccessoriesSettingsView: NSView {
         label1.textColor = DS.Colors.foreground
         cardView.addSubview(label1)
 
-        // Line 2: eye icon + text
         let eye2 = NSImageView(frame: .zero)
         eye2.image = NSImage(systemSymbolName: "eye", accessibilityDescription: nil)
         eye2.contentTintColor = DS.Colors.foreground
@@ -739,7 +350,6 @@ class AccessoriesSettingsView: NSView {
         label2.textColor = DS.Colors.foreground
         cardView.addSubview(label2)
 
-        // Set frames directly (static layout)
         let textX: CGFloat = 12 + iconWidth + 8
         star1.frame = NSRect(x: 12, y: 34, width: iconWidth, height: 18)
         label1.frame = NSRect(x: textX, y: 30, width: 320, height: 22)
@@ -769,43 +379,11 @@ class AccessoriesSettingsView: NSView {
 
         self.favouritesTableView = tableView
 
-        // Container view (no scroll view - table is embedded directly)
         let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: height))
         tableView.frame = container.bounds
         container.addSubview(tableView)
 
         return container
-    }
-
-    // MARK: - Icon helpers
-
-    private func iconForRoom(_ name: String) -> NSImage? {
-        let lowercased = name.lowercased()
-
-        let symbolName: String
-        if lowercased.contains("living") {
-            symbolName = "sofa"
-        } else if lowercased.contains("bedroom") || lowercased.contains("bed") {
-            symbolName = "bed.double"
-        } else if lowercased.contains("kitchen") {
-            symbolName = "refrigerator"
-        } else if lowercased.contains("bath") {
-            symbolName = "shower"
-        } else if lowercased.contains("office") || lowercased.contains("study") {
-            symbolName = "desktopcomputer"
-        } else if lowercased.contains("garage") {
-            symbolName = "car"
-        } else if lowercased.contains("garden") || lowercased.contains("outdoor") {
-            symbolName = "leaf"
-        } else if lowercased.contains("dining") {
-            symbolName = "fork.knife"
-        } else if lowercased.contains("hall") || lowercased.contains("corridor") {
-            symbolName = "door.left.hand.open"
-        } else {
-            symbolName = "square.split.bottomrightquarter"
-        }
-
-        return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
     }
 }
 
@@ -843,7 +421,6 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
     func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> NSPasteboardWriting? {
         let item = favouriteItems[row]
         let pasteboardItem = NSPasteboardItem()
-        // Write the item ID to pasteboard (not row index)
         pasteboardItem.setString(item.id, forType: .favouriteItem)
         return pasteboardItem
     }
@@ -863,21 +440,17 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             return false
         }
 
-        // Calculate destination row - adjust if dragging downward
         var newRow = row
         if originalRow < newRow {
             newRow -= 1
         }
 
-        // Don't do anything if dropping in same position
         if originalRow == newRow {
             return false
         }
 
-        // Move in the unified list
         PreferencesManager.shared.moveFavourite(from: originalRow, to: newRow)
 
-        // Rebuild the favourites list and animate the table
         rebuildFavouritesList()
 
         tableView.beginUpdates()

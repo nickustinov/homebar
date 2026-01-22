@@ -85,8 +85,10 @@ targets:
       - path: macOSBridge
         excludes:
           - "MacOSController.swift"
+          - "MenuBuilder.swift"
           - "HotkeyManager.swift"
           - "Settings/**"
+          - "Controls/ShortcutButton.swift"
       - path: Itsyhome/Shared
         buildPhase: sources
     dependencies:

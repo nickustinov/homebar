@@ -288,23 +288,11 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         if hasRGB {
             color = NSColor(hue: hue / 360.0, saturation: saturation / 100.0, brightness: 1.0, alpha: 1.0)
         } else if hasColorTemp {
-            color = miredToColor(colorTemp)
+            color = ColorConversion.miredToColor(colorTemp)
         } else {
             color = .white
         }
         colorCircle.layer?.backgroundColor = color.cgColor
-    }
-
-    private func miredToColor(_ mired: Double) -> NSColor {
-        let normalized = (mired - 50) / 350
-        let clamped = max(0, min(1, normalized))
-        if clamped < 0.5 {
-            let t = clamped * 2
-            return NSColor(red: 0.9 + 0.1 * t, green: 0.95 + 0.05 * t, blue: 1.0, alpha: 1.0)
-        } else {
-            let t = (clamped - 0.5) * 2
-            return NSColor(red: 1.0, green: 1.0 - 0.2 * t, blue: 1.0 - 0.5 * t, alpha: 1.0)
-        }
     }
 
     @objc private func sliderChanged(_ sender: ModernSlider) {
@@ -487,7 +475,7 @@ class ColorTempPickerView: NSView {
         for (index, preset) in presets.enumerated() {
             let x = padding + CGFloat(index) * (circleSize + spacing)
             let rect = NSRect(x: x, y: padding, width: circleSize, height: circleSize)
-            miredToColor(preset.mired).setFill()
+            ColorConversion.miredToColor(preset.mired).setFill()
             NSBezierPath(ovalIn: rect).fill()
             if index == selectedIndex {
                 NSColor.white.setStroke()
@@ -512,20 +500,6 @@ class ColorTempPickerView: NSView {
                 needsDisplay = true
                 return
             }
-        }
-    }
-
-    private func miredToColor(_ mired: Double) -> NSColor {
-        // Expanded range (50-500) to properly distinguish warm bulbs
-        let clamped = max(0, min(1, (mired - 50) / 450))
-        if clamped < 0.5 {
-            // Cool side: bluish white to neutral white
-            let t = clamped * 2
-            return NSColor(red: 0.9 + 0.1 * t, green: 0.95 + 0.05 * t, blue: 1.0, alpha: 1.0)
-        } else {
-            // Warm side: neutral white to orange/amber
-            let t = (clamped - 0.5) * 2
-            return NSColor(red: 1.0, green: 1.0 - 0.35 * t, blue: 1.0 - 0.7 * t, alpha: 1.0)
         }
     }
 }

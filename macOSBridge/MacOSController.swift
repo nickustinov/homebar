@@ -28,6 +28,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let mainMenu = StayOpenMenu()
     private var menuBuilder: MenuBuilder!
+    private var actionEngine: ActionEngine!
     private var currentMenuData: MenuData?
 
     @objc public weak var iOSBridge: Mac2iOS?
@@ -37,6 +38,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     @objc public required override init() {
         super.init()
         menuBuilder = MenuBuilder(bridge: nil)
+        actionEngine = ActionEngine(bridge: nil)
         setupStatusItem()
         setupMenu()
         setupNotifications()
@@ -228,6 +230,37 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         }
     }
 
+    @objc public func executeCommand(_ command: String) -> Bool {
+        guard ProStatusCache.shared.isPro else {
+            DispatchQueue.main.async {
+                self.showProRequiredAlert()
+            }
+            return false
+        }
+
+        switch ActionParser.parse(command) {
+        case .success(let parsed):
+            let result = actionEngine.execute(target: parsed.target, action: parsed.action)
+            return result == .success
+        case .failure:
+            return false
+        }
+    }
+
+    private func showProRequiredAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Itsyhome Pro required"
+        alert.informativeText = "Deeplinks are a Pro feature. Upgrade to Itsyhome Pro to control your devices from Shortcuts, Alfred, and other automation tools."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Upgrade")
+        alert.addButton(withTitle: "Later")
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            SettingsWindowController.shared.showWindow(nil)
+            SettingsWindowController.shared.selectTab(index: 2) // Pro tab
+        }
+    }
+
     // MARK: - Menu Building
 
     private func rebuildMenu(with data: MenuData) {
@@ -239,6 +272,9 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         menuBuilder.bridge = iOSBridge
         menuBuilder.buildMenu(into: mainMenu, with: data)
+
+        actionEngine.bridge = iOSBridge
+        actionEngine.updateMenuData(data)
 
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()

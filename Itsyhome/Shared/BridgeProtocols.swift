@@ -347,6 +347,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     func updateCharacteristic(identifier: UUID, value: Any)
     func setReachability(accessoryIdentifier: UUID, isReachable: Bool)
     func showError(message: String)
+    func executeCommand(_ command: String) -> Bool
 }
 
 // MARK: - Service type constants

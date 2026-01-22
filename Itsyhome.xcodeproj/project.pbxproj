@@ -3,15 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		00F3743A0841F193C487A90D /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7082F795BA2C9AA55C64A0 /* ACMenuItem.swift */; };
 		010BCFB919140D13C4961A9E /* AccessoriesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221351A6C7AB72AC5F0E1714 /* AccessoriesSettingsView.swift */; };
+		018431CF2F20A2331B4F42FE /* ActionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7FF79A158B9BA2B399F2EF /* ActionParser.swift */; };
 		0189B807373567481D495882 /* SceneMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */; };
 		069D686EF497B4BE291ED8F9 /* ValueConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1BB4554FA59FCE166E2B86 /* ValueConversionTests.swift */; };
 		08D8F3C60170681EF3187BCE /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */; };
+		0A005DFA734D5F67E70BA99A /* DeviceResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E76F58466E9E704D579F526 /* DeviceResolverTests.swift */; };
 		0AE9FFB43AE2BAEE112BEE83 /* HomeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 748347D84F0BDF92DA4DE1E4 /* HomeKit.framework */; };
 		0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88919649EAF34363518DE9FF /* BridgeProtocols.swift */; };
 		0D1340AA633BF40EC7B797C4 /* SecuritySystemMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD57CCBF703A5861D8AEFB0 /* SecuritySystemMenuItem.swift */; };
@@ -21,16 +23,22 @@
 		1539311789FA41246C3F438C /* ValveMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E64829BF9C061EB52A28437 /* ValveMenuItem.swift */; };
 		160978BDC19974A59FB1A4BB /* LightMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73072FCFE16311A3C25C1C2C /* LightMenuItem.swift */; };
 		16A327E2FD58F4B48606729C /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */; };
+		19DBF4D900CC57B5CA26166C /* ActionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6B3519AD69969925F8F105 /* ActionEngine.swift */; };
+		1F40AE6DB3424BCC0EC82C42 /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */; };
+		20065FF911389BDD959B2D6B /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */; };
 		21F39E80DC3F5C5543037DD6 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39978B305FBE0EDCA33CCAFB /* SettingsWindowController.swift */; };
 		232E3A7DC5643B1C04E1D3CF /* DraggableFavouriteRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5618F58D2C6E87A8665E2C4A /* DraggableFavouriteRowView.swift */; };
 		243C3F0D744EDDE9D9608B3C /* IconMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7001522F49F44848A26EC3E /* IconMapping.swift */; };
 		259E77A4CA92FB96D11ECD4C /* GarageDoorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */; };
+		2780E8A3CC3916038B2D93EF /* ActionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7FF79A158B9BA2B399F2EF /* ActionParser.swift */; };
 		280C74C7265950C9756B365E /* MacOSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D500F71D0EA63DEF283D8B /* MacOSController.swift */; };
 		28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374C26148C6FEAAFD207413 /* LockMenuItem.swift */; };
 		2FA906D09DF2D10CD127C5EB /* HumidifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */; };
+		3468ABB31915D39AF41D2621 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
 		3719FEBA07D012C6D4D5B663 /* MenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBAFF70B90E3449AD09EFEE /* MenuBuilder.swift */; };
 		3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */; };
 		4436CFEA7BA3F99DBA1BF890 /* LightMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73072FCFE16311A3C25C1C2C /* LightMenuItem.swift */; };
+		462B3D16738CD046AA4DA9CF /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */; };
 		4959FC69F1F23C3ABA0365A1 /* SwitchMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */; };
 		4DE21C1DE370423C77BB118D /* SensorSummaryMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */; };
 		51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7593F05E9EAB8871D43D8E8 /* ModeButton.swift */; };
@@ -41,28 +49,37 @@
 		550336C45D91454C7E897346 /* HumidifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */; };
 		5E2CF28F91004D72D8819802 /* AirPurifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */; };
 		646767AF7A71690332C474E0 /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7082F795BA2C9AA55C64A0 /* ACMenuItem.swift */; };
+		64A2F6EC52618A2CA486EA00 /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */; };
 		67926ADF4BFE82DCEF6BB9D1 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88919649EAF34363518DE9FF /* BridgeProtocols.swift */; };
 		67E9EC3321181637F2778AD9 /* ModeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7593F05E9EAB8871D43D8E8 /* ModeButton.swift */; };
 		680D90D25922D1D80083CFC7 /* SecuritySystemMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD57CCBF703A5861D8AEFB0 /* SecuritySystemMenuItem.swift */; };
 		6C54534AB061917B6EB6D307 /* IconMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7001522F49F44848A26EC3E /* IconMapping.swift */; };
+		6E6BF460C164E03C263E90F7 /* URLSchemeHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DC1291FE6F040A1673F599 /* URLSchemeHandlerTests.swift */; };
 		73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AE776817A51695FBA936B1 /* FanMenuItem.swift */; };
 		772EAC65582AA05AFFA09210 /* AirPurifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */; };
 		786699F2C5038B043DDACCDB /* ColorConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBA4F5B869DA1C032B0B3EB /* ColorConversion.swift */; };
+		7BB119B671B3D114D30396B0 /* DeviceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */; };
 		806CCEC2325035CD0F9D0690 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374C26148C6FEAAFD207413 /* LockMenuItem.swift */; };
 		80BA4CBB1ADDA67E5A9ABB5A /* FanMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AE776817A51695FBA936B1 /* FanMenuItem.swift */; };
 		851260AF14FDF357AD88C04F /* BlindMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */; };
 		874A311DF0D311BD252A5F4C /* SceneMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */; };
 		89A0591720D0B4F0527FA985 /* FavouritesSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F37D58E82DEF89116DBA8936 /* FavouritesSectionHeader.swift */; };
+		8EC542FB9144F2B0695D7D4A /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */; };
 		9152D628D15146FC06FE6B70 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */; };
+		9279623381FB28CEBFF44097 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
 		93F37AF55F715D6075134E69 /* ValueConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */; };
 		94D04698ADBC211F1A888348 /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */; };
 		98F783AA77C8DA2CF5D5A923 /* ModernSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA517D9CAF4A470166D8C402 /* ModernSlider.swift */; };
 		9FBEDE4F029FFD689286563C /* SwitchMenuItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F34BC0FC06EE9C93C6BC637 /* SwitchMenuItemTests.swift */; };
 		A453BEC6F07575A955C9EF4E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10754E8AB01F87A12A293A7 /* SceneDelegate.swift */; };
+		A59EA0092ED0DD63857F5043 /* ActionEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53529DEB10403CBB276F9AD /* ActionEngineTests.swift */; };
 		A5BA2A1B45F8FAAEB59ABB6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A88562EA2E11D2E4E9370E8 /* AppDelegate.swift */; };
+		ACED61115C2068673081984B /* ProSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3E8CD46F4A121F39753B98 /* ProSettingsView.swift */; };
 		AD9481FF14C9C1A6554663B1 /* ValueConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */; };
 		AE2684040DE50AEBB0A3A844 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A554C4D26C15417928E429D4 /* Assets.xcassets */; };
 		B6E0BA859343F2AC750C12D5 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DAE0D0C65A8D06C17611F3 /* HotkeyManager.swift */; };
+		BC18FC26A00B6D7E9D7D3575 /* ActionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6B3519AD69969925F8F105 /* ActionEngine.swift */; };
+		BDB2AF940BB608A11A976278 /* DeviceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */; };
 		C8A37E1284E27AADA3A6906B /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181D73D7B6680B4F8CD37D4E /* DesignSystem.swift */; };
 		CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */; };
 		CAFADC7AC3708C1CF63E3E15 /* SwitchMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */; };
@@ -70,6 +87,7 @@
 		CD6AE61B7DE19AA5DCD88280 /* ToggleSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */; };
 		CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA517D9CAF4A470166D8C402 /* ModernSlider.swift */; };
 		CE60FBDD7DA3242E781072D4 /* ColorConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBA4F5B869DA1C032B0B3EB /* ColorConversion.swift */; };
+		CECFFBB02999B556D5D55093 /* ActionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D7D48C5DF8A0F64F6CD9B2 /* ActionParserTests.swift */; };
 		CFC1E7D355E86CF204C816D8 /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A6222EC075A53E4D9A33DEA /* AboutSettingsView.swift */; };
 		D2096D71A418CA85F0ECD074 /* PreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC234CA03045239CB9D178E6 /* PreferencesManager.swift */; };
 		D6E99C5EF38C95797107C163 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */; };
@@ -102,6 +120,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		012A0E962F22706B00EEF9D3 /* ItsyhomeProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = ItsyhomeProducts.storekit; path = Itsyhome/ItsyhomeProducts.storekit; sourceTree = "<group>"; };
+		05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 		05CB381453EB6F2A71F1382F /* FavouritesRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesRowView.swift; sourceTree = "<group>"; };
 		074390035F5E079496B2A9FD /* LocalChangeNotifiableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalChangeNotifiableTests.swift; sourceTree = "<group>"; };
 		117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSummaryMenuItem.swift; sourceTree = "<group>"; };
@@ -110,6 +130,8 @@
 		2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumidifierMenuItem.swift; sourceTree = "<group>"; };
 		221351A6C7AB72AC5F0E1714 /* AccessoriesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessoriesSettingsView.swift; sourceTree = "<group>"; };
 		29D500F71D0EA63DEF283D8B /* MacOSController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacOSController.swift; sourceTree = "<group>"; };
+		2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProManager.swift; sourceTree = "<group>"; };
+		2E76F58466E9E704D579F526 /* DeviceResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceResolverTests.swift; sourceTree = "<group>"; };
 		2F34BC0FC06EE9C93C6BC637 /* SwitchMenuItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchMenuItemTests.swift; sourceTree = "<group>"; };
 		2FBAFF70B90E3449AD09EFEE /* MenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBuilder.swift; sourceTree = "<group>"; };
 		39978B305FBE0EDCA33CCAFB /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
@@ -118,12 +140,15 @@
 		46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueConversion.swift; sourceTree = "<group>"; };
 		4C1BB4554FA59FCE166E2B86 /* ValueConversionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueConversionTests.swift; sourceTree = "<group>"; };
 		4CBA4F5B869DA1C032B0B3EB /* ColorConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorConversion.swift; sourceTree = "<group>"; };
+		4D3E8CD46F4A121F39753B98 /* ProSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSettingsView.swift; sourceTree = "<group>"; };
 		4E64829BF9C061EB52A28437 /* ValveMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValveMenuItem.swift; sourceTree = "<group>"; };
+		4E7FF79A158B9BA2B399F2EF /* ActionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionParser.swift; sourceTree = "<group>"; };
 		51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchMenuItem.swift; sourceTree = "<group>"; };
 		5618F58D2C6E87A8665E2C4A /* DraggableFavouriteRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableFavouriteRowView.swift; sourceTree = "<group>"; };
 		5735B31C003BD03DE4B28206 /* macOSBridge.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSBridge.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A6222EC075A53E4D9A33DEA /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
 		6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMenuItems.swift; sourceTree = "<group>"; };
+		6EF08A602DCF69DA079C553B /* ProProducts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProProducts.swift; sourceTree = "<group>"; };
 		71AB516B350323CC9A1DAEE4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPurifierMenuItem.swift; sourceTree = "<group>"; };
 		73072FCFE16311A3C25C1C2C /* LightMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightMenuItem.swift; sourceTree = "<group>"; };
@@ -133,6 +158,7 @@
 		874AC367AE516CA50259C5B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		88919649EAF34363518DE9FF /* BridgeProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeProtocols.swift; sourceTree = "<group>"; };
 		8A88562EA2E11D2E4E9370E8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		99DC1291FE6F040A1673F599 /* URLSchemeHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandlerTests.swift; sourceTree = "<group>"; };
 		9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleSwitch.swift; sourceTree = "<group>"; };
 		9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlindMenuItem.swift; sourceTree = "<group>"; };
 		A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
@@ -148,10 +174,14 @@
 		D7001522F49F44848A26EC3E /* IconMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconMapping.swift; sourceTree = "<group>"; };
 		D8DAE0D0C65A8D06C17611F3 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		DC234CA03045239CB9D178E6 /* PreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesManager.swift; sourceTree = "<group>"; };
+		E2D7D48C5DF8A0F64F6CD9B2 /* ActionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionParserTests.swift; sourceTree = "<group>"; };
+		E53529DEB10403CBB276F9AD /* ActionEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionEngineTests.swift; sourceTree = "<group>"; };
 		EA517D9CAF4A470166D8C402 /* ModernSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernSlider.swift; sourceTree = "<group>"; };
+		F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceResolver.swift; sourceTree = "<group>"; };
 		F37D58E82DEF89116DBA8936 /* FavouritesSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesSectionHeader.swift; sourceTree = "<group>"; };
 		F3AE776817A51695FBA936B1 /* FanMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanMenuItem.swift; sourceTree = "<group>"; };
 		FBD57CCBF703A5861D8AEFB0 /* SecuritySystemMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecuritySystemMenuItem.swift; sourceTree = "<group>"; };
+		FE6B3519AD69969925F8F105 /* ActionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +209,7 @@
 			isa = PBXGroup;
 			children = (
 				88919649EAF34363518DE9FF /* BridgeProtocols.swift */,
+				05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */,
 			);
 			name = Shared;
 			path = Itsyhome/Shared;
@@ -194,9 +225,11 @@
 				2FBAFF70B90E3449AD09EFEE /* MenuBuilder.swift */,
 				A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */,
 				46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */,
+				3A45056D1FCE4E16C96D619A /* ActionEngine */,
 				6D6AC7C83D2E3676E42DF659 /* Controls */,
 				D2258862CCE787F231C5D76E /* DesignSystem */,
 				F993AEE95F23CC68310DE85E /* MenuItems */,
+				2BE0077BC968DC12164CC138 /* Pro */,
 				9956D260C6400CA53D1F56A3 /* Settings */,
 				071374446E1620A9E92A6C4C /* Utilities */,
 			);
@@ -211,6 +244,25 @@
 				AFFF50FE92C7137DE82A4A69 /* macOSBridgeTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2BE0077BC968DC12164CC138 /* Pro */ = {
+			isa = PBXGroup;
+			children = (
+				2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */,
+				6EF08A602DCF69DA079C553B /* ProProducts.swift */,
+			);
+			path = Pro;
+			sourceTree = "<group>";
+		};
+		3A45056D1FCE4E16C96D619A /* ActionEngine */ = {
+			isa = PBXGroup;
+			children = (
+				FE6B3519AD69969925F8F105 /* ActionEngine.swift */,
+				4E7FF79A158B9BA2B399F2EF /* ActionParser.swift */,
+				F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */,
+			);
+			path = ActionEngine;
 			sourceTree = "<group>";
 		};
 		4F80545076F8F58948E76D77 /* iOS */ = {
@@ -233,6 +285,17 @@
 			path = Controls;
 			sourceTree = "<group>";
 		};
+		6DF301553EF8494AC4153659 /* ActionEngineTests */ = {
+			isa = PBXGroup;
+			children = (
+				E53529DEB10403CBB276F9AD /* ActionEngineTests.swift */,
+				E2D7D48C5DF8A0F64F6CD9B2 /* ActionParserTests.swift */,
+				2E76F58466E9E704D579F526 /* DeviceResolverTests.swift */,
+				99DC1291FE6F040A1673F599 /* URLSchemeHandlerTests.swift */,
+			);
+			path = ActionEngineTests;
+			sourceTree = "<group>";
+		};
 		78B41F82784BDCAEC891225C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -251,6 +314,7 @@
 				F37D58E82DEF89116DBA8936 /* FavouritesSectionHeader.swift */,
 				A500307E119D41807918FC3C /* GeneralSettingsView.swift */,
 				DC234CA03045239CB9D178E6 /* PreferencesManager.swift */,
+				4D3E8CD46F4A121F39753B98 /* ProSettingsView.swift */,
 				39978B305FBE0EDCA33CCAFB /* SettingsWindowController.swift */,
 			);
 			path = Settings;
@@ -262,6 +326,7 @@
 				074390035F5E079496B2A9FD /* LocalChangeNotifiableTests.swift */,
 				2F34BC0FC06EE9C93C6BC637 /* SwitchMenuItemTests.swift */,
 				4C1BB4554FA59FCE166E2B86 /* ValueConversionTests.swift */,
+				6DF301553EF8494AC4153659 /* ActionEngineTests */,
 			);
 			path = macOSBridgeTests;
 			sourceTree = "<group>";
@@ -288,6 +353,7 @@
 		E4D0AC95AB41872138D6349D = {
 			isa = PBXGroup;
 			children = (
+				012A0E962F22706B00EEF9D3 /* ItsyhomeProducts.storekit */,
 				4F80545076F8F58948E76D77 /* iOS */,
 				124AEB36C1DA7177B3AE39CE /* macOSBridge */,
 				B56CD9353EE0F91CAC75E0A7 /* macOSBridgeTests */,
@@ -414,7 +480,6 @@
 			);
 			mainGroup = E4D0AC95AB41872138D6349D;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -463,6 +528,7 @@
 				52BED706E1E2183D364BA285 /* BridgeProtocols.swift in Sources */,
 				F2A340D41E3B57E9F7FEE940 /* HomeKitManager.swift in Sources */,
 				A453BEC6F07575A955C9EF4E /* SceneDelegate.swift in Sources */,
+				8EC542FB9144F2B0695D7D4A /* URLSchemeHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,12 +539,15 @@
 				646767AF7A71690332C474E0 /* ACMenuItem.swift in Sources */,
 				CFC1E7D355E86CF204C816D8 /* AboutSettingsView.swift in Sources */,
 				010BCFB919140D13C4961A9E /* AccessoriesSettingsView.swift in Sources */,
+				19DBF4D900CC57B5CA26166C /* ActionEngine.swift in Sources */,
+				2780E8A3CC3916038B2D93EF /* ActionParser.swift in Sources */,
 				772EAC65582AA05AFFA09210 /* AirPurifierMenuItem.swift in Sources */,
 				3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */,
 				CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */,
 				0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */,
 				CE60FBDD7DA3242E781072D4 /* ColorConversion.swift in Sources */,
 				DB962F06C77A87E8D2AAA55E /* DesignSystem.swift in Sources */,
+				7BB119B671B3D114D30396B0 /* DeviceResolver.swift in Sources */,
 				232E3A7DC5643B1C04E1D3CF /* DraggableFavouriteRowView.swift in Sources */,
 				80BA4CBB1ADDA67E5A9ABB5A /* FanMenuItem.swift in Sources */,
 				FC8D776A1F8F0E75A5D9222E /* FavouritesRowView.swift in Sources */,
@@ -495,6 +564,9 @@
 				51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */,
 				98F783AA77C8DA2CF5D5A923 /* ModernSlider.swift in Sources */,
 				D2096D71A418CA85F0ECD074 /* PreferencesManager.swift in Sources */,
+				20065FF911389BDD959B2D6B /* ProManager.swift in Sources */,
+				3468ABB31915D39AF41D2621 /* ProProducts.swift in Sources */,
+				ACED61115C2068673081984B /* ProSettingsView.swift in Sources */,
 				9152D628D15146FC06FE6B70 /* Protocols.swift in Sources */,
 				0189B807373567481D495882 /* SceneMenuItem.swift in Sources */,
 				54727DEB4A151CC024B9D31E /* ScenesGridMenuItem.swift in Sources */,
@@ -505,6 +577,7 @@
 				CAFADC7AC3708C1CF63E3E15 /* SwitchMenuItem.swift in Sources */,
 				08D8F3C60170681EF3187BCE /* ThermostatMenuItem.swift in Sources */,
 				CD6AE61B7DE19AA5DCD88280 /* ToggleSwitch.swift in Sources */,
+				1F40AE6DB3424BCC0EC82C42 /* URLSchemeHandler.swift in Sources */,
 				93F37AF55F715D6075134E69 /* ValueConversion.swift in Sources */,
 				CCFB8C68628CB06195CD5CBB /* ValveMenuItem.swift in Sources */,
 			);
@@ -515,12 +588,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				00F3743A0841F193C487A90D /* ACMenuItem.swift in Sources */,
+				BC18FC26A00B6D7E9D7D3575 /* ActionEngine.swift in Sources */,
+				A59EA0092ED0DD63857F5043 /* ActionEngineTests.swift in Sources */,
+				018431CF2F20A2331B4F42FE /* ActionParser.swift in Sources */,
+				CECFFBB02999B556D5D55093 /* ActionParserTests.swift in Sources */,
 				5E2CF28F91004D72D8819802 /* AirPurifierMenuItem.swift in Sources */,
 				16A327E2FD58F4B48606729C /* BaseMenuItems.swift in Sources */,
 				851260AF14FDF357AD88C04F /* BlindMenuItem.swift in Sources */,
 				67926ADF4BFE82DCEF6BB9D1 /* BridgeProtocols.swift in Sources */,
 				786699F2C5038B043DDACCDB /* ColorConversion.swift in Sources */,
 				C8A37E1284E27AADA3A6906B /* DesignSystem.swift in Sources */,
+				BDB2AF940BB608A11A976278 /* DeviceResolver.swift in Sources */,
+				0A005DFA734D5F67E70BA99A /* DeviceResolverTests.swift in Sources */,
 				73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */,
 				530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */,
 				550336C45D91454C7E897346 /* HumidifierMenuItem.swift in Sources */,
@@ -530,6 +609,8 @@
 				28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */,
 				67E9EC3321181637F2778AD9 /* ModeButton.swift in Sources */,
 				CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */,
+				64A2F6EC52618A2CA486EA00 /* ProManager.swift in Sources */,
+				9279623381FB28CEBFF44097 /* ProProducts.swift in Sources */,
 				D6E99C5EF38C95797107C163 /* Protocols.swift in Sources */,
 				874A311DF0D311BD252A5F4C /* SceneMenuItem.swift in Sources */,
 				538121CA4DBF8EEB27C242A1 /* ScenesGridMenuItem.swift in Sources */,
@@ -539,6 +620,8 @@
 				9FBEDE4F029FFD689286563C /* SwitchMenuItemTests.swift in Sources */,
 				94D04698ADBC211F1A888348 /* ThermostatMenuItem.swift in Sources */,
 				0E3C04C26FCF48722D26C6CE /* ToggleSwitch.swift in Sources */,
+				462B3D16738CD046AA4DA9CF /* URLSchemeHandler.swift in Sources */,
+				6E6BF460C164E03C263E90F7 /* URLSchemeHandlerTests.swift in Sources */,
 				AD9481FF14C9C1A6554663B1 /* ValueConversion.swift in Sources */,
 				069D686EF497B4BE291ED8F9 /* ValueConversionTests.swift in Sources */,
 				1539311789FA41246C3F438C /* ValveMenuItem.swift in Sources */,

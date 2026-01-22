@@ -15,12 +15,14 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
     private enum PaneIdentifier: String, CaseIterable {
         case general = "general"
         case accessories = "accessories"
+        case pro = "pro"
         case about = "about"
 
         var title: String {
             switch self {
             case .general: return "General"
             case .accessories: return "Accessories"
+            case .pro: return "Pro"
             case .about: return "About"
             }
         }
@@ -31,6 +33,8 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
                 return NSImage(systemSymbolName: "gearshape", accessibilityDescription: "General")
             case .accessories:
                 return NSImage(systemSymbolName: "lightbulb", accessibilityDescription: "Accessories")
+            case .pro:
+                return NSImage(systemSymbolName: "star", accessibilityDescription: "Pro")
             case .about:
                 return NSImage(systemSymbolName: "info.circle", accessibilityDescription: "About")
             }
@@ -44,6 +48,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
     // Content views
     private let generalView = GeneralSettingsView()
     private let accessoriesView = AccessoriesSettingsView()
+    private let proView = ProSettingsView()
     private let aboutView = AboutSettingsView()
 
     private var currentPane: PaneIdentifier = .general
@@ -97,6 +102,15 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    func selectTab(index: Int) {
+        let panes = PaneIdentifier.allCases
+        guard index >= 0 && index < panes.count else { return }
+
+        let pane = panes[index]
+        showPane(pane)
+        window?.toolbar?.selectedItemIdentifier = pane.toolbarItemIdentifier
+    }
+
     // MARK: - Pane switching
 
     private func showPane(_ pane: PaneIdentifier) {
@@ -111,6 +125,8 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
             paneView = generalView
         case .accessories:
             paneView = accessoriesView
+        case .pro:
+            paneView = proView
         case .about:
             paneView = aboutView
         }
@@ -123,6 +139,8 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
             contentSize = NSSize(width: 480, height: 200 + separatorHeight)
         case .accessories:
             contentSize = NSSize(width: 480, height: 400 + separatorHeight)
+        case .pro:
+            contentSize = NSSize(width: 560, height: 380 + separatorHeight)
         case .about:
             contentSize = NSSize(width: 480, height: 280 + separatorHeight)
         }

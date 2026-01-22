@@ -47,5 +47,16 @@
 	<dict/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nickustinov.itsyhome</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>itsyhome</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -53,7 +53,7 @@ class DeeplinksSection: SettingsCard {
         stackView.addArrangedSubview(descLabel)
         descLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
 
-        stackView.addArrangedSubview(createSpacer(height: 16))
+        stackView.addArrangedSubview(createSpacer(height: 4))
 
         // URL Format section
         let formatHeader = AccessorySectionHeader(title: "URL format")

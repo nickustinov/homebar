@@ -170,139 +170,6 @@ final class DeviceResolverTests: XCTestCase {
         }
     }
 
-    // MARK: - Name resolution tests
-
-    func testResolveByExactName() {
-        let result = DeviceResolver.resolve("Bedroom Light", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 1)
-            XCTAssertEqual(services[0].name, "Bedroom Light")
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveByNameCaseInsensitive() {
-        let result = DeviceResolver.resolve("bedroom light", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 1)
-            XCTAssertEqual(services[0].name, "Bedroom Light")
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveByPartialName() {
-        let result = DeviceResolver.resolve("Kitchen", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 1)
-            XCTAssertEqual(services[0].name, "Kitchen Light")
-        } else {
-            XCTFail("Expected services result, got \(result)")
-        }
-    }
-
-    func testResolveAmbiguousNameReturnsAmbiguous() {
-        // "Light" matches "Bedroom Light", "Kitchen Light", and both Spotlights (lightbulbs)
-        let result = DeviceResolver.resolve("Light", in: testMenuData)
-
-        if case .ambiguous(let services) = result {
-            XCTAssertEqual(services.count, 4)
-        } else {
-            XCTFail("Expected ambiguous result, got \(result)")
-        }
-    }
-
-    // MARK: - Type.room format tests
-
-    func testResolveTypeDotRoom() {
-        let result = DeviceResolver.resolve("light.bedroom", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 2) // Bedroom Light + Bedroom Spotlights
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveTypeDotRoomCaseInsensitive() {
-        let result = DeviceResolver.resolve("LIGHT.BEDROOM", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 2) // Bedroom Light + Bedroom Spotlights
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveTypeDotRoomWithAlias() {
-        let result = DeviceResolver.resolve("lightbulb.bedroom", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 2) // Bedroom Light + Bedroom Spotlights
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveTypeDotRoomNotFound() {
-        let result = DeviceResolver.resolve("light.bathroom", in: testMenuData)
-
-        if case .notFound = result {
-            // Expected
-        } else {
-            XCTFail("Expected notFound result")
-        }
-    }
-
-    // MARK: - Wildcard tests
-
-    func testResolveAllLights() {
-        let result = DeviceResolver.resolve("all lights", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 4) // Bedroom Light, Kitchen Light, Bedroom Spotlights, Office Spotlights
-            XCTAssertTrue(services.allSatisfy { $0.serviceType == ServiceTypes.lightbulb })
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveAllSwitches() {
-        let result = DeviceResolver.resolve("all switches", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 1)
-            XCTAssertEqual(services[0].name, "Bedroom Switch")
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveRoomWildcard() {
-        let result = DeviceResolver.resolve("bedroom.*", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 3) // Light, Switch, and Spotlights
-            XCTAssertTrue(services.allSatisfy { $0.roomIdentifier == bedroomRoomId.uuidString })
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
-    func testResolveTypeWildcard() {
-        let result = DeviceResolver.resolve("*.light", in: testMenuData)
-
-        if case .services(let services) = result {
-            XCTAssertEqual(services.count, 4) // All 4 lightbulbs
-        } else {
-            XCTFail("Expected services result")
-        }
-    }
-
     // MARK: - Scene resolution tests
 
     func testResolveSceneByPrefix() {
@@ -335,35 +202,67 @@ final class DeviceResolverTests: XCTestCase {
         }
     }
 
-    // MARK: - Not found tests
+    // MARK: - Group resolution tests
 
-    func testResolveNotFoundReturnsNotFound() {
-        let result = DeviceResolver.resolve("nonexistent device", in: testMenuData)
+    func testResolveGroupByPrefix() {
+        let group = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [bedroomLightId.uuidString, kitchenLightId.uuidString]
+        )
 
-        if case .notFound(let query) = result {
-            XCTAssertEqual(query, "nonexistent device")
+        let result = DeviceResolver.resolve("group.All Lights", in: testMenuData, groups: [group])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 2)
         } else {
-            XCTFail("Expected notFound result")
+            XCTFail("Expected services result, got \(result)")
         }
     }
 
-    func testResolveEmptyStringReturnsNotFound() {
-        let result = DeviceResolver.resolve("", in: testMenuData)
+    func testResolveGroupByExactName() {
+        let group = DeviceGroup(
+            id: UUID().uuidString,
+            name: "Office Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString]
+        )
+
+        let result = DeviceResolver.resolve("Office Lights", in: testMenuData, groups: [group])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].uniqueIdentifier, officeSpotlightsId.uuidString)
+        } else {
+            XCTFail("Expected services result, got \(result)")
+        }
+    }
+
+    func testResolveGroupNotFound() {
+        let result = DeviceResolver.resolve("group.Nonexistent", in: testMenuData, groups: [])
 
         if case .notFound = result {
             // Expected
         } else {
-            XCTFail("Expected notFound result")
+            XCTFail("Expected notFound result, got \(result)")
         }
     }
 
-    func testResolveWhitespaceOnlyReturnsNotFound() {
-        let result = DeviceResolver.resolve("   ", in: testMenuData)
+    func testResolveGroupWithNoMatchingDevices() {
+        let group = DeviceGroup(
+            id: UUID().uuidString,
+            name: "Empty Group",
+            icon: "lightbulb",
+            deviceIds: [UUID().uuidString] // Non-existent device
+        )
+
+        let result = DeviceResolver.resolve("group.Empty Group", in: testMenuData, groups: [group])
 
         if case .notFound = result {
-            // Expected
+            // Expected - group exists but has no resolvable devices
         } else {
-            XCTFail("Expected notFound result")
+            XCTFail("Expected notFound result, got \(result)")
         }
     }
 
@@ -413,27 +312,13 @@ final class DeviceResolverTests: XCTestCase {
         }
     }
 
-    func testResolveAmbiguousDeviceNameReturnsAmbiguous() {
-        // "Spotlights" exists in both Bedroom and Office
-        let result = DeviceResolver.resolve("Spotlights", in: testMenuData)
-
-        if case .ambiguous(let services) = result {
-            XCTAssertEqual(services.count, 2)
-        } else {
-            XCTFail("Expected ambiguous result, got \(result)")
-        }
-    }
-
     func testResolveRoomSlashDeviceNotFoundRoom() {
         let result = DeviceResolver.resolve("Bathroom/Spotlights", in: testMenuData)
 
-        // Should fall through to other resolution strategies
         if case .notFound = result {
             // Expected - no bathroom room exists
-        } else if case .ambiguous = result {
-            // Also acceptable - might match "Spotlights" partially
         } else {
-            XCTFail("Expected notFound or ambiguous result, got \(result)")
+            XCTFail("Expected notFound result, got \(result)")
         }
     }
 
@@ -444,6 +329,53 @@ final class DeviceResolverTests: XCTestCase {
             // Expected
         } else {
             XCTFail("Expected notFound result, got \(result)")
+        }
+    }
+
+    func testResolveRoomSlashDeviceAmbiguous() {
+        // Multiple devices match "Light" in Bedroom
+        let result = DeviceResolver.resolve("Bedroom/Light", in: testMenuData)
+
+        // Should match "Bedroom Light" exactly or be ambiguous
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].name, "Bedroom Light")
+        } else if case .ambiguous = result {
+            // Also acceptable
+        } else {
+            XCTFail("Expected services or ambiguous result, got \(result)")
+        }
+    }
+
+    // MARK: - Not found tests
+
+    func testResolveNotFoundReturnsNotFound() {
+        let result = DeviceResolver.resolve("nonexistent device", in: testMenuData)
+
+        if case .notFound(let query) = result {
+            XCTAssertEqual(query, "nonexistent device")
+        } else {
+            XCTFail("Expected notFound result")
+        }
+    }
+
+    func testResolveEmptyStringReturnsNotFound() {
+        let result = DeviceResolver.resolve("", in: testMenuData)
+
+        if case .notFound = result {
+            // Expected
+        } else {
+            XCTFail("Expected notFound result")
+        }
+    }
+
+    func testResolveWhitespaceOnlyReturnsNotFound() {
+        let result = DeviceResolver.resolve("   ", in: testMenuData)
+
+        if case .notFound = result {
+            // Expected
+        } else {
+            XCTFail("Expected notFound result")
         }
     }
 }

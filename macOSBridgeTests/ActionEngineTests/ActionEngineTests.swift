@@ -35,9 +35,9 @@ final class ActionEngineTests: XCTestCase {
 
         let light = ServiceData(
             uniqueIdentifier: lightId,
-            name: "Test Light",
+            name: "Room/Test Light",
             serviceType: ServiceTypes.lightbulb,
-            accessoryName: "Test Light",
+            accessoryName: "Room/Test Light",
             roomIdentifier: roomId,
             powerStateId: powerStateId,
             brightnessId: brightnessId
@@ -45,9 +45,9 @@ final class ActionEngineTests: XCTestCase {
 
         let lock = ServiceData(
             uniqueIdentifier: lockId,
-            name: "Test Lock",
+            name: "Room/Test Lock",
             serviceType: ServiceTypes.lock,
-            accessoryName: "Test Lock",
+            accessoryName: "Room/Test Lock",
             roomIdentifier: roomId,
             lockCurrentStateId: UUID(),
             lockTargetStateId: lockTargetStateId
@@ -56,14 +56,14 @@ final class ActionEngineTests: XCTestCase {
         let accessories = [
             AccessoryData(
                 uniqueIdentifier: UUID(),
-                name: "Test Light",
+                name: "Room/Test Light",
                 roomIdentifier: roomId,
                 services: [light],
                 isReachable: true
             ),
             AccessoryData(
                 uniqueIdentifier: UUID(),
-                name: "Test Lock",
+                name: "Room/Test Lock",
                 roomIdentifier: roomId,
                 services: [lock],
                 isReachable: true
@@ -89,7 +89,7 @@ final class ActionEngineTests: XCTestCase {
         let noBridgeEngine = ActionEngine(bridge: nil)
         noBridgeEngine.updateMenuData(testMenuData)
 
-        let result = noBridgeEngine.execute(target: "Test Light", action: .toggle)
+        let result = noBridgeEngine.execute(target: "Room/Test Light", action: .toggle)
 
         XCTAssertEqual(result, .error(.bridgeUnavailable))
     }
@@ -97,7 +97,7 @@ final class ActionEngineTests: XCTestCase {
     func testExecuteWithNoMenuDataReturnsError() {
         let noDataEngine = ActionEngine(bridge: mockBridge)
 
-        let result = noDataEngine.execute(target: "Test Light", action: .toggle)
+        let result = noDataEngine.execute(target: "Room/Test Light", action: .toggle)
 
         XCTAssertEqual(result, .error(.bridgeUnavailable))
     }
@@ -107,7 +107,7 @@ final class ActionEngineTests: XCTestCase {
     func testToggleWritesPowerState() {
         mockBridge.characteristicValues[powerStateId] = false
 
-        let result = engine.execute(target: "Test Light", action: .toggle)
+        let result = engine.execute(target: "Room/Test Light", action: .toggle)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[powerStateId] as? Bool, true)
@@ -116,7 +116,7 @@ final class ActionEngineTests: XCTestCase {
     func testToggleInvertsPowerState() {
         mockBridge.characteristicValues[powerStateId] = true
 
-        let result = engine.execute(target: "Test Light", action: .toggle)
+        let result = engine.execute(target: "Room/Test Light", action: .toggle)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[powerStateId] as? Bool, false)
@@ -127,7 +127,7 @@ final class ActionEngineTests: XCTestCase {
     func testTurnOnSetsPowerStateTrue() {
         mockBridge.characteristicValues[powerStateId] = false
 
-        let result = engine.execute(target: "Test Light", action: .turnOn)
+        let result = engine.execute(target: "Room/Test Light", action: .turnOn)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[powerStateId] as? Bool, true)
@@ -136,7 +136,7 @@ final class ActionEngineTests: XCTestCase {
     func testTurnOffSetsPowerStateFalse() {
         mockBridge.characteristicValues[powerStateId] = true
 
-        let result = engine.execute(target: "Test Light", action: .turnOff)
+        let result = engine.execute(target: "Room/Test Light", action: .turnOff)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[powerStateId] as? Bool, false)
@@ -145,21 +145,21 @@ final class ActionEngineTests: XCTestCase {
     // MARK: - Brightness tests
 
     func testSetBrightnessWritesValue() {
-        let result = engine.execute(target: "Test Light", action: .setBrightness(75))
+        let result = engine.execute(target: "Room/Test Light", action: .setBrightness(75))
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[brightnessId] as? Int, 75)
     }
 
     func testSetBrightnessClampsTooHigh() {
-        let result = engine.execute(target: "Test Light", action: .setBrightness(150))
+        let result = engine.execute(target: "Room/Test Light", action: .setBrightness(150))
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[brightnessId] as? Int, 100)
     }
 
     func testSetBrightnessClampsTooLow() {
-        let result = engine.execute(target: "Test Light", action: .setBrightness(-10))
+        let result = engine.execute(target: "Room/Test Light", action: .setBrightness(-10))
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[brightnessId] as? Int, 0)
@@ -168,14 +168,14 @@ final class ActionEngineTests: XCTestCase {
     // MARK: - Lock tests
 
     func testLockWritesLockedState() {
-        let result = engine.execute(target: "Test Lock", action: .lock)
+        let result = engine.execute(target: "Room/Test Lock", action: .lock)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[lockTargetStateId] as? Int, 1)
     }
 
     func testUnlockWritesUnlockedState() {
-        let result = engine.execute(target: "Test Lock", action: .unlock)
+        let result = engine.execute(target: "Room/Test Lock", action: .unlock)
 
         XCTAssertEqual(result, .success)
         XCTAssertEqual(mockBridge.writtenCharacteristics[lockTargetStateId] as? Int, 0)
@@ -205,7 +205,7 @@ final class ActionEngineTests: XCTestCase {
 
     func testUnsupportedActionOnServiceReturnsError() {
         // Trying to set brightness on a lock (which doesn't support it)
-        let result = engine.execute(target: "Test Lock", action: .setBrightness(50))
+        let result = engine.execute(target: "Room/Test Lock", action: .setBrightness(50))
 
         if case .error(.executionFailed) = result {
             // Expected
@@ -219,7 +219,7 @@ final class ActionEngineTests: XCTestCase {
     func testExecuteMultipleTargets() {
         mockBridge.characteristicValues[powerStateId] = false
 
-        let result = engine.executeMultiple(targets: ["Test Light"], action: .toggle)
+        let result = engine.executeMultiple(targets: ["Room/Test Light"], action: .toggle)
 
         XCTAssertEqual(result, .success)
     }
@@ -227,7 +227,7 @@ final class ActionEngineTests: XCTestCase {
     func testExecuteMultipleWithPartialFailure() {
         mockBridge.characteristicValues[powerStateId] = false
 
-        let result = engine.executeMultiple(targets: ["Test Light", "Nonexistent"], action: .toggle)
+        let result = engine.executeMultiple(targets: ["Room/Test Light", "Nonexistent"], action: .toggle)
 
         if case .partial(let succeeded, let failed) = result {
             XCTAssertEqual(succeeded, 1)

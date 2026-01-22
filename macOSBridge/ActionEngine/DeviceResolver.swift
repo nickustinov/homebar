@@ -41,7 +41,7 @@ enum DeviceResolver {
     /// - Scene: "scene.Goodnight", "Goodnight"
     /// - Group: "group.Office Lights"
     /// - UUID: "ABC123-DEF456-..."
-    static func resolve(_ query: String, in data: MenuData) -> ResolveResult {
+    static func resolve(_ query: String, in data: MenuData, groups: [DeviceGroup] = []) -> ResolveResult {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else {
             return .notFound(query)
@@ -58,7 +58,7 @@ enum DeviceResolver {
         }
 
         // 3. Check for group prefix or group name match
-        if let groupResult = resolveGroup(trimmed, in: data) {
+        if let groupResult = resolveGroup(trimmed, groups: groups, data: data) {
             return groupResult
         }
 
@@ -141,9 +141,8 @@ enum DeviceResolver {
         return .notFound("scene.\(name)")
     }
 
-    private static func resolveGroup(_ query: String, in data: MenuData) -> ResolveResult? {
+    private static func resolveGroup(_ query: String, groups: [DeviceGroup], data: MenuData) -> ResolveResult? {
         let lowered = query.lowercased()
-        let groups = PreferencesManager.shared.deviceGroups
 
         // Check for group. prefix
         if lowered.hasPrefix("group.") {

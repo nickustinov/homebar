@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import macOSBridge
 
 final class URLSchemeHandlerTests: XCTestCase {
 

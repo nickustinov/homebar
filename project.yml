@@ -92,6 +92,7 @@ targets:
           - "HotkeyManager.swift"
           - "Settings/**"
           - "Controls/ShortcutButton.swift"
+      - path: macOSBridge/Settings/PreferencesManager.swift
       - path: Itsyhome/Shared
         buildPhase: sources
     dependencies:

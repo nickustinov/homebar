@@ -85,7 +85,7 @@ class ActionEngine {
             return .error(.bridgeUnavailable)
         }
 
-        let resolved = DeviceResolver.resolve(target, in: data)
+        let resolved = DeviceResolver.resolve(target, in: data, groups: PreferencesManager.shared.deviceGroups)
 
         switch resolved {
         case .services(let services):

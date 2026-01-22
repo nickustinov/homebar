@@ -16,14 +16,19 @@ class SettingsWindowController: NSWindowController {
 
     private init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 550, height: 450),
-            styleMask: [.titled, .closable],
+            contentRect: NSRect(x: 0, y: 0, width: 650, height: 450),
+            styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
         )
         window.title = "Settings"
 
         super.init(window: window)
+
+        // Fixed size window
+        window.setContentSize(NSSize(width: 650, height: 450))
+        window.contentMinSize = NSSize(width: 650, height: 450)
+        window.contentMaxSize = NSSize(width: 650, height: 450)
 
         window.contentView = settingsView
     }

@@ -83,6 +83,10 @@ targets:
     sources:
       - path: macOSBridgeTests
       - path: macOSBridge
+        excludes:
+          - "MacOSController.swift"
+          - "HotkeyManager.swift"
+          - "Settings/**"
       - path: Itsyhome/Shared
         buildPhase: sources
     dependencies:

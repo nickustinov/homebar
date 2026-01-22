@@ -39,13 +39,6 @@ class DeeplinksSection: SettingsCard {
     }
 
     private func setupContent() {
-        // Pro badge (only show if user doesn't have PRO)
-        if !ProStatusCache.shared.isPro {
-            let proBadge = createProBadge()
-            stackView.addArrangedSubview(proBadge)
-            proBadge.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        }
-
         // Description
         let descLabel = NSTextField(wrappingLabelWithString: "Control your HomeKit devices from Shortcuts, Alfred, Raycast, Stream Deck, and other automation tools using URL schemes.")
         descLabel.font = .systemFont(ofSize: 13)
@@ -70,7 +63,7 @@ class DeeplinksSection: SettingsCard {
         stackView.addArrangedSubview(createSpacer(height: 12))
 
         // Actions section
-        let actionsHeader = AccessorySectionHeader(title: "Actions")
+        let actionsHeader = AccessorySectionHeader(title: "Actions (examples)")
         stackView.addArrangedSubview(actionsHeader)
         actionsHeader.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
         actionsHeader.heightAnchor.constraint(equalToConstant: 32).isActive = true
@@ -105,67 +98,23 @@ class DeeplinksSection: SettingsCard {
         stackView.addArrangedSubview(createSpacer(height: 16))
     }
 
-    private func createProBadge() -> NSView {
-        let container = NSView()
-        container.wantsLayer = true
-        container.layer?.backgroundColor = NSColor(red: 0.95, green: 0.92, blue: 1.0, alpha: 1.0).cgColor
-        container.layer?.cornerRadius = 10
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        let content = NSStackView()
-        content.orientation = .horizontal
-        content.spacing = 8
-        content.alignment = .centerY
-        content.translatesAutoresizingMaskIntoConstraints = false
-
-        let iconView = NSImageView()
-        iconView.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: "Pro")
-        iconView.contentTintColor = .systemPurple
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        iconView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-
-        let label = NSTextField(labelWithString: "Itsyhome Pro feature")
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .labelColor
-
-        content.addArrangedSubview(iconView)
-        content.addArrangedSubview(label)
-
-        container.addSubview(content)
-        NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            content.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-            content.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor, constant: -12),
-            content.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
-        ])
-
-        return container
-    }
-
     private func createActionsContent() -> NSView {
-        let stack = NSStackView()
-        stack.orientation = .vertical
-        stack.spacing = 4
-        stack.alignment = .leading
+        var rows: [[NSView]] = []
 
         for (action, _, example) in actions {
-            let row = NSStackView()
-            row.orientation = .horizontal
-            row.spacing = 8
-            row.alignment = .centerY
-
             let actionLabel = NSTextField(labelWithString: action)
             actionLabel.font = .systemFont(ofSize: 11)
             actionLabel.textColor = .labelColor
-            actionLabel.translatesAutoresizingMaskIntoConstraints = false
-            actionLabel.widthAnchor.constraint(equalToConstant: 70).isActive = true
+            actionLabel.alignment = .left
+            actionLabel.setContentHuggingPriority(.required, for: .horizontal)
+            actionLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
 
             let exampleLabel = NSTextField(labelWithString: "itsyhome://\(example)")
             exampleLabel.font = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
             exampleLabel.textColor = .secondaryLabelColor
             exampleLabel.isSelectable = true
             exampleLabel.lineBreakMode = .byTruncatingTail
+            exampleLabel.setContentHuggingPriority(.init(1), for: .horizontal)
 
             let copyButton = NSButton(title: "Copy", target: self, action: #selector(copyURL(_:)))
             copyButton.bezelStyle = .inline
@@ -173,14 +122,16 @@ class DeeplinksSection: SettingsCard {
             copyButton.font = .systemFont(ofSize: 9)
             copyButton.toolTip = "itsyhome://\(example)"
 
-            row.addArrangedSubview(actionLabel)
-            row.addArrangedSubview(exampleLabel)
-            row.addArrangedSubview(copyButton)
-
-            stack.addArrangedSubview(row)
+            rows.append([actionLabel, exampleLabel, copyButton])
         }
 
-        return stack
+        let grid = NSGridView(views: rows)
+        grid.rowSpacing = 8
+        grid.columnSpacing = 12
+        grid.column(at: 0).xPlacement = .leading
+        grid.column(at: 1).xPlacement = .fill
+        grid.column(at: 2).xPlacement = .trailing
+        return grid
     }
 
     private func createTargetFormatsContent() -> NSView {

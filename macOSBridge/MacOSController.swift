@@ -276,6 +276,8 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         actionEngine.bridge = iOSBridge
         actionEngine.updateMenuData(data)
 
+        WebhookServer.shared.configure(actionEngine: actionEngine)
+
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
 

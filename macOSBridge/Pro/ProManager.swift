@@ -105,11 +105,13 @@ final class ProManager: ObservableObject {
 
         isPro = hasProEntitlement
 
-        // Start or stop iCloud sync based on Pro status
+        // Start or stop Pro features based on status
         if hasProEntitlement {
             CloudSyncManager.shared.startListening()
+            WebhookServer.shared.startIfEnabled()
         } else {
             CloudSyncManager.shared.stopListening()
+            WebhookServer.shared.stop()
         }
     }
 

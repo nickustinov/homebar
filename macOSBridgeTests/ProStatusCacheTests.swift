@@ -45,21 +45,15 @@ final class ProStatusCacheTests: XCTestCase {
     func testIsProThreadSafety() {
         let cache = ProStatusCache.shared
         let iterations = 1000
-        let expectation = XCTestExpectation(description: "Thread safety test")
-        expectation.expectedFulfillmentCount = iterations * 2
 
-        // Concurrent reads and writes
+        // concurrentPerform is synchronous — verifies no crashes from concurrent access
         DispatchQueue.concurrentPerform(iterations: iterations) { i in
             if i % 2 == 0 {
                 cache.isPro = true
-                expectation.fulfill()
             } else {
                 _ = cache.isPro
-                expectation.fulfill()
             }
         }
-
-        wait(for: [expectation], timeout: 5.0)
     }
 
     // MARK: - Debug override tests

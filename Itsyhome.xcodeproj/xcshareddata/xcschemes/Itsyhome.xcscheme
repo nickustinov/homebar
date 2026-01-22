@@ -39,6 +39,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3D82946180A7ED5E54DDDED8"
+               BuildableName = "macOSBridgeTests.xctest"
+               BlueprintName = "macOSBridgeTests"
+               ReferencedContainer = "container:Itsyhome.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

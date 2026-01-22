@@ -8,5 +8,7 @@
 	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<key>com.apple.security.network.server</key>
+	<true/>
 </dict>
 </plist>

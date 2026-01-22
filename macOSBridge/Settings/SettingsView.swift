@@ -66,6 +66,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         case accessories
         case groups
         case deeplinks
+        case webhooks
         case about
 
         var title: String {
@@ -74,6 +75,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             case .accessories: return "Accessories"
             case .groups: return "Groups"
             case .deeplinks: return "Deeplinks"
+            case .webhooks: return "Webhooks"
             case .about: return "About"
             }
         }
@@ -84,13 +86,14 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             case .accessories: return "lightbulb"
             case .groups: return "folder"
             case .deeplinks: return "link"
+            case .webhooks: return "network"
             case .about: return "info.circle"
             }
         }
 
         var isProFeature: Bool {
             switch self {
-            case .groups, .deeplinks: return true
+            case .groups, .deeplinks, .webhooks: return true
             default: return false
             }
         }
@@ -101,6 +104,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private var accessoriesSection: AccessoriesSettingsView?
     private var groupsSection: GroupsSettingsView?
     private var deeplinksSection: DeeplinksSection?
+    private var webhooksSection: WebhooksSection?
     private var aboutSection: AboutSection?
 
     override init(frame frameRect: NSRect) {
@@ -211,6 +215,12 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
                 deeplinksSection = DeeplinksSection()
             }
             contentView = deeplinksSection!
+
+        case .webhooks:
+            if webhooksSection == nil {
+                webhooksSection = WebhooksSection()
+            }
+            contentView = webhooksSection!
 
         case .about:
             if aboutSection == nil {

@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import Combine
 
 // Flipped view for proper top-to-bottom layout in scroll views
 class FlippedView: NSView {
@@ -108,6 +109,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private var deeplinksSection: DeeplinksSection?
     private var webhooksSection: WebhooksSection?
     private var aboutSection: AboutSection?
+    private var cancellables = Set<AnyCancellable>()
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -190,11 +192,35 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             name: Self.navigateToSectionNotification,
             object: nil
         )
+
+        // Refresh Pro-gated sections when Pro status changes
+        ProManager.shared.$isPro
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.handleProStatusChanged() }
+            .store(in: &cancellables)
     }
 
     @objc private func handleNavigateToSection(_ notification: Notification) {
         guard let index = notification.userInfo?["index"] as? Int else { return }
         selectSection(at: index)
+    }
+
+    private func handleProStatusChanged() {
+        // Clear cached Pro-feature sections so they rebuild with new state
+        groupsSection = nil
+        deeplinksSection = nil
+        webhooksSection = nil
+
+        // Reload sidebar to update PRO badges
+        sidebarTableView.reloadData()
+
+        // Re-show current section if it's a Pro section
+        let row = sidebarTableView.selectedRow
+        guard row >= 0, row < Section.allCases.count else { return }
+        let current = Section.allCases[row]
+        if current.isProFeature {
+            showSection(current)
+        }
     }
 
     private func showSection(_ section: Section) {

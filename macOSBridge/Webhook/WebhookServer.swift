@@ -289,6 +289,28 @@ final class WebhookServer {
             return
         }
 
+        let lowered = target.lowercased()
+
+        // Try exact room name match first (avoids space-splitting issues)
+        if let room = data.rooms.first(where: { $0.name.lowercased() == lowered }) {
+            let roomServices = data.accessories.filter { $0.roomIdentifier == room.uniqueIdentifier }
+                .flatMap { $0.services }
+            if !roomServices.isEmpty {
+                let items = roomServices.map { buildServiceInfoJSON($0, in: data, engine: engine) }
+                sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
+                return
+            }
+        }
+
+        // Try exact device name match
+        let exactDevices = data.accessories.flatMap { $0.services }
+            .filter { $0.name.lowercased() == lowered }
+        if !exactDevices.isEmpty {
+            sendServiceInfoResponse(exactDevices, data: data, engine: engine, connection: connection)
+            return
+        }
+
+        // Use DeviceResolver for Room/Device, group, scene, UUID formats
         let resolved = DeviceResolver.resolve(target, in: data, groups: PreferencesManager.shared.deviceGroups)
 
         switch resolved {
@@ -299,33 +321,8 @@ final class WebhookServer {
             let json = "{\"name\":\"\(escapeJSON(scene.name))\",\"type\":\"scene\"}"
             sendResponse(connection: connection, status: 200, body: json)
 
-        case .notFound:
-            // Fallback: try matching by room name (always returns array)
-            let lowered = target.lowercased()
-            let matchingRoom = data.rooms.first { $0.name.lowercased() == lowered }
-            if let room = matchingRoom {
-                let roomServices = data.accessories.filter { $0.roomIdentifier == room.uniqueIdentifier }
-                    .flatMap { $0.services }
-                if !roomServices.isEmpty {
-                    let items = roomServices.map { buildServiceInfoJSON($0, in: data, engine: engine) }
-                    sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
-                    return
-                }
-            }
-
-            // Fallback: try matching by bare device name
-            let matchingServices = data.accessories.flatMap { $0.services }
-                .filter { $0.name.lowercased() == lowered }
-            if !matchingServices.isEmpty {
-                sendServiceInfoResponse(matchingServices, data: data, engine: engine, connection: connection)
-                return
-            }
-
+        case .notFound, .ambiguous:
             sendResponse(connection: connection, status: 404, body: errorJSON("Not found: \(target)"))
-
-        case .ambiguous(let options):
-            let names = options.map { "\"\(escapeJSON($0.name))\"" }
-            sendResponse(connection: connection, status: 400, body: "{\"status\":\"error\",\"message\":\"Ambiguous target\",\"options\":[\(names.joined(separator: ","))]}")
         }
     }
 

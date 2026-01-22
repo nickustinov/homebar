@@ -164,14 +164,14 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             sidebarBackground.bottomAnchor.constraint(equalTo: bottomAnchor),
             sidebarBackground.widthAnchor.constraint(equalToConstant: 200),
 
-            // Sidebar scroll view
-            sidebarScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            // Sidebar scroll view (below title bar)
+            sidebarScrollView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 8),
             sidebarScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             sidebarScrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
             sidebarScrollView.widthAnchor.constraint(equalToConstant: 200),
 
-            // Content
-            contentContainer.topAnchor.constraint(equalTo: topAnchor),
+            // Content (below title bar)
+            contentContainer.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             contentContainer.leadingAnchor.constraint(equalTo: sidebarBackground.trailingAnchor),
             contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor)
@@ -233,11 +233,20 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         let wrapper = FlippedView()
         wrapper.translatesAutoresizingMaskIntoConstraints = false
 
+        let titleLabel = NSTextField(labelWithString: section.title)
+        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        wrapper.addSubview(titleLabel)
+
         contentView.translatesAutoresizingMaskIntoConstraints = false
         wrapper.addSubview(contentView)
 
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 20),
+            titleLabel.topAnchor.constraint(equalTo: wrapper.topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor, constant: -20),
+
+            contentView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
             contentView.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor, constant: 20),
             contentView.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor, constant: -20),
             contentView.bottomAnchor.constraint(lessThanOrEqualTo: wrapper.bottomAnchor)

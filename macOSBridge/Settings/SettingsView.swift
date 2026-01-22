@@ -12,6 +12,17 @@ class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
 
+// Custom row view with solid blue selection
+class SidebarRowView: NSTableRowView {
+    override func drawSelection(in dirtyRect: NSRect) {
+        guard isSelected else { return }
+        let selectionRect = bounds.insetBy(dx: 8, dy: 2)
+        let path = NSBezierPath(roundedRect: selectionRect, xRadius: 6, yRadius: 6)
+        NSColor.systemBlue.setFill()
+        path.fill()
+    }
+}
+
 class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     private let sidebarTableView = NSTableView()
@@ -183,6 +194,10 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     // MARK: - NSTableViewDelegate
 
+    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        return SidebarRowView()
+    }
+
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let section = Section.allCases[row]
 
@@ -216,9 +231,13 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         }
 
         cell?.imageView?.image = NSImage(systemSymbolName: section.icon, accessibilityDescription: section.title)
-        cell?.imageView?.contentTintColor = .secondaryLabelColor
         cell?.textField?.stringValue = section.title
         cell?.textField?.font = .systemFont(ofSize: 13)
+
+        // Update colors based on selection
+        let isSelected = tableView.selectedRow == row
+        cell?.imageView?.contentTintColor = isSelected ? .white : .secondaryLabelColor
+        cell?.textField?.textColor = isSelected ? .white : .labelColor
 
         return cell
     }
@@ -226,6 +245,11 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     func tableViewSelectionDidChange(_ notification: Notification) {
         let row = sidebarTableView.selectedRow
         guard row >= 0, row < Section.allCases.count else { return }
+
+        // Reload all rows to update selection colors
+        sidebarTableView.reloadData(forRowIndexes: IndexSet(integersIn: 0..<Section.allCases.count), columnIndexes: IndexSet(integer: 0))
+        sidebarTableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+
         showSection(Section.allCases[row])
     }
 

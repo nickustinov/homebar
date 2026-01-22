@@ -8,12 +8,15 @@
 import AppKit
 
 struct FavouritesRowLayout {
-    static let rowHeight: CGFloat = 28
+    static let rowHeight: CGFloat = 36
+    static let cardHeight: CGFloat = 32
     static let buttonSize: CGFloat = 20
-    static let iconSize: CGFloat = 14
+    static let iconSize: CGFloat = 16
     static let spacing: CGFloat = 8
     static let labelHeight: CGFloat = 17
-    static let leftPadding: CGFloat = 16  // Match table view internal padding
+    static let leftPadding: CGFloat = 4
+    static let cardPadding: CGFloat = 2
+    static let cardCornerRadius: CGFloat = 8
 
     static var iconStartX: CGFloat {
         leftPadding + buttonSize + spacing + buttonSize + spacing
@@ -31,6 +34,7 @@ class FavouritesRowView: NSView {
         case service(ServiceData)
     }
 
+    private let cardBackground: NSView
     private let starButton: NSButton
     private let eyeButton: NSButton
     private let nameLabel: NSTextField
@@ -50,6 +54,12 @@ class FavouritesRowView: NSView {
         self.isItemHidden = isItemHidden
         self.isSectionHidden = isSectionHidden
 
+        // Card background
+        cardBackground = NSView()
+        cardBackground.wantsLayer = true
+        cardBackground.layer?.backgroundColor = NSColor.quaternarySystemFill.cgColor
+        cardBackground.layer?.cornerRadius = FavouritesRowLayout.cardCornerRadius
+
         // Star button
         starButton = NSButton(frame: .zero)
         starButton.bezelStyle = .inline
@@ -66,8 +76,8 @@ class FavouritesRowView: NSView {
 
         // Name label
         nameLabel = NSTextField(labelWithString: "")
-        nameLabel.font = DS.Typography.label
-        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.font = .systemFont(ofSize: 13)
+        nameLabel.textColor = .labelColor
         nameLabel.lineBreakMode = .byTruncatingTail
 
         // Type icon
@@ -76,6 +86,7 @@ class FavouritesRowView: NSView {
 
         super.init(frame: NSRect(x: 0, y: 0, width: 360, height: FavouritesRowLayout.rowHeight))
 
+        addSubview(cardBackground)
         addSubview(starButton)
         addSubview(eyeButton)
         addSubview(nameLabel)
@@ -98,12 +109,12 @@ class FavouritesRowView: NSView {
         case .scene(let scene):
             nameLabel.stringValue = scene.name
             typeIcon.image = inferSceneIcon(for: scene)
-            typeIcon.contentTintColor = DS.Colors.mutedForeground
+            typeIcon.contentTintColor = .secondaryLabelColor
 
         case .service(let service):
             nameLabel.stringValue = service.name
             typeIcon.image = iconForServiceType(service.serviceType)
-            typeIcon.contentTintColor = DS.Colors.mutedForeground
+            typeIcon.contentTintColor = .secondaryLabelColor
         }
 
         updateStarButton()
@@ -113,13 +124,13 @@ class FavouritesRowView: NSView {
     private func updateStarButton() {
         let symbolName = isFavourite ? "star.fill" : "star"
         starButton.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
-        starButton.contentTintColor = isFavourite ? DS.Colors.warning : DS.Colors.mutedForeground
+        starButton.contentTintColor = isFavourite ? .systemYellow : .tertiaryLabelColor
     }
 
     private func updateEyeButton() {
         let symbolName = isItemHidden ? "eye.slash" : "eye"
         eyeButton.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
-        eyeButton.contentTintColor = isItemHidden ? DS.Colors.mutedForeground : DS.Colors.foreground
+        eyeButton.contentTintColor = isItemHidden ? .tertiaryLabelColor : .secondaryLabelColor
 
         // Dim the whole row when hidden (either item or section)
         let shouldDim = isItemHidden || isSectionHidden
@@ -145,13 +156,24 @@ class FavouritesRowView: NSView {
         let buttonSize = FavouritesRowLayout.buttonSize
         let iconSize = FavouritesRowLayout.iconSize
         let spacing = FavouritesRowLayout.spacing
-        let rightPadding: CGFloat = 16
+        let cardPadding = FavouritesRowLayout.cardPadding
+        let cardHeight = FavouritesRowLayout.cardHeight
+
+        // Card background
+        cardBackground.frame = NSRect(
+            x: 0,
+            y: cardPadding,
+            width: bounds.width,
+            height: cardHeight
+        )
+
+        let cardY = cardPadding
         var x: CGFloat = FavouritesRowLayout.leftPadding
 
         // Star button
         starButton.frame = NSRect(
             x: x,
-            y: (bounds.height - buttonSize) / 2,
+            y: cardY + (cardHeight - buttonSize) / 2,
             width: buttonSize,
             height: buttonSize
         )
@@ -160,25 +182,27 @@ class FavouritesRowView: NSView {
         // Eye button
         eyeButton.frame = NSRect(
             x: x,
-            y: (bounds.height - buttonSize) / 2,
+            y: cardY + (cardHeight - buttonSize) / 2,
             width: buttonSize,
             height: buttonSize
         )
         x += buttonSize + spacing
 
-        // Type icon on far right
+        // Type icon
         typeIcon.frame = NSRect(
-            x: bounds.width - iconSize - rightPadding,
-            y: (bounds.height - iconSize) / 2,
+            x: x,
+            y: cardY + (cardHeight - iconSize) / 2,
             width: iconSize,
             height: iconSize
         )
+        x += iconSize + spacing
 
-        // Name label (fills space between buttons and icon)
+        // Name label (fills remaining space)
+        let rightPadding: CGFloat = 12
         nameLabel.frame = NSRect(
             x: x,
-            y: (bounds.height - FavouritesRowLayout.labelHeight) / 2,
-            width: max(0, bounds.width - x - iconSize - rightPadding - 8),
+            y: cardY + (cardHeight - FavouritesRowLayout.labelHeight) / 2,
+            width: max(0, bounds.width - x - rightPadding),
             height: FavouritesRowLayout.labelHeight
         )
     }

@@ -74,27 +74,31 @@ class GeneralSection: SettingsCard {
         proBox.translatesAutoresizingMaskIntoConstraints = false
 
         let content = NSStackView()
-        content.orientation = .horizontal
-        content.spacing = 16
-        content.alignment = .centerY
+        content.orientation = .vertical
+        content.spacing = 12
+        content.alignment = .leading
         content.translatesAutoresizingMaskIntoConstraints = false
         proBox.addSubview(content)
+
+        // Header row with icon and title
+        let headerRow = NSStackView()
+        headerRow.orientation = .horizontal
+        headerRow.spacing = 10
+        headerRow.alignment = .centerY
 
         // Star icon
         let iconView = NSImageView()
         iconView.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: "Pro")
         iconView.contentTintColor = NSColor.systemPurple
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 28, weight: .medium)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.widthAnchor.constraint(equalToConstant: 36).isActive = true
-        iconView.heightAnchor.constraint(equalToConstant: 36).isActive = true
-        content.addArrangedSubview(iconView)
+        iconView.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        iconView.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        headerRow.addArrangedSubview(iconView)
 
-        // Text stack
-        let textStack = NSStackView()
-        textStack.orientation = .vertical
-        textStack.spacing = 4
-        textStack.alignment = .leading
+        proTitleLabel = createLabel("Itsyhome Pro", style: .body)
+        proTitleLabel.font = .systemFont(ofSize: 15, weight: .semibold)
+        headerRow.addArrangedSubview(proTitleLabel)
 
         // Pro badge (shown when subscribed)
         proBadge.stringValue = "ACTIVE"
@@ -108,61 +112,45 @@ class GeneralSection: SettingsCard {
         proBadge.wantsLayer = true
         proBadge.layer?.cornerRadius = 3
         proBadge.translatesAutoresizingMaskIntoConstraints = false
+        proBadge.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        proBadge.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        headerRow.addArrangedSubview(proBadge)
 
+        content.addArrangedSubview(headerRow)
+
+        // Thank you label (shown when subscribed)
         thankYouLabel.stringValue = "Thank you for your support!"
         thankYouLabel.font = .systemFont(ofSize: 11)
         thankYouLabel.textColor = .secondaryLabelColor
         thankYouLabel.isBezeled = false
         thankYouLabel.isEditable = false
         thankYouLabel.drawsBackground = false
-
-        // Title row
-        let titleRow = NSStackView()
-        titleRow.orientation = .horizontal
-        titleRow.spacing = 6
-        titleRow.alignment = .centerY
-
-        proTitleLabel = createLabel("Itsyhome Pro", style: .body)
-        proTitleLabel.font = .systemFont(ofSize: 15, weight: .semibold)
-
-        titleRow.addArrangedSubview(proTitleLabel)
-        titleRow.addArrangedSubview(proBadge)
-        textStack.addArrangedSubview(titleRow)
-
-        // Thank you (shown when subscribed)
-        textStack.addArrangedSubview(thankYouLabel)
+        content.addArrangedSubview(thankYouLabel)
 
         // Subtitle (shown when not subscribed)
-        proSubtitleLabel = createLabel("Unlock powerful automation with deeplinks, webhooks, and more.", style: .caption)
-        textStack.addArrangedSubview(proSubtitleLabel)
-
-        content.addArrangedSubview(textStack)
-
-        // Spacer
-        let spacer = NSView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        content.addArrangedSubview(spacer)
+        proSubtitleLabel = createLabel("Unlock deeplinks, webhooks, and more.", style: .caption)
+        content.addArrangedSubview(proSubtitleLabel)
 
         // Buttons stack
         buttonStack = NSStackView()
         buttonStack.orientation = .vertical
-        buttonStack.spacing = 4
-        buttonStack.alignment = .trailing
+        buttonStack.spacing = 8
+        buttonStack.alignment = .leading
 
         let purchaseRow = NSStackView()
         purchaseRow.orientation = .horizontal
-        purchaseRow.spacing = 10
+        purchaseRow.spacing = 8
 
         yearlyButton.title = "Yearly"
         yearlyButton.bezelStyle = .rounded
-        yearlyButton.controlSize = .large
+        yearlyButton.controlSize = .regular
         yearlyButton.isEnabled = false
         yearlyButton.target = self
         yearlyButton.action = #selector(yearlyTapped)
 
         lifetimeButton.title = "Lifetime"
         lifetimeButton.bezelStyle = .rounded
-        lifetimeButton.controlSize = .large
+        lifetimeButton.controlSize = .regular
         lifetimeButton.isEnabled = false
         lifetimeButton.target = self
         lifetimeButton.action = #selector(lifetimeTapped)
@@ -183,12 +171,10 @@ class GeneralSection: SettingsCard {
         content.addArrangedSubview(buttonStack)
 
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: proBox.topAnchor, constant: 16),
-            content.leadingAnchor.constraint(equalTo: proBox.leadingAnchor, constant: 16),
-            content.trailingAnchor.constraint(equalTo: proBox.trailingAnchor, constant: -16),
-            content.bottomAnchor.constraint(equalTo: proBox.bottomAnchor, constant: -16),
-            proBadge.widthAnchor.constraint(equalToConstant: 44),
-            proBadge.heightAnchor.constraint(equalToConstant: 16)
+            content.topAnchor.constraint(equalTo: proBox.topAnchor, constant: 12),
+            content.leadingAnchor.constraint(equalTo: proBox.leadingAnchor, constant: 12),
+            content.trailingAnchor.constraint(equalTo: proBox.trailingAnchor, constant: -12),
+            content.bottomAnchor.constraint(equalTo: proBox.bottomAnchor, constant: -12)
         ])
 
         stackView.addArrangedSubview(proBox)

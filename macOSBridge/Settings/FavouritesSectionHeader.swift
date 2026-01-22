@@ -18,8 +18,8 @@ class FavouritesSectionHeader: NSView {
 
     init(title: String, icon: NSImage?, isHidden: Bool = false, showEyeButton: Bool = false) {
         titleLabel = NSTextField(labelWithString: title)
-        titleLabel.font = DS.Typography.bodyMedium
-        titleLabel.textColor = isHidden ? DS.Colors.mutedForeground : DS.Colors.foreground
+        titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        titleLabel.textColor = isHidden ? .tertiaryLabelColor : .labelColor
         titleLabel.alphaValue = isHidden ? 0.5 : 1.0
 
         if showEyeButton {
@@ -31,7 +31,7 @@ class FavouritesSectionHeader: NSView {
             button.imageScaling = .scaleProportionallyUpOrDown
             let symbolName = isHidden ? "eye.slash" : "eye"
             button.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
-            button.contentTintColor = isHidden ? DS.Colors.mutedForeground : DS.Colors.foreground
+            button.contentTintColor = isHidden ? .tertiaryLabelColor : .secondaryLabelColor
             eyeButton = button
         } else {
             eyeButton = nil
@@ -59,23 +59,24 @@ class FavouritesSectionHeader: NSView {
         super.layout()
 
         let buttonSize = FavouritesRowLayout.buttonSize
-        let leftPadding = FavouritesRowLayout.iconStartX
+        let spacing: CGFloat = 6
+        var titleX: CGFloat = FavouritesRowLayout.leftPadding
 
-        // Eye button on the left (aligned with eye buttons in rows)
+        // Eye button on the left of title
         if let eyeButton = eyeButton {
-            let eyeX = FavouritesRowLayout.leftPadding + buttonSize + FavouritesRowLayout.spacing
             eyeButton.frame = NSRect(
-                x: eyeX,
+                x: titleX,
                 y: (bounds.height - buttonSize) / 2,
                 width: buttonSize,
                 height: buttonSize
             )
+            titleX += buttonSize + spacing
         }
 
         titleLabel.frame = NSRect(
-            x: leftPadding,
+            x: titleX,
             y: (bounds.height - FavouritesRowLayout.labelHeight) / 2,
-            width: bounds.width - leftPadding - 8,
+            width: bounds.width - titleX - 8,
             height: FavouritesRowLayout.labelHeight
         )
     }

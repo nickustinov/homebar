@@ -11,32 +11,29 @@ import AppKit
 
 class AccessoriesSettingsView: NSView {
 
-    private static let contentWidth: CGFloat = 480
-
-    private let scrollView: NSScrollView
-    private let contentView: NSView
+    private let stackView = NSStackView()
     private var menuData: MenuData?
     private var needsRebuild = false
-    private var shouldScrollToTop = true
 
     // Favourites table (embedded in content)
     private var favouritesTableView: NSTableView?
     private var favouriteItems: [FavouriteItem] = []
 
     override init(frame frameRect: NSRect) {
-        scrollView = NSScrollView(frame: .zero)
-        scrollView.hasVerticalScroller = true
-        scrollView.autohidesScrollers = true
-        scrollView.borderType = .noBorder
-        scrollView.drawsBackground = false
-
-        contentView = NSView()
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.documentView = contentView
-
         super.init(frame: frameRect)
 
-        addSubview(scrollView)
+        stackView.orientation = .vertical
+        stackView.spacing = 0
+        stackView.alignment = .leading
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stackView)
+
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
     }
 
     required init?(coder: NSCoder) {
@@ -45,8 +42,6 @@ class AccessoriesSettingsView: NSView {
 
     override func layout() {
         super.layout()
-
-        scrollView.frame = bounds
 
         if needsRebuild {
             needsRebuild = false
@@ -58,7 +53,6 @@ class AccessoriesSettingsView: NSView {
         self.menuData = data
         PreferencesManager.shared.currentHomeId = data.selectedHomeId
         needsRebuild = true
-        shouldScrollToTop = true
         needsLayout = true
     }
 
@@ -89,13 +83,12 @@ class AccessoriesSettingsView: NSView {
     private func rebuildContent() {
         rebuildFavouritesList()
 
-        contentView.subviews.forEach { $0.removeFromSuperview() }
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         favouritesTableView = nil
 
         guard let data = menuData else { return }
 
         let preferences = PreferencesManager.shared
-        let padding: CGFloat = 12
         let rowHeight = FavouritesRowLayout.rowHeight
         let headerHeight: CGFloat = 32
         let sectionSpacing: CGFloat = 12
@@ -132,28 +125,20 @@ class AccessoriesSettingsView: NSView {
             }
         }
 
-        var views: [(view: NSView, height: CGFloat)] = []
-
-        // Instructions card
-        let instructionsCard = createInstructionsCard()
-        views.append((instructionsCard, 62))
-
-        views.append((NSView(), sectionSpacing))
-
         // Favourites section
         if !favouriteItems.isEmpty {
             let favouritesHeader = FavouritesSectionHeader(
                 title: "Favourites",
                 icon: NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
             )
-            views.append((favouritesHeader, headerHeight))
-            views.append((NSView(), 12))
+            addView(favouritesHeader, height: headerHeight)
+            addSpacer(height: 12)
 
             let tableHeight = CGFloat(favouriteItems.count) * rowHeight
-            let tableContainer = createFavouritesTable(width: scrollView.bounds.width - padding * 2, height: tableHeight)
-            views.append((tableContainer, tableHeight))
+            let tableContainer = createFavouritesTable(height: tableHeight)
+            addView(tableContainer, height: tableHeight)
 
-            views.append((NSView(), sectionSpacing * 2))
+            addSpacer(height: sectionSpacing * 2)
         }
 
         // Scenes section
@@ -169,7 +154,7 @@ class AccessoriesSettingsView: NSView {
                 self?.needsRebuild = true
                 self?.needsLayout = true
             }
-            views.append((scenesHeader, headerHeight))
+            addView(scenesHeader, height: headerHeight)
 
             let isScenesHidden = preferences.hideScenesSection
             for scene in data.scenes {
@@ -191,10 +176,10 @@ class AccessoriesSettingsView: NSView {
                     self?.needsRebuild = true
                     self?.needsLayout = true
                 }
-                views.append((row, rowHeight))
+                addView(row, height: rowHeight)
             }
 
-            views.append((NSView(), sectionSpacing))
+            addSpacer(height: sectionSpacing)
         }
 
         // Room sections
@@ -215,7 +200,7 @@ class AccessoriesSettingsView: NSView {
                 self?.needsRebuild = true
                 self?.needsLayout = true
             }
-            views.append((header, headerHeight))
+            addView(header, height: headerHeight)
 
             let sortedServices = services.sorted { s1, s2 in
                 let idx1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
@@ -246,10 +231,10 @@ class AccessoriesSettingsView: NSView {
                     self?.needsRebuild = true
                     self?.needsLayout = true
                 }
-                views.append((row, rowHeight))
+                addView(row, height: rowHeight)
             }
 
-            views.append((NSView(), sectionSpacing))
+            addSpacer(height: sectionSpacing)
         }
 
         // Other section
@@ -258,7 +243,7 @@ class AccessoriesSettingsView: NSView {
                 title: "Other",
                 icon: NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
             )
-            views.append((header, headerHeight))
+            addView(header, height: headerHeight)
 
             let sortedServices = noRoomServices.sorted { s1, s2 in
                 let idx1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
@@ -287,79 +272,28 @@ class AccessoriesSettingsView: NSView {
                     self?.needsRebuild = true
                     self?.needsLayout = true
                 }
-                views.append((row, rowHeight))
+                addView(row, height: rowHeight)
             }
 
-            views.append((NSView(), sectionSpacing))
-        }
-
-        // Layout
-        let totalHeight = views.reduce(0) { $0 + $1.height } + padding * 2
-
-        let contentWidth = max(Self.contentWidth, scrollView.bounds.width)
-        contentView.frame = NSRect(x: 0, y: 0, width: contentWidth, height: totalHeight)
-
-        var currentY = totalHeight - padding
-        for (view, height) in views {
-            currentY -= height
-            view.frame = NSRect(
-                x: padding,
-                y: currentY,
-                width: contentWidth - (padding * 2),
-                height: height
-            )
-            contentView.addSubview(view)
-        }
-
-        if shouldScrollToTop {
-            shouldScrollToTop = false
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.scrollView.contentView.scroll(to: NSPoint(x: 0, y: totalHeight - self.scrollView.bounds.height))
-            }
+            addSpacer(height: sectionSpacing)
         }
     }
 
-    private func createInstructionsCard() -> NSView {
-        let cardView = NSView(frame: .zero)
-        cardView.wantsLayer = true
-        cardView.layer?.backgroundColor = DS.Colors.muted.withAlphaComponent(0.5).cgColor
-        cardView.layer?.cornerRadius = DS.Radius.md
-
-        let iconWidth: CGFloat = 24
-
-        let star1 = NSImageView(frame: .zero)
-        star1.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
-        star1.contentTintColor = DS.Colors.warning
-        star1.imageScaling = .scaleProportionallyUpOrDown
-        cardView.addSubview(star1)
-
-        let label1 = NSTextField(labelWithString: "Add to favourites (shown at top of menu)")
-        label1.font = DS.Typography.label
-        label1.textColor = DS.Colors.foreground
-        cardView.addSubview(label1)
-
-        let eye2 = NSImageView(frame: .zero)
-        eye2.image = NSImage(systemSymbolName: "eye", accessibilityDescription: nil)
-        eye2.contentTintColor = DS.Colors.foreground
-        eye2.imageScaling = .scaleProportionallyUpOrDown
-        cardView.addSubview(eye2)
-
-        let label2 = NSTextField(labelWithString: "Toggle visibility in menus")
-        label2.font = DS.Typography.label
-        label2.textColor = DS.Colors.foreground
-        cardView.addSubview(label2)
-
-        let textX: CGFloat = 12 + iconWidth + 8
-        star1.frame = NSRect(x: 12, y: 34, width: iconWidth, height: 18)
-        label1.frame = NSRect(x: textX, y: 30, width: 320, height: 22)
-        eye2.frame = NSRect(x: 12, y: 10, width: iconWidth, height: 18)
-        label2.frame = NSRect(x: textX, y: 6, width: 320, height: 22)
-
-        return cardView
+    private func addView(_ view: NSView, height: CGFloat) {
+        view.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(view)
+        view.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+        view.heightAnchor.constraint(equalToConstant: height).isActive = true
     }
 
-    private func createFavouritesTable(width: CGFloat, height: CGFloat) -> NSView {
+    private func addSpacer(height: CGFloat) {
+        let spacer = NSView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(spacer)
+        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+    }
+
+    private func createFavouritesTable(height: CGFloat) -> NSView {
         let tableView = NSTableView()
         tableView.delegate = self
         tableView.dataSource = self
@@ -374,14 +308,21 @@ class AccessoriesSettingsView: NSView {
         tableView.usesAutomaticRowHeights = false
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("main"))
-        column.width = width
+        column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
 
         self.favouritesTableView = tableView
 
-        let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: height))
-        tableView.frame = container.bounds
+        let container = NSView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(tableView)
+
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: container.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
 
         return container
     }

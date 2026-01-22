@@ -29,18 +29,26 @@ extension NSPasteboard.PasteboardType {
 
 class DraggableFavouriteRowView: NSView {
 
+    private let cardBackground: NSView
+    private let dragHandle: DragHandleView
     private let starButton: NSButton
-    private let dragHandle: NSImageView
     private let typeIcon: NSImageView
     private let nameLabel: NSTextField
-    private let shortcutButton: ShortcutButton
 
     private let itemId: String
     var onRemove: (() -> Void)?
-    var onShortcutChanged: ((PreferencesManager.ShortcutData?) -> Void)?
 
     init(item: FavouriteItem) {
         self.itemId = item.id
+
+        // Card background
+        cardBackground = NSView()
+        cardBackground.wantsLayer = true
+        cardBackground.layer?.backgroundColor = NSColor.quaternarySystemFill.cgColor
+        cardBackground.layer?.cornerRadius = FavouritesRowLayout.cardCornerRadius
+
+        // Drag handle (6 dots)
+        dragHandle = DragHandleView()
 
         // Star button
         starButton = NSButton(frame: .zero)
@@ -49,45 +57,29 @@ class DraggableFavouriteRowView: NSView {
         starButton.imagePosition = .imageOnly
         starButton.imageScaling = .scaleProportionallyUpOrDown
         starButton.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
-        starButton.contentTintColor = DS.Colors.warning
-
-        // Drag handle
-        dragHandle = NSImageView()
-        dragHandle.imageScaling = .scaleProportionallyUpOrDown
-        dragHandle.image = NSImage(systemSymbolName: "line.3.horizontal", accessibilityDescription: nil)
-        dragHandle.contentTintColor = DS.Colors.mutedForeground
+        starButton.contentTintColor = .systemYellow
 
         // Type icon
         typeIcon = NSImageView()
         typeIcon.imageScaling = .scaleProportionallyUpOrDown
-        typeIcon.contentTintColor = DS.Colors.mutedForeground
+        typeIcon.contentTintColor = .secondaryLabelColor
 
         // Name label
         nameLabel = NSTextField(labelWithString: item.name)
-        nameLabel.font = DS.Typography.label
-        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.font = .systemFont(ofSize: 13)
+        nameLabel.textColor = .labelColor
         nameLabel.lineBreakMode = .byTruncatingTail
-
-        // Shortcut button
-        shortcutButton = ShortcutButton(frame: .zero)
-        shortcutButton.shortcut = PreferencesManager.shared.shortcut(for: item.id)
 
         super.init(frame: NSRect(x: 0, y: 0, width: 360, height: FavouritesRowLayout.rowHeight))
 
-        addSubview(starButton)
+        addSubview(cardBackground)
         addSubview(dragHandle)
+        addSubview(starButton)
         addSubview(typeIcon)
         addSubview(nameLabel)
-        addSubview(shortcutButton)
 
         starButton.target = self
         starButton.action = #selector(starClicked)
-
-        shortcutButton.onShortcutRecorded = { [weak self] shortcut in
-            guard let self = self else { return }
-            PreferencesManager.shared.setShortcut(shortcut, for: self.itemId)
-            self.onShortcutChanged?(shortcut)
-        }
 
         // Set type icon based on item
         switch item.kind {
@@ -112,55 +104,88 @@ class DraggableFavouriteRowView: NSView {
         let buttonSize = FavouritesRowLayout.buttonSize
         let iconSize = FavouritesRowLayout.iconSize
         let spacing = FavouritesRowLayout.spacing
-        let rightPadding: CGFloat = 0
-        var x: CGFloat = 0
+        let cardPadding = FavouritesRowLayout.cardPadding
+        let cardHeight = FavouritesRowLayout.cardHeight
+        let dragHandleWidth: CGFloat = 12
 
-        // Star button
-        starButton.frame = NSRect(
-            x: x,
-            y: (bounds.height - buttonSize) / 2,
-            width: buttonSize,
-            height: buttonSize
+        // Card background
+        cardBackground.frame = NSRect(
+            x: 0,
+            y: cardPadding,
+            width: bounds.width,
+            height: cardHeight
         )
-        x += buttonSize + spacing
+
+        let cardY = cardPadding
+        var x: CGFloat = 4  // Reduced padding so star aligns with other rows
 
         // Drag handle
         dragHandle.frame = NSRect(
             x: x,
-            y: (bounds.height - buttonSize) / 2,
+            y: cardY + (cardHeight - 16) / 2,
+            width: dragHandleWidth,
+            height: 16
+        )
+        x += dragHandleWidth + spacing
+
+        // Star button
+        starButton.frame = NSRect(
+            x: x,
+            y: cardY + (cardHeight - buttonSize) / 2,
             width: buttonSize,
             height: buttonSize
         )
         x += buttonSize + spacing
 
-        // Type icon on far right
+        // Type icon
         typeIcon.frame = NSRect(
-            x: bounds.width - iconSize - rightPadding,
-            y: (bounds.height - iconSize) / 2,
+            x: x,
+            y: cardY + (cardHeight - iconSize) / 2,
             width: iconSize,
             height: iconSize
         )
+        x += iconSize + spacing
 
-        // Shortcut button to the left of type icon
-        let shortcutWidth: CGFloat = 110
-        let shortcutHeight: CGFloat = 20
-        shortcutButton.frame = NSRect(
-            x: bounds.width - iconSize - rightPadding - 16 - shortcutWidth,
-            y: (bounds.height - shortcutHeight) / 2,
-            width: shortcutWidth,
-            height: shortcutHeight
-        )
-
-        // Name label (fills space between drag handle and shortcut button)
+        // Name label (fills remaining space)
+        let rightPadding: CGFloat = 12
         nameLabel.frame = NSRect(
             x: x,
-            y: (bounds.height - FavouritesRowLayout.labelHeight) / 2,
-            width: max(0, bounds.width - x - shortcutWidth - iconSize - rightPadding - 24),
+            y: cardY + (cardHeight - FavouritesRowLayout.labelHeight) / 2,
+            width: max(0, bounds.width - x - rightPadding),
             height: FavouritesRowLayout.labelHeight
         )
     }
 
     override var intrinsicContentSize: NSSize {
         NSSize(width: NSView.noIntrinsicMetric, height: FavouritesRowLayout.rowHeight)
+    }
+}
+
+// MARK: - Drag handle view (6 dots)
+
+class DragHandleView: NSView {
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+
+        let dotSize: CGFloat = 2
+        let hSpacing: CGFloat = 2
+        let vSpacing: CGFloat = 2
+        let totalWidth = dotSize * 2 + hSpacing
+        let totalHeight = dotSize * 3 + vSpacing * 2
+
+        let startX = (bounds.width - totalWidth) / 2
+        let startY = (bounds.height - totalHeight) / 2
+
+        NSColor.tertiaryLabelColor.setFill()
+
+        for col in 0..<2 {
+            for row in 0..<3 {
+                let x = startX + CGFloat(col) * (dotSize + hSpacing)
+                let y = startY + CGFloat(row) * (dotSize + vSpacing)
+                let dotRect = NSRect(x: x, y: y, width: dotSize, height: dotSize)
+                let path = NSBezierPath(ovalIn: dotRect)
+                path.fill()
+            }
+        }
     }
 }

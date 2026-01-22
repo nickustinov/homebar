@@ -53,6 +53,14 @@ class GroupsSettingsView: NSView {
     private func setupContent() {
         let isPro = ProStatusCache.shared.isPro
 
+        // Pro banner (only shown for non-Pro users)
+        if !isPro {
+            let banner = SettingsCard.createProBanner()
+            stackView.addArrangedSubview(banner)
+            banner.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+            addSpacer(height: 12)
+        }
+
         // Description
         let descLabel = NSTextField(wrappingLabelWithString: "Create custom groups of devices to control multiple devices at once. Groups appear in your menu and can be controlled via deeplinks.")
         descLabel.font = .systemFont(ofSize: 13)
@@ -107,6 +115,7 @@ class GroupsSettingsView: NSView {
         tableView.draggingDestinationFeedbackStyle = .gap
         tableView.allowsMultipleSelection = false
         tableView.usesAutomaticRowHeights = false
+        tableView.focusRingType = .none
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("main"))
         column.resizingMask = .autoresizingMask
@@ -216,6 +225,10 @@ extension GroupsSettingsView: NSTableViewDelegate, NSTableViewDataSource {
         50
     }
 
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        return false
+    }
+
     func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
         let rowView = NSTableRowView()
         rowView.isGroupRowStyle = false
@@ -224,10 +237,8 @@ extension GroupsSettingsView: NSTableViewDelegate, NSTableViewDataSource {
 
     private func createGroupRowView(group: DeviceGroup, row: Int) -> NSView {
         let isPro = ProStatusCache.shared.isPro
-        let container = NSView()
-        container.wantsLayer = true
-        container.layer?.backgroundColor = NSColor(white: 0.97, alpha: 1.0).cgColor
-        container.layer?.cornerRadius = 10
+        let container = CardBoxView()
+        container.translatesAutoresizingMaskIntoConstraints = false
 
         // Drag handle (hidden for non-pro)
         let dragHandle = DragHandleView()

@@ -100,7 +100,7 @@ class GeneralSection: SettingsCard {
         // Pro badge (only shown for non-Pro users)
         syncProBadge = NSView()
         syncProBadge.wantsLayer = true
-        syncProBadge.layer?.backgroundColor = NSColor.systemPurple.cgColor
+        syncProBadge.layer?.backgroundColor = NSColor.systemBlue.cgColor
         syncProBadge.layer?.cornerRadius = 3
         syncProBadge.translatesAutoresizingMaskIntoConstraints = false
         syncProBadge.widthAnchor.constraint(equalToConstant: 26).isActive = true
@@ -144,10 +144,7 @@ class GeneralSection: SettingsCard {
 
     private func setupProSection() {
         // Pro subscription box with gradient-like appearance
-        proBox = NSView()
-        proBox.wantsLayer = true
-        proBox.layer?.backgroundColor = NSColor(red: 0.95, green: 0.92, blue: 1.0, alpha: 1.0).cgColor
-        proBox.layer?.cornerRadius = 10
+        proBox = ProTintBoxView()
         proBox.translatesAutoresizingMaskIntoConstraints = false
 
         let content = NSStackView()
@@ -166,7 +163,7 @@ class GeneralSection: SettingsCard {
         // Star icon
         let iconView = NSImageView()
         iconView.image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: "Pro")
-        iconView.contentTintColor = NSColor.systemPurple
+        iconView.contentTintColor = NSColor.systemBlue
         iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.widthAnchor.constraint(equalToConstant: 24).isActive = true
@@ -209,7 +206,7 @@ class GeneralSection: SettingsCard {
         content.addArrangedSubview(thankYouLabel)
 
         // Subtitle (shown when not subscribed)
-        proSubtitleLabel = createLabel("Unlock deeplinks, webhooks, and more.", style: .caption)
+        proSubtitleLabel = createLabel("Unlock iCloud sync, device groups, deeplinks, webhooks/CLI, and more.", style: .caption)
         content.addArrangedSubview(proSubtitleLabel)
 
         // Buttons stack
@@ -224,19 +221,28 @@ class GeneralSection: SettingsCard {
 
         yearlyButton.title = "Yearly"
         yearlyButton.bezelStyle = .rounded
-        yearlyButton.controlSize = .regular
+        yearlyButton.controlSize = .large
+        yearlyButton.bezelColor = .systemBlue
+
         yearlyButton.isEnabled = false
         yearlyButton.target = self
         yearlyButton.action = #selector(yearlyTapped)
 
         lifetimeButton.title = "Lifetime"
         lifetimeButton.bezelStyle = .rounded
-        lifetimeButton.controlSize = .regular
+        lifetimeButton.controlSize = .large
+        lifetimeButton.bezelColor = .systemBlue
+
         lifetimeButton.isEnabled = false
         lifetimeButton.target = self
         lifetimeButton.action = #selector(lifetimeTapped)
 
+        let orLabel = NSTextField(labelWithString: "or")
+        orLabel.font = .systemFont(ofSize: 12)
+        orLabel.textColor = .secondaryLabelColor
+
         purchaseRow.addArrangedSubview(yearlyButton)
+        purchaseRow.addArrangedSubview(orLabel)
         purchaseRow.addArrangedSubview(lifetimeButton)
 
         restoreButton.title = "Restore purchases"
@@ -263,10 +269,7 @@ class GeneralSection: SettingsCard {
     }
 
     private func createCardBox() -> NSView {
-        let box = NSView()
-        box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor(white: 0.97, alpha: 1.0).cgColor
-        box.layer?.cornerRadius = 10
+        let box = CardBoxView()
         box.translatesAutoresizingMaskIntoConstraints = false
         return box
     }
@@ -360,12 +363,16 @@ class GeneralSection: SettingsCard {
     }
 
     private func updateButtonTitles() {
+        let attrs: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.white,
+            .font: NSFont.systemFont(ofSize: 14, weight: .medium)
+        ]
         if let yearly = ProManager.shared.yearlyProduct {
-            yearlyButton.title = "\(yearly.displayPrice)/year"
+            yearlyButton.attributedTitle = NSAttributedString(string: "\(yearly.displayPrice)/year", attributes: attrs)
             yearlyButton.isEnabled = true
         }
         if let lifetime = ProManager.shared.lifetimeProduct {
-            lifetimeButton.title = "\(lifetime.displayPrice) lifetime"
+            lifetimeButton.attributedTitle = NSAttributedString(string: "\(lifetime.displayPrice) lifetime", attributes: attrs)
             lifetimeButton.isEnabled = true
         }
     }

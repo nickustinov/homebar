@@ -149,7 +149,7 @@ final class ProStatusCache: @unchecked Sendable {
     static let shared = ProStatusCache()
 
     // Set to true for testing Pro features during development
-    static let debugOverride: Bool = true
+    static let debugOverride: Bool = false
 
     private let lock = NSLock()
     private var _isPro: Bool = false

@@ -48,6 +48,14 @@ class WebhooksSection: SettingsCard {
     }
 
     private func setupContent() {
+        // Pro banner (only shown for non-Pro users)
+        if !ProStatusCache.shared.isPro {
+            let banner = SettingsCard.createProBanner()
+            stackView.addArrangedSubview(banner)
+            banner.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+            stackView.addArrangedSubview(createSpacer(height: 12))
+        }
+
         // Description
         let descLabel = NSTextField(wrappingLabelWithString: "Run a local HTTP server to control and query your HomeKit devices via GET requests. Use from any device on your network, or install the itsyhome CLI tool (brew install nickustinov/tap/itsyhome).")
         descLabel.font = .systemFont(ofSize: 13)
@@ -317,10 +325,7 @@ class WebhooksSection: SettingsCard {
     // MARK: - UI helpers
 
     private func createCardBox() -> NSView {
-        let box = NSView()
-        box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor(white: 0.97, alpha: 1.0).cgColor
-        box.layer?.cornerRadius = 10
+        let box = CardBoxView()
         box.translatesAutoresizingMaskIntoConstraints = false
         return box
     }

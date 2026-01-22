@@ -56,6 +56,8 @@ class SidebarRowView: NSTableRowView {
 
 class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
+    static let navigateToSectionNotification = Notification.Name("SettingsNavigateToSection")
+
     private let sidebarTableView = NSTableView()
     private let contentContainer = NSScrollView()
 
@@ -123,9 +125,9 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     private func setupView() {
         // Sidebar background
-        let sidebarBackground = NSView()
-        sidebarBackground.wantsLayer = true
-        sidebarBackground.layer?.backgroundColor = NSColor(white: 0.92, alpha: 1.0).cgColor
+        let sidebarBackground = NSVisualEffectView()
+        sidebarBackground.material = .sidebar
+        sidebarBackground.blendingMode = .behindWindow
         sidebarBackground.translatesAutoresizingMaskIntoConstraints = false
         addSubview(sidebarBackground)
 
@@ -180,6 +182,19 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         // Select first row
         sidebarTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         showSection(.general)
+
+        // Listen for section navigation requests
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNavigateToSection(_:)),
+            name: Self.navigateToSectionNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleNavigateToSection(_ notification: Notification) {
+        guard let index = notification.userInfo?["index"] as? Int else { return }
+        selectSection(at: index)
     }
 
     private func showSection(_ section: Section) {

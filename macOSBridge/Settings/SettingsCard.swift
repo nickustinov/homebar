@@ -95,4 +95,94 @@ class SettingsCard: NSView {
     enum LabelStyle {
         case title, subtitle, body, caption, sectionHeader, code
     }
+
+    /// Creates a Pro-required banner with a button to navigate to the General section
+    static func createProBanner() -> NSView {
+        let banner = ProBannerView()
+        banner.translatesAutoresizingMaskIntoConstraints = false
+        return banner
+    }
+}
+
+// MARK: - Adaptive background views
+
+/// Rounded card background that adapts to light/dark mode
+class CardBoxView: NSView {
+    override func draw(_ dirtyRect: NSRect) {
+        let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let color = isDark ? NSColor(white: 0.18, alpha: 1.0) : NSColor(white: 0.97, alpha: 1.0)
+        let path = NSBezierPath(roundedRect: bounds, xRadius: 10, yRadius: 10)
+        color.setFill()
+        path.fill()
+    }
+}
+
+/// Rounded background with a blue tint for Pro-related sections
+class ProTintBoxView: NSView {
+    override func draw(_ dirtyRect: NSRect) {
+        let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let color = isDark
+            ? NSColor(red: 0.12, green: 0.16, blue: 0.25, alpha: 1.0)
+            : NSColor(red: 0.92, green: 0.95, blue: 1.0, alpha: 1.0)
+        let path = NSBezierPath(roundedRect: bounds, xRadius: 10, yRadius: 10)
+        color.setFill()
+        path.fill()
+    }
+}
+
+private class ProBannerView: ProTintBoxView {
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setup() {
+        let iconView = NSImageView()
+        iconView.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: "Pro required")
+        iconView.contentTintColor = .systemBlue
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(iconView)
+
+        let label = NSTextField(wrappingLabelWithString: "This feature is available to Itsyhome Pro subscribers.")
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .labelColor
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+
+        let button = NSButton(title: "Get Pro", target: self, action: #selector(getProTapped))
+        button.bezelStyle = .rounded
+        button.controlSize = .small
+        button.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(button)
+
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 44),
+
+            iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 18),
+            iconView.heightAnchor.constraint(equalToConstant: 18),
+
+            label.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: button.leadingAnchor, constant: -8),
+
+            button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            button.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
+    }
+
+    @objc private func getProTapped() {
+        NotificationCenter.default.post(
+            name: SettingsView.navigateToSectionNotification,
+            object: nil,
+            userInfo: ["index": 0]
+        )
+    }
 }

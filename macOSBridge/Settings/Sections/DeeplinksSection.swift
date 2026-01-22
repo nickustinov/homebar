@@ -39,6 +39,14 @@ class DeeplinksSection: SettingsCard {
     }
 
     private func setupContent() {
+        // Pro banner (only shown for non-Pro users)
+        if !ProStatusCache.shared.isPro {
+            let banner = SettingsCard.createProBanner()
+            stackView.addArrangedSubview(banner)
+            banner.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+            stackView.addArrangedSubview(createSpacer(height: 12))
+        }
+
         // Description
         let descLabel = NSTextField(wrappingLabelWithString: "Control your HomeKit devices from Shortcuts, Alfred, Raycast, Stream Deck, and other automation tools using URL schemes.")
         descLabel.font = .systemFont(ofSize: 13)
@@ -166,10 +174,7 @@ class DeeplinksSection: SettingsCard {
     }
 
     private func createCardBox() -> NSView {
-        let box = NSView()
-        box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor(white: 0.97, alpha: 1.0).cgColor
-        box.layer?.cornerRadius = 10
+        let box = CardBoxView()
         box.translatesAutoresizingMaskIntoConstraints = false
         return box
     }

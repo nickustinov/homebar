@@ -125,6 +125,12 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         accessoriesSection?.configure(with: data)
     }
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard window != nil, sidebarTableView.selectedRow < 0 else { return }
+        sidebarTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+    }
+
     private func setupView() {
         // Sidebar background
         let sidebarBackground = NSVisualEffectView()
@@ -181,8 +187,6 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
-        // Select first row
-        sidebarTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         showSection(.general)
 
         // Listen for section navigation requests

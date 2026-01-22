@@ -61,6 +61,7 @@ struct AccessoryRowConfig {
     let isSectionHidden: Bool
     let showDragHandle: Bool
     let showEyeButton: Bool
+    let itemId: String?  // For shortcut binding
 }
 
 // MARK: - Accessory row view
@@ -73,9 +74,11 @@ class AccessoryRowView: NSView {
     private var eyeButton: NSButton?
     private let typeIcon = NSImageView()
     private let nameLabel = NSTextField()
+    private var shortcutButton: ShortcutButton?
 
     private var isFavourite: Bool
     private var isItemHidden: Bool
+    private var itemId: String?
 
     var onStarToggled: (() -> Void)?
     var onEyeToggled: (() -> Void)?
@@ -83,6 +86,7 @@ class AccessoryRowView: NSView {
     init(config: AccessoryRowConfig) {
         self.isFavourite = config.isFavourite
         self.isItemHidden = config.isItemHidden
+        self.itemId = config.itemId
 
         super.init(frame: NSRect(x: 0, y: 0, width: 360, height: AccessoryRowLayout.rowHeight))
 
@@ -144,6 +148,17 @@ class AccessoryRowView: NSView {
         nameLabel.isEditable = false
         nameLabel.drawsBackground = false
         addSubview(nameLabel)
+
+        // Shortcut button (only for favourites)
+        if config.showDragHandle, let itemId = config.itemId {
+            let btn = ShortcutButton(frame: .zero)
+            btn.shortcut = PreferencesManager.shared.shortcut(for: itemId)
+            btn.onShortcutRecorded = { shortcut in
+                PreferencesManager.shared.setShortcut(shortcut, for: itemId)
+            }
+            shortcutButton = btn
+            addSubview(btn)
+        }
     }
 
     private func updateState(config: AccessoryRowConfig) {
@@ -207,15 +222,25 @@ class AccessoryRowView: NSView {
         // Eye button
         if let eye = eyeButton {
             eye.frame = NSRect(x: x, y: cardY + (L.cardHeight - L.buttonSize) / 2, width: L.buttonSize, height: L.buttonSize)
-            x += L.buttonSize + L.spacing
+            x += L.buttonSize
         }
 
-        // Type icon
+        // Type icon (with 8pt gap from control icons)
+        x += 8
         typeIcon.frame = NSRect(x: x, y: cardY + (L.cardHeight - L.iconSize) / 2, width: L.iconSize, height: L.iconSize)
         x += L.iconSize + L.spacing
 
+        // Shortcut button on the right (if present)
+        var rightEdge = bounds.width - L.rightPadding
+        if let shortcut = shortcutButton {
+            let shortcutWidth: CGFloat = 100
+            let shortcutHeight: CGFloat = 20
+            shortcut.frame = NSRect(x: rightEdge - shortcutWidth, y: cardY + (L.cardHeight - shortcutHeight) / 2, width: shortcutWidth, height: shortcutHeight)
+            rightEdge -= shortcutWidth + L.spacing
+        }
+
         // Name label
-        nameLabel.frame = NSRect(x: x, y: cardY + (L.cardHeight - L.labelHeight) / 2, width: max(0, bounds.width - x - L.rightPadding), height: L.labelHeight)
+        nameLabel.frame = NSRect(x: x, y: cardY + (L.cardHeight - L.labelHeight) / 2, width: max(0, rightEdge - x), height: L.labelHeight)
     }
 
     override var intrinsicContentSize: NSSize {
@@ -236,7 +261,7 @@ class AccessorySectionHeader: NSView {
         super.init(frame: NSRect(x: 0, y: 0, width: 360, height: 32))
 
         titleLabel.stringValue = title
-        titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
         titleLabel.textColor = isItemHidden ? .tertiaryLabelColor : .labelColor
         titleLabel.alphaValue = isItemHidden ? 0.5 : 1.0
         titleLabel.isBezeled = false

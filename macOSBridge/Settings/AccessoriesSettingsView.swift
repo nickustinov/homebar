@@ -153,7 +153,8 @@ class AccessoriesSettingsView: NSView {
                     isItemHidden: isSceneHidden,
                     isSectionHidden: isHidden,
                     showDragHandle: false,
-                    showEyeButton: true
+                    showEyeButton: true,
+                    itemId: nil
                 )
                 let row = AccessoryRowView(config: config)
                 row.onStarToggled = { [weak self] in
@@ -199,7 +200,8 @@ class AccessoriesSettingsView: NSView {
                     isItemHidden: isServiceHidden,
                     isSectionHidden: isRoomHidden,
                     showDragHandle: false,
-                    showEyeButton: true
+                    showEyeButton: true,
+                    itemId: nil
                 )
                 let row = AccessoryRowView(config: config)
                 row.onStarToggled = { [weak self] in
@@ -235,7 +237,8 @@ class AccessoriesSettingsView: NSView {
                     isItemHidden: isServiceHidden,
                     isSectionHidden: false,
                     showDragHandle: false,
-                    showEyeButton: true
+                    showEyeButton: true,
+                    itemId: nil
                 )
                 let row = AccessoryRowView(config: config)
                 row.onStarToggled = { [weak self] in
@@ -335,7 +338,8 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             isItemHidden: false,
             isSectionHidden: false,
             showDragHandle: true,
-            showEyeButton: false
+            showEyeButton: false,
+            itemId: item.id
         )
         let rowView = AccessoryRowView(config: config)
         rowView.onStarToggled = { [weak self] in

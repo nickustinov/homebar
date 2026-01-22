@@ -21,6 +21,21 @@ class SidebarRowView: NSTableRowView {
         NSColor.systemBlue.setFill()
         path.fill()
     }
+
+    override var isSelected: Bool {
+        didSet {
+            updateCellColors()
+        }
+    }
+
+    private func updateCellColors() {
+        for subview in subviews {
+            if let cell = subview as? NSTableCellView {
+                cell.imageView?.contentTintColor = isSelected ? .white : .secondaryLabelColor
+                cell.textField?.textColor = isSelected ? .white : .labelColor
+            }
+        }
+    }
 }
 
 class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
@@ -231,13 +246,10 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         }
 
         cell?.imageView?.image = NSImage(systemSymbolName: section.icon, accessibilityDescription: section.title)
+        cell?.imageView?.contentTintColor = .secondaryLabelColor
         cell?.textField?.stringValue = section.title
         cell?.textField?.font = .systemFont(ofSize: 13)
-
-        // Update colors based on selection
-        let isSelected = tableView.selectedRow == row
-        cell?.imageView?.contentTintColor = isSelected ? .white : .secondaryLabelColor
-        cell?.textField?.textColor = isSelected ? .white : .labelColor
+        cell?.textField?.textColor = .labelColor
 
         return cell
     }
@@ -245,11 +257,6 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     func tableViewSelectionDidChange(_ notification: Notification) {
         let row = sidebarTableView.selectedRow
         guard row >= 0, row < Section.allCases.count else { return }
-
-        // Reload all rows to update selection colors
-        sidebarTableView.reloadData(forRowIndexes: IndexSet(integersIn: 0..<Section.allCases.count), columnIndexes: IndexSet(integer: 0))
-        sidebarTableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
-
         showSection(Section.allCases[row])
     }
 

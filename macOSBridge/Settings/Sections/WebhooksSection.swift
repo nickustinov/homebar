@@ -206,7 +206,11 @@ class WebhooksSection: SettingsCard {
         statusRow.spacing = 6
         statusRow.alignment = .centerY
 
+        let labelWidth: CGFloat = 60
+
         let statusTitle = createLabel("Status:", style: .body)
+        statusTitle.translatesAutoresizingMaskIntoConstraints = false
+        statusTitle.widthAnchor.constraint(equalToConstant: labelWidth).isActive = true
         statusLabel = createLabel("Stopped", style: .body)
         statusRow.addArrangedSubview(statusTitle)
         statusRow.addArrangedSubview(statusLabel)
@@ -219,6 +223,8 @@ class WebhooksSection: SettingsCard {
         addressRow.alignment = .centerY
 
         let addressTitle = createLabel("Address:", style: .body)
+        addressTitle.translatesAutoresizingMaskIntoConstraints = false
+        addressTitle.widthAnchor.constraint(equalToConstant: labelWidth).isActive = true
         addressLabel = NSTextField(labelWithString: "—")
         addressLabel.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
         addressLabel.textColor = .secondaryLabelColor
@@ -241,6 +247,8 @@ class WebhooksSection: SettingsCard {
         portRow.alignment = .centerY
 
         let portTitle = createLabel("Port:", style: .body)
+        portTitle.translatesAutoresizingMaskIntoConstraints = false
+        portTitle.widthAnchor.constraint(equalToConstant: labelWidth).isActive = true
         portField = NSTextField()
         portField.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
         portField.placeholderString = "\(WebhookServer.defaultPort)"

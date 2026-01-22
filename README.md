@@ -35,6 +35,50 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 | Security systems | Arm home/away/night, disarm |
 | Temperature & Humidity sensors | Summary display per room |
 
+## Itsyhome Pro
+
+### Deeplinks
+
+Control your HomeKit devices from external apps using URL schemes. Perfect for Shortcuts, Alfred, Raycast, Stream Deck, and other automation tools.
+
+**URL format:**
+```
+itsyhome://<action>/<target>
+```
+
+**Actions:**
+
+| Action | URL format | Example |
+|--------|-----------|---------|
+| Toggle | `itsyhome://toggle/<Room>/<Device>` | `itsyhome://toggle/Office/Spotlights` |
+| Turn on | `itsyhome://on/<Room>/<Device>` | `itsyhome://on/Kitchen/Light` |
+| Turn off | `itsyhome://off/<Room>/<Device>` | `itsyhome://off/Bedroom/Lamp` |
+| Brightness | `itsyhome://brightness/<0-100>/<Room>/<Device>` | `itsyhome://brightness/50/Office/Lamp` |
+| Position | `itsyhome://position/<0-100>/<Room>/<Device>` | `itsyhome://position/75/Living%20Room/Blinds` |
+| Temperature | `itsyhome://temp/<degrees>/<Room>/<Device>` | `itsyhome://temp/22/Hallway/Thermostat` |
+| Color | `itsyhome://color/<hue>/<saturation>/<Room>/<Device>` | `itsyhome://color/120/100/Bedroom/Light` |
+| Scene | `itsyhome://scene/<Scene%20Name>` | `itsyhome://scene/Goodnight` |
+| Lock | `itsyhome://lock/<Room>/<Device>` | `itsyhome://lock/Front%20Door` |
+| Unlock | `itsyhome://unlock/<Room>/<Device>` | `itsyhome://unlock/Front%20Door` |
+| Open | `itsyhome://open/<Room>/<Device>` | `itsyhome://open/Garage/Door` |
+| Close | `itsyhome://close/<Room>/<Device>` | `itsyhome://close/Bedroom/Blinds` |
+
+**Target formats:**
+
+- `Room/Device` - Device in specific room (e.g., `Office/Spotlights`)
+- `Device` - Device by name (e.g., `Kitchen Light`)
+- `light.room` - All lights in room (e.g., `light.bedroom`)
+- `all lights` - All lights in home
+
+**Testing from terminal:**
+```bash
+open "itsyhome://toggle/Office/Spotlights"
+open "itsyhome://scene/Goodnight"
+open "itsyhome://brightness/50/Bedroom/Lamp"
+```
+
+**Note:** Spaces in room or device names must be URL-encoded as `%20`.
+
 ## Requirements
 
 - macOS 14.0 or later

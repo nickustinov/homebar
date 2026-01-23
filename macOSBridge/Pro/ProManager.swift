@@ -36,10 +36,6 @@ final class ProManager: ObservableObject {
 
     // MARK: - Products
 
-    var yearlyProduct: Product? {
-        products.first { $0.id == ProProducts.yearlySubscription }
-    }
-
     var lifetimeProduct: Product? {
         products.first { $0.id == ProProducts.lifetime }
     }

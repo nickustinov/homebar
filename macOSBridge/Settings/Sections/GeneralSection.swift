@@ -15,6 +15,7 @@ class GeneralSection: SettingsCard {
     private let syncSwitch = NSSwitch()
     private var syncStatusLabel: NSTextField!
     private var syncProBadge: NSView!
+    private let syncNowButton = NSButton()
 
     // Pro section
     private var cancellables = Set<AnyCancellable>()
@@ -24,8 +25,7 @@ class GeneralSection: SettingsCard {
     private var proTitleLabel: NSTextField!
     private var proSubtitleLabel: NSTextField!
     private var buttonStack: NSStackView!
-    private let yearlyButton = NSButton()
-    private let lifetimeButton = NSButton()
+    private let buyButton = NSButton()
     private let restoreButton = NSButton()
 
     override init(frame frameRect: NSRect) {
@@ -125,13 +125,24 @@ class GeneralSection: SettingsCard {
         syncStatusLabel.maximumNumberOfLines = 2
         labelStack.addArrangedSubview(syncStatusLabel)
 
+        // Sync now button
+        syncNowButton.title = "Sync now"
+        syncNowButton.bezelStyle = .inline
+        syncNowButton.controlSize = .small
+        syncNowButton.isBordered = false
+        syncNowButton.contentTintColor = .systemBlue
+        syncNowButton.target = self
+        syncNowButton.action = #selector(syncNowTapped)
+        syncNowButton.isHidden = true
+        labelStack.addArrangedSubview(syncNowButton)
+
         syncSwitch.translatesAutoresizingMaskIntoConstraints = false
 
         container.addSubview(labelStack)
         container.addSubview(syncSwitch)
 
         NSLayoutConstraint.activate([
-            container.heightAnchor.constraint(equalToConstant: 56),
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 56),
             labelStack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             labelStack.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             labelStack.trailingAnchor.constraint(lessThanOrEqualTo: syncSwitch.leadingAnchor, constant: -16),
@@ -215,35 +226,24 @@ class GeneralSection: SettingsCard {
         buttonStack.spacing = 8
         buttonStack.alignment = .leading
 
+        buyButton.title = "Unlock"
+        buyButton.bezelStyle = .rounded
+        buyButton.controlSize = .large
+        buyButton.bezelColor = .systemBlue
+        buyButton.isEnabled = false
+        buyButton.target = self
+        buyButton.action = #selector(buyTapped)
+
+        let noRecurringLabel = NSTextField(labelWithString: "No recurring charges.")
+        noRecurringLabel.font = .boldSystemFont(ofSize: 11)
+        noRecurringLabel.textColor = .secondaryLabelColor
+
         let purchaseRow = NSStackView()
         purchaseRow.orientation = .horizontal
-        purchaseRow.spacing = 8
-
-        yearlyButton.title = "Yearly"
-        yearlyButton.bezelStyle = .rounded
-        yearlyButton.controlSize = .large
-        yearlyButton.bezelColor = .systemBlue
-
-        yearlyButton.isEnabled = false
-        yearlyButton.target = self
-        yearlyButton.action = #selector(yearlyTapped)
-
-        lifetimeButton.title = "Lifetime"
-        lifetimeButton.bezelStyle = .rounded
-        lifetimeButton.controlSize = .large
-        lifetimeButton.bezelColor = .systemBlue
-
-        lifetimeButton.isEnabled = false
-        lifetimeButton.target = self
-        lifetimeButton.action = #selector(lifetimeTapped)
-
-        let orLabel = NSTextField(labelWithString: "or")
-        orLabel.font = .systemFont(ofSize: 12)
-        orLabel.textColor = .secondaryLabelColor
-
-        purchaseRow.addArrangedSubview(yearlyButton)
-        purchaseRow.addArrangedSubview(orLabel)
-        purchaseRow.addArrangedSubview(lifetimeButton)
+        purchaseRow.spacing = 10
+        purchaseRow.alignment = .centerY
+        purchaseRow.addArrangedSubview(buyButton)
+        purchaseRow.addArrangedSubview(noRecurringLabel)
 
         restoreButton.title = "Restore purchases"
         restoreButton.bezelStyle = .inline
@@ -333,12 +333,14 @@ class GeneralSection: SettingsCard {
 
     private func updateSyncUI() {
         let isPro = ProStatusCache.shared.isPro
+        let syncEnabled = CloudSyncManager.shared.isSyncEnabled
         syncSwitch.isEnabled = isPro
         syncProBadge.isHidden = isPro
+        syncNowButton.isHidden = !(isPro && syncEnabled)
 
         if !isPro {
-            syncStatusLabel.stringValue = "Requires Pro to sync across devices."
-        } else if CloudSyncManager.shared.isSyncEnabled {
+            syncStatusLabel.stringValue = "Sync favourites, hidden items, groups, and shortcuts."
+        } else if syncEnabled {
             if let lastSync = CloudSyncManager.shared.lastSyncTimestamp {
                 let formatter = RelativeDateTimeFormatter()
                 formatter.unitsStyle = .abbreviated
@@ -367,13 +369,9 @@ class GeneralSection: SettingsCard {
             .foregroundColor: NSColor.white,
             .font: NSFont.systemFont(ofSize: 14, weight: .medium)
         ]
-        if let yearly = ProManager.shared.yearlyProduct {
-            yearlyButton.attributedTitle = NSAttributedString(string: "\(yearly.displayPrice)/year", attributes: attrs)
-            yearlyButton.isEnabled = true
-        }
-        if let lifetime = ProManager.shared.lifetimeProduct {
-            lifetimeButton.attributedTitle = NSAttributedString(string: "\(lifetime.displayPrice) lifetime", attributes: attrs)
-            lifetimeButton.isEnabled = true
+        if let product = ProManager.shared.lifetimeProduct {
+            buyButton.attributedTitle = NSAttributedString(string: "Unlock for \(product.displayPrice)", attributes: attrs)
+            buyButton.isEnabled = true
         }
     }
 
@@ -407,17 +405,15 @@ class GeneralSection: SettingsCard {
 
     @objc private func syncSwitchChanged(_ sender: NSSwitch) {
         CloudSyncManager.shared.isSyncEnabled = sender.state == .on
+        updateSyncUI()
     }
 
-    @objc private func yearlyTapped() {
-        guard let product = ProManager.shared.yearlyProduct else { return }
-        Task {
-            do { _ = try await ProManager.shared.purchase(product) }
-            catch { print("Purchase error: \(error)") }
-        }
+    @objc private func syncNowTapped() {
+        CloudSyncManager.shared.syncNow()
+        updateSyncUI()
     }
 
-    @objc private func lifetimeTapped() {
+    @objc private func buyTapped() {
         guard let product = ProManager.shared.lifetimeProduct else { return }
         Task {
             do { _ = try await ProManager.shared.purchase(product) }

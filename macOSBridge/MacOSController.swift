@@ -42,6 +42,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         setupStatusItem()
         setupMenu()
         setupNotifications()
+        Task { @MainActor in _ = ProManager.shared }
     }
 
     private func setupNotifications() {

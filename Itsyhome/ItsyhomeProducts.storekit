@@ -5,7 +5,7 @@
   ],
   "products" : [
     {
-      "displayPrice" : "29.99",
+      "displayPrice" : "9.99",
       "familyShareable" : false,
       "internalID" : "lifetime",
       "localizations" : [
@@ -76,43 +76,7 @@
     ]
   },
   "subscriptionGroups" : [
-    {
-      "id" : "pro_subscription_group",
-      "localizations" : [
 
-      ],
-      "name" : "Pro",
-      "subscriptions" : [
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "9.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "yearly",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Access all Pro features",
-              "displayName" : "Yearly Pro",
-              "locale" : "en_US"
-            }
-          ],
-          "productID" : "com.nickustinov.itsyhome.pro.yearly",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Yearly Pro",
-          "subscriptionGroupID" : "pro_subscription_group",
-          "type" : "RecurringSubscription",
-          "winbackOffers" : [
-
-          ]
-        }
-      ]
-    }
   ],
   "version" : {
     "major" : 4,

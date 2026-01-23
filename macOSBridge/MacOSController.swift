@@ -30,6 +30,8 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private var menuBuilder: MenuBuilder!
     private var actionEngine: ActionEngine!
     private var currentMenuData: MenuData?
+    private var menuIsOpen = false
+    private var needsRebuild = false
 
     @objc public weak var iOSBridge: Mac2iOS?
 
@@ -75,6 +77,10 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     @objc private func preferencesDidChange() {
+        if menuIsOpen {
+            needsRebuild = true
+            return
+        }
         if let data = currentMenuData {
             rebuildMenu(with: data)
         }
@@ -407,7 +413,21 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
     public func menuWillOpen(_ menu: NSMenu) {
         if menu == mainMenu {
+            menuIsOpen = true
             refreshCharacteristics()
+        }
+    }
+
+    public func menuDidClose(_ menu: NSMenu) {
+        if menu == mainMenu {
+            menuIsOpen = false
+            if needsRebuild {
+                needsRebuild = false
+                if let data = currentMenuData {
+                    rebuildMenu(with: data)
+                }
+                HotkeyManager.shared.registerShortcuts()
+            }
         }
     }
 

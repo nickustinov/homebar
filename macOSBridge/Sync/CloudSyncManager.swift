@@ -19,8 +19,6 @@ final class CloudSyncManager {
     private var isListening = false
     private var isSyncing = false
     private var isApplyingCloudChanges = false
-    private var periodicSyncTimer: Timer?
-    private let syncInterval: TimeInterval = 3600 // 1 hour
 
     // Bidirectional lookups built from MenuData
     private var serviceIdToStable: [String: String] = [:]
@@ -143,20 +141,11 @@ final class CloudSyncManager {
         cloudStore.synchronize()
         pullFromCloudStore()
         isSyncing = false
-
-        // Start periodic sync
-        periodicSyncTimer?.invalidate()
-        periodicSyncTimer = Timer.scheduledTimer(withTimeInterval: syncInterval, repeats: true) { [weak self] _ in
-            self?.periodicSync()
-        }
-        print("[CloudSync] periodic sync scheduled every \(Int(syncInterval / 60)) minutes")
     }
 
     func stopListening() {
         guard isListening else { return }
         isListening = false
-        periodicSyncTimer?.invalidate()
-        periodicSyncTimer = nil
 
         NotificationCenter.default.removeObserver(
             self,
@@ -206,17 +195,6 @@ final class CloudSyncManager {
 
         print("[CloudSync] handleLocalChange — uploading")
         uploadAllSyncableKeys()
-    }
-
-    private func periodicSync() {
-        guard !isSyncing else { return }
-        guard ProStatusCache.shared.isPro && isSyncEnabled else { return }
-        print("[CloudSync] periodic sync triggered")
-        isSyncing = true
-        cloudStore.synchronize()
-        pullFromCloudStore()
-        uploadAllSyncableKeys()
-        isSyncing = false
     }
 
     // MARK: - Translation helpers

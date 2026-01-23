@@ -15,7 +15,7 @@ class SceneMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private var currentValues: [UUID: Double] = [:]
     private var isActive: Bool = false
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let toggleSwitch: ToggleSwitch
@@ -42,7 +42,7 @@ class SceneMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         let height = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -73,6 +73,37 @@ class SceneMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         super.init(title: sceneData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isActive.toggle()
+            self.toggleSwitch.setOn(self.isActive, animated: true)
+            if self.isActive {
+                self.executeScene()
+                for action in self.sceneData.actions {
+                    if let charId = UUID(uuidString: action.characteristicId) {
+                        self.currentValues[charId] = action.targetValue
+                    }
+                }
+            } else {
+                self.reverseScene()
+                for action in self.sceneData.actions {
+                    if let charId = UUID(uuidString: action.characteristicId),
+                       Self.reversibleTypes.contains(action.characteristicType) {
+                        let oppositeValue = self.calculateOppositeValue(for: action)
+                        if let doubleValue = oppositeValue as? Double {
+                            self.currentValues[charId] = doubleValue
+                        } else if let intValue = oppositeValue as? Int {
+                            self.currentValues[charId] = Double(intValue)
+                        } else if let boolValue = oppositeValue as? Bool {
+                            self.currentValues[charId] = boolValue ? 1.0 : 0.0
+                        }
+                    }
+                }
+            }
+            self.updateUI()
+        }
 
         // Set up action
         toggleSwitch.target = self

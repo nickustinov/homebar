@@ -26,7 +26,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     private var coolingThreshold: Double = 24
     private var heatingThreshold: Double = 20
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let tempLabel: NSTextField
@@ -68,7 +68,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
 
         // Create wrapper view (full width for menu sizing) - start collapsed
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
 
         // Row 1: Icon, name, current temp, power toggle (centered vertically)
         let iconY = (collapsedHeight - DS.ControlSize.iconMedium) / 2
@@ -189,6 +189,18 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isActive.toggle()
+            self.powerToggle.setOn(self.isActive, animated: true)
+            if let id = self.activeId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isActive ? 1 : 0)
+                self.notifyLocalChange(characteristicId: id, value: self.isActive ? 1 : 0)
+            }
+            self.updateUI()
+        }
 
         // Set up actions
         powerToggle.target = self

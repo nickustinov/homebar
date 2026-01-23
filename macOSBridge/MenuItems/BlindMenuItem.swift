@@ -17,7 +17,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private var position: Int = 0
     private var ignoreUpdatesUntil: Date?
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let positionSlider: ModernSlider
@@ -40,7 +40,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         let height: CGFloat = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -77,6 +77,21 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            let newPosition = self.position > 50 ? 0 : 100
+            self.position = newPosition
+            self.positionSlider.doubleValue = Double(newPosition)
+            self.updateIcon()
+            if let id = self.targetPositionCharacteristicId {
+                self.bridge?.writeCharacteristic(identifier: id, value: newPosition)
+                if let currentId = self.currentPositionCharacteristicId {
+                    self.notifyLocalChange(characteristicId: currentId, value: newPosition)
+                }
+            }
+        }
 
         // Set up action
         positionSlider.target = self

@@ -51,7 +51,7 @@ class SensorSummaryMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
         let itemHeight: CGFloat = 44
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: itemHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: itemHeight))
 
         let iconSize: CGFloat = 24
         let sectionWidth: CGFloat = 115

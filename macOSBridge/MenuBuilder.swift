@@ -116,8 +116,8 @@ class MenuBuilder {
             let gridItem = ScenesGridMenuItem(scenes: visibleScenes, bridge: bridge)
             menu.addItem(gridItem)
         } else {
-            let scenesItem = NSMenuItem(title: "Scenes", action: nil, keyEquivalent: "")
-            scenesItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+            let icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+            let scenesItem = createSubmenuItem(title: "Scenes", icon: icon)
 
             let submenu = StayOpenMenu()
             for scene in visibleScenes {
@@ -150,8 +150,8 @@ class MenuBuilder {
                 continue
             }
 
-            let roomItem = NSMenuItem(title: room.name, action: nil, keyEquivalent: "")
-            roomItem.image = IconMapping.iconForRoom(room.name)
+            let icon = IconMapping.iconForRoom(room.name)
+            let roomItem = createSubmenuItem(title: room.name, icon: icon)
 
             let submenu = StayOpenMenu()
             addServicesGroupedByType(to: submenu, accessories: roomAccessories)
@@ -160,8 +160,8 @@ class MenuBuilder {
         }
 
         if !noRoomAccessories.isEmpty {
-            let otherItem = NSMenuItem(title: "Other", action: nil, keyEquivalent: "")
-            otherItem.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
+            let icon = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
+            let otherItem = createSubmenuItem(title: "Other", icon: icon)
 
             let submenu = StayOpenMenu()
             addServicesGroupedByType(to: submenu, accessories: noRoomAccessories)
@@ -241,6 +241,80 @@ class MenuBuilder {
             )
             menu.addItem(sensorItem)
         }
+    }
+
+    // MARK: - Submenu items (rooms, etc.)
+
+    func createSubmenuItem(title: String, icon: NSImage?) -> NSMenuItem {
+        let height = DS.ControlSize.menuItemHeight
+        let width = DS.ControlSize.menuItemWidth
+
+        let containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: width, height: height))
+
+        // Icon
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
+        let iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
+        iconView.image = icon
+        iconView.contentTintColor = DS.Colors.foreground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
+        containerView.addSubview(iconView)
+
+        // Chevron (right-aligned)
+        let chevronSize: CGFloat = 10
+        let chevronX = width - DS.Spacing.md - chevronSize
+        let chevronY = (height - chevronSize) / 2
+        let chevronView = NSImageView(frame: NSRect(x: chevronX, y: chevronY, width: chevronSize, height: chevronSize))
+        chevronView.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
+        chevronView.contentTintColor = DS.Colors.mutedForeground
+        chevronView.imageScaling = .scaleProportionallyUpOrDown
+        containerView.addSubview(chevronView)
+
+        // Name label
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (height - 17) / 2
+        let labelWidth = chevronX - labelX - DS.Spacing.xs
+        let nameLabel = NSTextField(labelWithString: title)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
+        containerView.addSubview(nameLabel)
+
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.view = containerView
+        return item
+    }
+
+    func createActionItem(title: String, icon: NSImage?, action: @escaping () -> Void) -> NSMenuItem {
+        let height = DS.ControlSize.menuItemHeight
+        let width = DS.ControlSize.menuItemWidth
+
+        let containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: width, height: height))
+
+        // Icon
+        let iconY = (height - DS.ControlSize.iconMedium) / 2
+        let iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
+        iconView.image = icon
+        iconView.contentTintColor = DS.Colors.foreground
+        iconView.imageScaling = .scaleProportionallyUpOrDown
+        containerView.addSubview(iconView)
+
+        // Name label
+        let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
+        let labelY = (height - 17) / 2
+        let labelWidth = width - labelX - DS.Spacing.md
+        let nameLabel = NSTextField(labelWithString: title)
+        nameLabel.frame = NSRect(x: labelX, y: labelY, width: labelWidth, height: 17)
+        nameLabel.font = DS.Typography.label
+        nameLabel.textColor = DS.Colors.foreground
+        nameLabel.lineBreakMode = .byTruncatingTail
+        containerView.addSubview(nameLabel)
+
+        containerView.onAction = action
+
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.view = containerView
+        return item
     }
 
     // MARK: - Service menu items

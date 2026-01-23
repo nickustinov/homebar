@@ -17,7 +17,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
     private var isActive: Bool = false
     private var speed: Double = 1
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let speedSlider: ModernSlider
@@ -50,7 +50,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         let height: CGFloat = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -97,6 +97,18 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isActive.toggle()
+            self.toggleSwitch.setOn(self.isActive, animated: true)
+            if let id = self.activeId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isActive ? 1 : 0)
+                self.notifyLocalChange(characteristicId: id, value: self.isActive ? 1 : 0)
+            }
+            self.updateUI()
+        }
 
         // Set up actions
         speedSlider.target = self

@@ -305,43 +305,40 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
         }
 
-        let settingsItem = NSMenuItem(
-            title: "Settings...",
-            action: #selector(openSettings(_:)),
-            keyEquivalent: ""
-        )
-        settingsItem.target = self
-        settingsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
+        let settingsIcon = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
+        let settingsItem = menuBuilder.createActionItem(title: "Settings...", icon: settingsIcon) { [weak self] in
+            self?.openSettings(nil)
+        }
         mainMenu.addItem(settingsItem)
 
         mainMenu.addItem(NSMenuItem.separator())
 
-        let refreshItem = NSMenuItem(
-            title: "Refresh",
-            action: #selector(refreshHomeKit(_:)),
-            keyEquivalent: ""
-        )
-        refreshItem.target = self
-        refreshItem.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
+        let refreshIcon = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
+        let refreshItem = menuBuilder.createActionItem(title: "Refresh", icon: refreshIcon) { [weak self] in
+            self?.refreshHomeKit(nil)
+        }
         mainMenu.addItem(refreshItem)
 
-        let quitItem = NSMenuItem(title: "Quit", action: #selector(quit(_:)), keyEquivalent: "")
-        quitItem.target = self
+        let quitItem = menuBuilder.createActionItem(title: "Quit", icon: nil) { [weak self] in
+            self?.quit(nil)
+        }
         mainMenu.addItem(quitItem)
     }
 
     private func addHomeSelector(homes: [HomeData], selectedId: String?) {
-        let homeItem = NSMenuItem(title: "Home", action: nil, keyEquivalent: "")
-        homeItem.image = NSImage(systemSymbolName: "house", accessibilityDescription: nil)
+        let homeIcon = NSImage(systemSymbolName: "house", accessibilityDescription: nil)
+        let homeItem = menuBuilder.createSubmenuItem(title: "Home", icon: homeIcon)
 
         let submenu = StayOpenMenu()
         for home in homes {
-            let item = NSMenuItem(title: home.name, action: #selector(selectHome(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = home.uniqueIdentifier
-            item.image = NSImage(systemSymbolName: home.isPrimary ? "house.fill" : "house", accessibilityDescription: nil)
-            if home.uniqueIdentifier == selectedId {
-                item.state = .on
+            let isSelected = home.uniqueIdentifier == selectedId
+            let iconName = isSelected ? "checkmark" : (home.isPrimary ? "house.fill" : "house")
+            let icon = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
+            let item = menuBuilder.createActionItem(title: home.name, icon: icon) { [weak self] in
+                if let uuid = UUID(uuidString: home.uniqueIdentifier) {
+                    SettingsWindowController.shared.close()
+                    self?.iOSBridge?.selectedHomeIdentifier = uuid
+                }
             }
             submenu.addItem(item)
         }

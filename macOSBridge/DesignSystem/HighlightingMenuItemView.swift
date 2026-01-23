@@ -1,0 +1,100 @@
+//
+//  HighlightingMenuItemView.swift
+//  macOSBridge
+//
+//  Container view for custom menu items that draws the standard
+//  menu selection highlight when the mouse hovers over the item.
+//
+
+import AppKit
+
+class HighlightingMenuItemView: NSView {
+
+    var onAction: (() -> Void)?
+    var closesMenuOnAction: Bool = true
+
+    private var isMouseInside = false
+    private var trackingArea: NSTrackingArea?
+    private var originalTextColors: [ObjectIdentifier: NSColor] = [:]
+    private var originalTintColors: [ObjectIdentifier: NSColor] = [:]
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let existing = trackingArea {
+            removeTrackingArea(existing)
+        }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(area)
+        trackingArea = area
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        isMouseInside = true
+        updateTextColors(highlighted: true)
+        needsDisplay = true
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        isMouseInside = false
+        updateTextColors(highlighted: false)
+        needsDisplay = true
+    }
+
+    private func updateTextColors(highlighted: Bool) {
+        for subview in subviews {
+            if let textField = subview as? NSTextField {
+                let key = ObjectIdentifier(textField)
+                if highlighted {
+                    if originalTextColors[key] == nil {
+                        originalTextColors[key] = textField.textColor
+                    }
+                    textField.textColor = .selectedMenuItemTextColor
+                } else if let original = originalTextColors[key] {
+                    textField.textColor = original
+                }
+            } else if let imageView = subview as? NSImageView {
+                let key = ObjectIdentifier(imageView)
+                if highlighted {
+                    if originalTintColors[key] == nil {
+                        originalTintColors[key] = imageView.contentTintColor
+                    }
+                    imageView.contentTintColor = .selectedMenuItemTextColor
+                } else if let original = originalTintColors[key] {
+                    imageView.contentTintColor = original
+                }
+            }
+        }
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard let action = onAction else { return }
+        if closesMenuOnAction {
+            isMouseInside = false
+            updateTextColors(highlighted: false)
+            needsDisplay = true
+            enclosingMenuItem?.menu?.cancelTracking()
+            action()
+        } else {
+            // Restore original colors, perform action, then re-save post-action colors
+            updateTextColors(highlighted: false)
+            action()
+            originalTextColors.removeAll()
+            originalTintColors.removeAll()
+            updateTextColors(highlighted: true)
+            needsDisplay = true
+        }
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        if isMouseInside {
+            let rect = bounds.insetBy(dx: 4, dy: 0)
+            NSColor.selectedContentBackgroundColor.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
+        }
+    }
+}

@@ -58,6 +58,7 @@
 		54727DEB4A151CC024B9D31E /* ScenesGridMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33028C597EEA3DAE92520C3 /* ScenesGridMenuItem.swift */; };
 		550336C45D91454C7E897346 /* HumidifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */; };
 		5E2CF28F91004D72D8819802 /* AirPurifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */; };
+		610C502AF5144D05B01A8278 /* HighlightingMenuItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */; };
 		63AA00C163B17C7DF80BE19C /* DeviceGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1078ED585A5ECE7DF0A569F6 /* DeviceGroup.swift */; };
 		646767AF7A71690332C474E0 /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7082F795BA2C9AA55C64A0 /* ACMenuItem.swift */; };
 		64A2F6EC52618A2CA486EA00 /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */; };
@@ -76,6 +77,7 @@
 		7BB119B671B3D114D30396B0 /* DeviceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */; };
 		806CCEC2325035CD0F9D0690 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374C26148C6FEAAFD207413 /* LockMenuItem.swift */; };
 		80BA4CBB1ADDA67E5A9ABB5A /* FanMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AE776817A51695FBA936B1 /* FanMenuItem.swift */; };
+		823ABDFECC4D6E3E63AC3E02 /* HighlightingMenuItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */; };
 		851260AF14FDF357AD88C04F /* BlindMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */; };
 		874A311DF0D311BD252A5F4C /* SceneMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */; };
 		8EC542FB9144F2B0695D7D4A /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */; };
@@ -191,6 +193,7 @@
 		A3A3EB6D0DE7E9C0DE57ABAF /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneMenuItem.swift; sourceTree = "<group>"; };
 		A554C4D26C15417928E429D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightingMenuItemView.swift; sourceTree = "<group>"; };
 		AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageDoorMenuItem.swift; sourceTree = "<group>"; };
 		AFFF50FE92C7137DE82A4A69 /* macOSBridgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSBridgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10754E8AB01F87A12A293A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -419,6 +422,7 @@
 			isa = PBXGroup;
 			children = (
 				181D73D7B6680B4F8CD37D4E /* DesignSystem.swift */,
+				AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */,
 				EA517D9CAF4A470166D8C402 /* ModernSlider.swift */,
 				9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */,
 			);
@@ -643,6 +647,7 @@
 				ED027DAB764D6BD656E4F586 /* GroupEditorPanel.swift in Sources */,
 				5400908F7EA3B99BACF94081 /* GroupMenuItem.swift in Sources */,
 				EF5B75FFA100C7A2957EBEBC /* GroupsSettingsView.swift in Sources */,
+				823ABDFECC4D6E3E63AC3E02 /* HighlightingMenuItemView.swift in Sources */,
 				B6E0BA859343F2AC750C12D5 /* HotkeyManager.swift in Sources */,
 				2FA906D09DF2D10CD127C5EB /* HumidifierMenuItem.swift in Sources */,
 				243C3F0D744EDDE9D9608B3C /* IconMapping.swift in Sources */,
@@ -701,6 +706,7 @@
 				73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */,
 				530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */,
 				38F444AACFBC37487F3A5204 /* GroupMenuItem.swift in Sources */,
+				610C502AF5144D05B01A8278 /* HighlightingMenuItemView.swift in Sources */,
 				550336C45D91454C7E897346 /* HumidifierMenuItem.swift in Sources */,
 				6C54534AB061917B6EB6D307 /* IconMapping.swift in Sources */,
 				160978BDC19974A59FB1A4BB /* LightMenuItem.swift in Sources */,

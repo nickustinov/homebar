@@ -20,7 +20,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private var currentState: Int = 1  // Default closed
     private var isObstructed: Bool = false
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let statusLabel: NSTextField
@@ -46,7 +46,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         let height = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -92,6 +92,20 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            // Toggle: if open (0) or opening (2), close; otherwise open
+            let isOpen = self.currentState == 0 || self.currentState == 2 || self.currentState == 4
+            let targetState = isOpen ? 1 : 0
+            if let id = self.targetDoorStateId {
+                self.bridge?.writeCharacteristic(identifier: id, value: targetState)
+                if let currentId = self.currentDoorStateId {
+                    self.notifyLocalChange(characteristicId: currentId, value: targetState == 1 ? 1 : 0)
+                }
+            }
+        }
 
         // Set up action
         toggleSwitch.target = self

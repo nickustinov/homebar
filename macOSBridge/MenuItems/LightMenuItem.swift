@@ -13,6 +13,8 @@ final class ClickableColorCircleView: NSView {
     override func mouseDown(with event: NSEvent) {
         onClick?()
     }
+
+    override func mouseUp(with event: NSEvent) {}
 }
 
 class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable, ReachabilityUpdatableMenuItem, LocalChangeNotifiable {
@@ -34,7 +36,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private var saturation: Double = 100
     private var colorTemp: Double = 300
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let colorCircle: ClickableColorCircleView
@@ -79,7 +81,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.hasColorTemp = colorTempCharacteristicId != nil
 
         let height: CGFloat = collapsedHeight
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -138,6 +140,18 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isOn.toggle()
+            self.toggleSwitch.setOn(self.isOn, animated: true)
+            if let id = self.powerCharacteristicId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isOn)
+                self.notifyLocalChange(characteristicId: id, value: self.isOn)
+            }
+            self.updateUI()
+        }
 
         brightnessSlider.target = self
         brightnessSlider.action = #selector(sliderChanged(_:))

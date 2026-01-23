@@ -16,7 +16,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
     private var targetStateCharacteristicId: UUID?
     private var isLocked: Bool = true
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let statusLabel: NSTextField
@@ -39,7 +39,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         let height = DS.ControlSize.menuItemHeight
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -85,6 +85,12 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.setLockState(locked: !self.isLocked)
+        }
 
         // Set up action
         toggleSwitch.target = self

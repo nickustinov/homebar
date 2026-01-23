@@ -49,7 +49,7 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         self.targetStateId = serviceData.securitySystemTargetStateId.flatMap { UUID(uuidString: $0) }
 
         // Create wrapper view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: rowHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: rowHeight))
 
         let topRowHeight = DS.ControlSize.menuItemHeight
 

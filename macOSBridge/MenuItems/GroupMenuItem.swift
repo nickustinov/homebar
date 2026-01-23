@@ -13,7 +13,7 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, LocalChangeNotifiable 
     private let menuData: MenuData
     weak var bridge: Mac2iOS?
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let statusLabel: NSTextField  // Shows "2/3" when partial
@@ -91,7 +91,7 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, LocalChangeNotifiable 
         }
 
         let height = DS.ControlSize.menuItemHeight
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: height))
 
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
@@ -128,6 +128,46 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, LocalChangeNotifiable 
         // Add appropriate control based on group type
         setupControl(height: height, labelX: labelX)
         updateUI()
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            if self.commonType == ServiceTypes.windowCovering {
+                // Blinds group: toggle between 0/100
+                let avgPosition = self.positionStates.values.reduce(0, +) / max(self.positionStates.count, 1)
+                let newPosition = avgPosition > 50 ? 0 : 100
+                self.positionSlider?.doubleValue = Double(newPosition)
+                let services = self.group.resolveServices(in: self.menuData)
+                for (currentId, _) in self.positionStates {
+                    self.positionStates[currentId] = newPosition
+                    self.notifyLocalChange(characteristicId: currentId, value: newPosition)
+                }
+                for service in services {
+                    if let idString = service.targetPositionId, let id = UUID(uuidString: idString) {
+                        self.bridge?.writeCharacteristic(identifier: id, value: newPosition)
+                    }
+                }
+                self.updateBlindsIcon(position: newPosition)
+            } else {
+                // Toggle all devices on/off
+                let anyOn = self.deviceStates.values.contains(true)
+                let newState = !anyOn
+                self.toggleSwitch?.setOn(newState, animated: true)
+                let services = self.group.resolveServices(in: self.menuData)
+                for service in services {
+                    if let idString = service.powerStateId, let id = UUID(uuidString: idString) {
+                        self.deviceStates[id] = newState
+                        self.bridge?.writeCharacteristic(identifier: id, value: newState)
+                        self.notifyLocalChange(characteristicId: id, value: newState)
+                    } else if let idString = service.activeId, let id = UUID(uuidString: idString) {
+                        self.deviceStates[id] = newState
+                        self.bridge?.writeCharacteristic(identifier: id, value: newState ? 1 : 0)
+                        self.notifyLocalChange(characteristicId: id, value: newState ? 1 : 0)
+                    }
+                }
+                self.updateUI()
+            }
+        }
     }
 
     required init(coder: NSCoder) {

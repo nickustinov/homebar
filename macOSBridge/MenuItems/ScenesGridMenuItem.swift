@@ -36,7 +36,7 @@ class ScenesGridMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         let rows = (scenes.count + buttonsPerRow - 1) / buttonsPerRow
         let totalHeight = CGFloat(rows) * buttonHeight + CGFloat(max(0, rows - 1)) * verticalSpacing + (padding * 2)
 
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: totalHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: totalHeight))
 
         // Create scene buttons
         for (index, scene) in scenes.enumerated() {

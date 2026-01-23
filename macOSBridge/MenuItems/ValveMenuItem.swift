@@ -19,7 +19,7 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     private var isActive: Bool = false
     private var isInUse: Bool = false
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let inUseIndicator: NSView
@@ -42,7 +42,7 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.valveType = serviceData.valveTypeValue ?? 0
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
         let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
@@ -84,6 +84,18 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isActive.toggle()
+            self.toggleSwitch.setOn(self.isActive, animated: true)
+            if let id = self.activeId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isActive ? 1 : 0)
+                self.notifyLocalChange(characteristicId: id, value: self.isActive ? 1 : 0)
+            }
+            self.updateUI()
+        }
 
         // Set up action
         toggleSwitch.target = self

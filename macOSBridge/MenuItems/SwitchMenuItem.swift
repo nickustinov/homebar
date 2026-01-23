@@ -15,7 +15,7 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
     private var powerCharacteristicId: UUID?
     private var isOn: Bool = false
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let toggleSwitch: ToggleSwitch
@@ -34,7 +34,7 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
 
         // Create the custom view
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: DS.ControlSize.menuItemHeight))
 
         // Icon
         let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
@@ -66,6 +66,18 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isOn.toggle()
+            self.toggleSwitch.setOn(self.isOn, animated: true)
+            if let id = self.powerCharacteristicId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isOn)
+                self.notifyLocalChange(characteristicId: id, value: self.isOn)
+            }
+            self.updateUI()
+        }
 
         // Set up action
         toggleSwitch.target = self

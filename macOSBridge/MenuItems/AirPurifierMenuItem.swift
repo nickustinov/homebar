@@ -22,7 +22,7 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
     private var targetState: Int = 0   // 0=manual, 1=auto
     private var speed: Double = 100
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let powerToggle: ToggleSwitch
@@ -64,7 +64,7 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
         self.speedMax = serviceData.rotationSpeedMax ?? 100
 
         // Create wrapper view - start collapsed
-        containerView = NSView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
+        containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
 
         // Row 1: Icon, name, power toggle
         let iconY = (collapsedHeight - DS.ControlSize.iconMedium) / 2
@@ -150,6 +150,18 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        containerView.closesMenuOnAction = false
+        containerView.onAction = { [weak self] in
+            guard let self else { return }
+            self.isActive.toggle()
+            self.powerToggle.setOn(self.isActive, animated: true)
+            if let id = self.activeId {
+                self.bridge?.writeCharacteristic(identifier: id, value: self.isActive ? 1 : 0)
+                self.notifyLocalChange(characteristicId: id, value: self.isActive ? 1 : 0)
+            }
+            self.updateUI()
+        }
 
         // Set up actions
         powerToggle.target = self

@@ -153,16 +153,23 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
         // Temperature controls: - | temp | +
         let tempControlsX = DS.ControlSize.menuItemWidth - DS.Spacing.md - 78
+        let isDark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let buttonBgAlpha: CGFloat = isDark ? 0.2 : 0.08
+        let buttonFont = NSFont.systemFont(ofSize: 12, weight: .bold)
 
         // Minus button (small rounded square)
         minusButton = NSButton(frame: NSRect(x: tempControlsX, y: 4, width: 20, height: 20))
         minusButton.isBordered = false
         minusButton.wantsLayer = true
-        minusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(0.15).cgColor
+        minusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(buttonBgAlpha).cgColor
         minusButton.layer?.cornerRadius = 4
-        minusButton.title = "−"
-        minusButton.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        minusButton.contentTintColor = .labelColor
+        if isDark {
+            minusButton.attributedTitle = NSAttributedString(string: "−", attributes: [.foregroundColor: NSColor.white, .font: buttonFont])
+        } else {
+            minusButton.title = "−"
+            minusButton.font = buttonFont
+            minusButton.contentTintColor = .secondaryLabelColor
+        }
         controlsRow.addSubview(minusButton)
 
         // Target temp label
@@ -177,11 +184,15 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         plusButton = NSButton(frame: NSRect(x: tempControlsX + 56, y: 4, width: 20, height: 20))
         plusButton.isBordered = false
         plusButton.wantsLayer = true
-        plusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(0.15).cgColor
+        plusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(buttonBgAlpha).cgColor
         plusButton.layer?.cornerRadius = 4
-        plusButton.title = "+"
-        plusButton.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        plusButton.contentTintColor = .labelColor
+        if isDark {
+            plusButton.attributedTitle = NSAttributedString(string: "+", attributes: [.foregroundColor: NSColor.white, .font: buttonFont])
+        } else {
+            plusButton.title = "+"
+            plusButton.font = buttonFont
+            plusButton.contentTintColor = .secondaryLabelColor
+        }
         controlsRow.addSubview(plusButton)
 
         containerView.addSubview(controlsRow)

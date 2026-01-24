@@ -280,10 +280,12 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
         #if targetEnvironment(macCatalyst)
         let activityType = "com.nickustinov.itsyhome.camera"
 
-        // Reuse existing camera session if available
+        // Reuse existing session if available
         let existingSession = UIApplication.shared.openSessions.first { session in
             session.configuration.name == "Camera Configuration"
         }
+
+        print("[CameraPanel] openCameraWindow called, existingSession=\(existingSession != nil)")
 
         let activity = NSUserActivity(activityType: activityType)
         activity.title = "Cameras"
@@ -293,9 +295,18 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             userActivity: activity,
             options: nil,
             errorHandler: { error in
-                logger.error("Failed to open camera window: \(error.localizedDescription)")
+                print("[CameraPanel] scene activation error: \(error.localizedDescription)")
             }
         )
+        #endif
+    }
+
+    func closeCameraWindow() {
+        #if targetEnvironment(macCatalyst)
+        guard let session = UIApplication.shared.openSessions.first(where: {
+            $0.configuration.name == "Camera Configuration"
+        }) else { return }
+        UIApplication.shared.requestSceneSessionDestruction(session, options: nil, errorHandler: nil)
         #endif
     }
 

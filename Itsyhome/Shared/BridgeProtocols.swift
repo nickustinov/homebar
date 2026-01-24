@@ -338,6 +338,7 @@ public protocol Mac2iOS: NSObjectProtocol {
     func writeCharacteristic(identifier: UUID, value: Any)
     func getCharacteristicValue(identifier: UUID) -> Any?
     func openCameraWindow()
+    func closeCameraWindow()
 }
 
 /// Protocol for iOS code to call macOS plugin
@@ -351,6 +352,8 @@ public protocol iOS2Mac: NSObjectProtocol {
     func setReachability(accessoryIdentifier: UUID, isReachable: Bool)
     func showError(message: String)
     func executeCommand(_ command: String) -> Bool
+    func configureCameraPanel()
+    func resizeCameraPanel(width: CGFloat, height: CGFloat)
 }
 
 // MARK: - Service type constants

@@ -268,4 +268,5 @@ private class MockMac2iOS: NSObject, Mac2iOS {
     }
 
     func openCameraWindow() {}
+    func closeCameraWindow() {}
 }

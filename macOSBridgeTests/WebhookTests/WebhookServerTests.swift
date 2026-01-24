@@ -426,4 +426,5 @@ private class MockWebhookBridge: NSObject, Mac2iOS {
     }
 
     func openCameraWindow() {}
+    func closeCameraWindow() {}
 }

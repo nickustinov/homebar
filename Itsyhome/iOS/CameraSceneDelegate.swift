@@ -2,7 +2,7 @@
 //  CameraSceneDelegate.swift
 //  Itsyhome
 //
-//  UIWindowSceneDelegate for the camera window
+//  UIWindowSceneDelegate for the camera panel
 //
 
 import UIKit
@@ -15,14 +15,19 @@ class CameraSceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         #if targetEnvironment(macCatalyst)
+        windowScene.sizeRestrictions?.minimumSize = CGSize(width: 200, height: 150)
+        windowScene.sizeRestrictions?.maximumSize = CGSize(width: 800, height: 800)
         windowScene.title = "Cameras"
-        windowScene.sizeRestrictions?.minimumSize = CGSize(width: 640, height: 480)
-        windowScene.sizeRestrictions?.maximumSize = CGSize(width: 1920, height: 1080)
+
+        if let titlebar = windowScene.titlebar {
+            titlebar.titleVisibility = .hidden
+            titlebar.toolbar = nil
+        }
         #endif
 
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = CameraViewController()
-        window.makeKeyAndVisible()
+        window.isHidden = false
         self.window = window
     }
 

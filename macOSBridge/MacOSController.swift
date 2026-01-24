@@ -26,12 +26,15 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     // MARK: - Properties
 
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+    private var cameraStatusItem: NSStatusItem?
     let mainMenu = StayOpenMenu()
     private var menuBuilder: MenuBuilder!
     private var actionEngine: ActionEngine!
     private var currentMenuData: MenuData?
     private var menuIsOpen = false
     private var needsRebuild = false
+    private var clickOutsideMonitor: Any?
+    private var cameraPanelWindow: NSWindow?
 
     @objc public weak var iOSBridge: Mac2iOS?
 
@@ -261,6 +264,195 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         }
     }
 
+    @objc public func configureCameraPanel() {
+        // No longer used — macOS side polls instead
+    }
+
+    private func setupCameraStatusItem(hasCameras: Bool) {
+        if hasCameras {
+            if cameraStatusItem == nil {
+                let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+                if let button = item.button {
+                    let pluginBundle = Bundle(for: MacOSController.self)
+                    if let icon = pluginBundle.image(forResource: "CameraMenuBarIcon") {
+                        icon.isTemplate = true
+                        button.image = icon
+                    } else {
+                        button.image = NSImage(systemSymbolName: "video.fill", accessibilityDescription: "Cameras")
+                        button.image?.isTemplate = true
+                    }
+                    button.action = #selector(cameraStatusItemClicked)
+                    button.target = self
+                }
+                cameraStatusItem = item
+            }
+        } else {
+            if let item = cameraStatusItem {
+                NSStatusBar.system.removeStatusItem(item)
+                cameraStatusItem = nil
+            }
+        }
+    }
+
+    @objc private func cameraStatusItemClicked() {
+        if let existing = cameraPanelWindow, existing.isVisible {
+            dismissCameraPanel()
+            return
+        }
+
+        if cameraPanelWindow != nil {
+            showCameraPanel()
+        } else {
+            iOSBridge?.openCameraWindow()
+            // Poll for the window to appear, then configure it
+            setupCameraPanelWindow()
+        }
+    }
+
+    private func showCameraPanel() {
+        guard let panel = cameraPanelWindow else { return }
+        positionCameraPanel(panel)
+        panel.orderFront(nil)
+        setupClickOutsideMonitor()
+    }
+
+    private var cameraPanelPollTimer: DispatchSourceTimer?
+    private var cameraWindowObserver: NSObjectProtocol?
+
+    private func setupCameraPanelWindow() {
+        // Register notification observer to catch window as early as possible
+        cameraWindowObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.didUpdateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  let window = notification.object as? NSWindow,
+                  window.title == "Cameras",
+                  self.cameraPanelWindow == nil else { return }
+            self.configureCameraPanelWindow(window)
+        }
+
+        // Also poll aggressively (every 5ms) as a fallback
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: .milliseconds(5))
+        timer.setEventHandler { [weak self] in
+            guard let self = self, self.cameraPanelWindow == nil else {
+                self?.stopCameraPanelPolling()
+                return
+            }
+            if let window = NSApp.windows.first(where: { $0.title == "Cameras" }) {
+                self.configureCameraPanelWindow(window)
+            }
+        }
+        timer.resume()
+        cameraPanelPollTimer = timer
+
+        // Safety timeout — stop polling after 3 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            self?.stopCameraPanelPolling()
+        }
+    }
+
+    private func stopCameraPanelPolling() {
+        cameraPanelPollTimer?.cancel()
+        cameraPanelPollTimer = nil
+        if let observer = cameraWindowObserver {
+            NotificationCenter.default.removeObserver(observer)
+            cameraWindowObserver = nil
+        }
+    }
+
+    private func configureCameraPanelWindow(_ cameraWindow: NSWindow) {
+        stopCameraPanelPolling()
+
+        // Immediately hide to prevent flash
+        cameraWindow.alphaValue = 0
+        cameraWindow.orderOut(nil)
+
+        cameraPanelWindow = cameraWindow
+
+        cameraWindow.titlebarAppearsTransparent = true
+        cameraWindow.titleVisibility = .hidden
+        cameraWindow.toolbar = nil
+        cameraWindow.standardWindowButton(.closeButton)?.isHidden = true
+        cameraWindow.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        cameraWindow.standardWindowButton(.zoomButton)?.isHidden = true
+        cameraWindow.styleMask.insert(.fullSizeContentView)
+
+        cameraWindow.isMovable = false
+        cameraWindow.level = .popUpMenu
+        cameraWindow.backgroundColor = NSColor(white: 0.12, alpha: 1.0)
+        cameraWindow.hasShadow = true
+        cameraWindow.isOpaque = false
+
+        cameraWindow.contentView?.wantsLayer = true
+        cameraWindow.contentView?.layer?.cornerRadius = 10
+        cameraWindow.contentView?.layer?.masksToBounds = true
+
+        // Position correctly, then reveal
+        positionCameraPanelWithSize(cameraWindow, width: 300, height: 520)
+        cameraWindow.alphaValue = 1.0
+        cameraWindow.orderFront(nil)
+        setupClickOutsideMonitor()
+    }
+
+    @objc public func resizeCameraPanel(width: CGFloat, height: CGFloat) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, let window = self.cameraPanelWindow else { return }
+            self.positionCameraPanelWithSize(window, width: width, height: height, animate: true)
+        }
+    }
+
+    private func positionCameraPanel(_ window: NSWindow) {
+        positionCameraPanelWithSize(window, width: window.frame.width, height: window.frame.height)
+    }
+
+    private func positionCameraPanelWithSize(_ window: NSWindow, width: CGFloat, height: CGFloat, animate: Bool = false) {
+        guard let button = cameraStatusItem?.button,
+              let buttonWindow = button.window else { return }
+
+        let buttonRect = button.convert(button.bounds, to: nil)
+        let screenRect = buttonWindow.convertToScreen(buttonRect)
+
+        let x = screenRect.midX - width / 2
+        let y = screenRect.minY - height - 4
+
+        window.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true, animate: animate)
+    }
+
+    private func setupClickOutsideMonitor() {
+        removeClickOutsideMonitor()
+        clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            guard let self = self else { return }
+            let screenPoint = NSEvent.mouseLocation
+            if let panel = self.cameraPanelWindow, panel.frame.contains(screenPoint) {
+                return
+            }
+            // Also ignore clicks on the camera status item button (toggle handled by action)
+            if let button = self.cameraStatusItem?.button, let btnWindow = button.window {
+                let btnRect = button.convert(button.bounds, to: nil)
+                let btnScreenRect = btnWindow.convertToScreen(btnRect)
+                if btnScreenRect.contains(screenPoint) {
+                    return
+                }
+            }
+            self.dismissCameraPanel()
+        }
+    }
+
+    private func removeClickOutsideMonitor() {
+        if let monitor = clickOutsideMonitor {
+            NSEvent.removeMonitor(monitor)
+            clickOutsideMonitor = nil
+        }
+    }
+
+    private func dismissCameraPanel() {
+        removeClickOutsideMonitor()
+        cameraPanelWindow?.orderOut(nil)
+    }
+
     private func showProRequiredAlert() {
         let alert = NSAlert()
         alert.messageText = "Itsyhome Pro required"
@@ -293,6 +485,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         actionEngine.updateMenuData(data)
 
         WebhookServer.shared.configure(actionEngine: actionEngine)
+        setupCameraStatusItem(hasCameras: data.hasCameras)
 
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()
@@ -303,14 +496,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private func addFooterItems() {
         if let data = currentMenuData, data.homes.count > 1 {
             addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
-        }
-
-        if currentMenuData?.hasCameras == true {
-            let cameraIcon = NSImage(systemSymbolName: "video.fill", accessibilityDescription: nil)
-            let cameraItem = menuBuilder.createActionItem(title: "Cameras", icon: cameraIcon) { [weak self] in
-                self?.iOSBridge?.openCameraWindow()
-            }
-            mainMenu.addItem(cameraItem)
         }
 
         let settingsIcon = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)

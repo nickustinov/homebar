@@ -2,7 +2,7 @@
 //  CameraViewController.swift
 //  Itsyhome
 //
-//  Grid of camera snapshots with live streaming on tap
+//  Grid of camera views displayed in the menu bar panel
 //
 
 import UIKit
@@ -14,19 +14,27 @@ class CameraViewController: UIViewController {
     private var emptyLabel: UILabel!
     private var streamContainerView: UIView!
     private var streamCameraView: HMCameraView!
-    private var streamErrorLabel: UILabel!
     private var backButton: UIButton!
+
+    private static let gridWidth: CGFloat = 300
+    private static let gridHeight: CGFloat = 520
+    private static let streamWidth: CGFloat = 550
+    private static let streamHeight: CGFloat = 309 // 16:9
 
     private var cameraAccessories: [HMAccessory] = []
     private var snapshotControls: [UUID: HMCameraSnapshotControl] = [:]
     private var activeStreamControl: HMCameraStreamControl?
     private var snapshotTimer: Timer?
 
+    private var macOSController: iOS2Mac? {
+        (UIApplication.shared.delegate as? AppDelegate)?.macOSController
+    }
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = UIColor(white: 0.12, alpha: 1.0)
         setupCollectionView()
         setupEmptyState()
         setupStreamView()
@@ -47,9 +55,9 @@ class CameraViewController: UIViewController {
 
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumInteritemSpacing = 12
-        layout.minimumLineSpacing = 12
-        layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        layout.minimumInteritemSpacing = 8
+        layout.minimumLineSpacing = 8
+        layout.sectionInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
 
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -60,7 +68,7 @@ class CameraViewController: UIViewController {
         view.addSubview(collectionView)
 
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -71,7 +79,7 @@ class CameraViewController: UIViewController {
         emptyLabel = UILabel()
         emptyLabel.text = "No cameras found"
         emptyLabel.textColor = .secondaryLabel
-        emptyLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        emptyLabel.font = .systemFont(ofSize: 14, weight: .medium)
         emptyLabel.textAlignment = .center
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
         emptyLabel.isHidden = true
@@ -108,34 +116,21 @@ class CameraViewController: UIViewController {
             streamCameraView.bottomAnchor.constraint(equalTo: streamContainerView.bottomAnchor)
         ])
 
-        streamErrorLabel = UILabel()
-        streamErrorLabel.textColor = .white
-        streamErrorLabel.font = .systemFont(ofSize: 16, weight: .medium)
-        streamErrorLabel.textAlignment = .center
-        streamErrorLabel.numberOfLines = 0
-        streamErrorLabel.translatesAutoresizingMaskIntoConstraints = false
-        streamErrorLabel.isHidden = true
-        streamContainerView.addSubview(streamErrorLabel)
-
-        NSLayoutConstraint.activate([
-            streamErrorLabel.centerXAnchor.constraint(equalTo: streamContainerView.centerXAnchor),
-            streamErrorLabel.centerYAnchor.constraint(equalTo: streamContainerView.centerYAnchor),
-            streamErrorLabel.leadingAnchor.constraint(greaterThanOrEqualTo: streamContainerView.leadingAnchor, constant: 20),
-            streamErrorLabel.trailingAnchor.constraint(lessThanOrEqualTo: streamContainerView.trailingAnchor, constant: -20)
-        ])
-
-        backButton = UIButton(type: .system)
-        backButton.setTitle("Back", for: .normal)
-        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .white
-        backButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        backButton = UIButton(type: .custom)
+        backButton.setImage(UIImage(systemName: "chevron.left")?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+        backButton.setTitle(" Back", for: .normal)
+        backButton.setTitleColor(.white, for: .normal)
+        backButton.titleLabel?.font = .systemFont(ofSize: 13, weight: .medium)
+        backButton.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        backButton.layer.cornerRadius = 14
+        backButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 10, bottom: 6, right: 12)
         backButton.translatesAutoresizingMaskIntoConstraints = false
         backButton.addTarget(self, action: #selector(backToGrid), for: .touchUpInside)
         streamContainerView.addSubview(backButton)
 
         NSLayoutConstraint.activate([
-            backButton.topAnchor.constraint(equalTo: streamContainerView.safeAreaLayoutGuide.topAnchor, constant: 12),
-            backButton.leadingAnchor.constraint(equalTo: streamContainerView.leadingAnchor, constant: 16)
+            backButton.topAnchor.constraint(equalTo: streamContainerView.topAnchor, constant: 8),
+            backButton.leadingAnchor.constraint(equalTo: streamContainerView.leadingAnchor, constant: 8)
         ])
     }
 
@@ -180,15 +175,13 @@ class CameraViewController: UIViewController {
 
     private func startStream(for accessory: HMAccessory) {
         guard let profile = accessory.cameraProfiles?.first,
-              let streamControl = profile.streamControl else {
-            showStreamError("Camera does not support streaming")
-            return
-        }
+              let streamControl = profile.streamControl else { return }
 
         streamContainerView.isHidden = false
         collectionView.isHidden = true
-        streamErrorLabel.isHidden = true
         stopSnapshotTimer()
+
+        macOSController?.resizeCameraPanel(width: Self.streamWidth, height: Self.streamHeight)
 
         activeStreamControl = streamControl
         streamControl.delegate = self
@@ -200,14 +193,10 @@ class CameraViewController: UIViewController {
         activeStreamControl = nil
         streamCameraView.cameraSource = nil
         streamContainerView.isHidden = true
-        streamErrorLabel.isHidden = true
         collectionView.isHidden = cameraAccessories.isEmpty
-        startSnapshotTimer()
-    }
 
-    private func showStreamError(_ message: String) {
-        streamErrorLabel.text = message
-        streamErrorLabel.isHidden = false
+        macOSController?.resizeCameraPanel(width: Self.gridWidth, height: Self.gridHeight)
+        startSnapshotTimer()
     }
 
     // MARK: - Public
@@ -253,13 +242,9 @@ extension CameraViewController: UICollectionViewDelegate {
 
 extension CameraViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let insets: CGFloat = 16 * 2
-        let spacing: CGFloat = 12
-        let availableWidth = collectionView.bounds.width - insets
-        let tileWidth: CGFloat = 280
-        let columns = max(1, floor((availableWidth + spacing) / (tileWidth + spacing)))
-        let width = (availableWidth - spacing * (columns - 1)) / columns
-        let height = width * 9.0 / 16.0 + 32 // 16:9 aspect ratio + label height
+        let insets: CGFloat = 12 * 2
+        let width = collectionView.bounds.width - insets
+        let height = width * 9.0 / 16.0 + 28
         return CGSize(width: width, height: height)
     }
 }
@@ -269,7 +254,6 @@ extension CameraViewController: UICollectionViewDelegateFlowLayout {
 extension CameraViewController: HMCameraSnapshotControlDelegate {
     func cameraSnapshotControl(_ cameraSnapshotControl: HMCameraSnapshotControl, didTake snapshot: HMCameraSnapshot?, error: Error?) {
         guard error == nil else { return }
-        // Find which accessory this snapshot belongs to and reload its cell
         for (index, accessory) in cameraAccessories.enumerated() {
             if snapshotControls[accessory.uniqueIdentifier] === cameraSnapshotControl {
                 let indexPath = IndexPath(item: index, section: 0)
@@ -288,14 +272,13 @@ extension CameraViewController: HMCameraStreamControlDelegate {
     func cameraStreamControlDidStartStream(_ cameraStreamControl: HMCameraStreamControl) {
         DispatchQueue.main.async {
             self.streamCameraView.cameraSource = cameraStreamControl.cameraStream
-            self.streamErrorLabel.isHidden = true
         }
     }
 
     func cameraStreamControl(_ cameraStreamControl: HMCameraStreamControl, didStopStreamWithError error: Error?) {
-        if let error = error {
+        if error != nil {
             DispatchQueue.main.async {
-                self.showStreamError("Stream stopped: \(error.localizedDescription)")
+                self.backToGrid()
             }
         }
     }
@@ -319,16 +302,16 @@ private class CameraSnapshotCell: UICollectionViewCell {
     }
 
     private func setupViews() {
-        contentView.backgroundColor = .secondarySystemBackground
-        contentView.layer.cornerRadius = 8
+        contentView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        contentView.layer.cornerRadius = 6
         contentView.clipsToBounds = true
 
         cameraView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cameraView)
 
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        nameLabel.textColor = .label
+        nameLabel.font = .systemFont(ofSize: 11, weight: .medium)
+        nameLabel.textColor = .white
         nameLabel.textAlignment = .center
         contentView.addSubview(nameLabel)
 
@@ -336,12 +319,12 @@ private class CameraSnapshotCell: UICollectionViewCell {
             cameraView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cameraView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             cameraView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            cameraView.bottomAnchor.constraint(equalTo: nameLabel.topAnchor, constant: -4),
+            cameraView.bottomAnchor.constraint(equalTo: nameLabel.topAnchor, constant: -2),
 
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-            nameLabel.heightAnchor.constraint(equalToConstant: 20)
+            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 6),
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -6),
+            nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
+            nameLabel.heightAnchor.constraint(equalToConstant: 16)
         ])
     }
 

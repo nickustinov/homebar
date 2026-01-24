@@ -11,6 +11,8 @@ import AppKit
 class HighlightingMenuItemView: NSView {
 
     var onAction: (() -> Void)?
+    var onMouseEnter: (() -> Void)?
+    var onMouseExit: (() -> Void)?
     var closesMenuOnAction: Bool = true
 
     private var isMouseInside = false
@@ -37,12 +39,14 @@ class HighlightingMenuItemView: NSView {
         isMouseInside = true
         updateTextColors(highlighted: true)
         needsDisplay = true
+        onMouseEnter?()
     }
 
     override func mouseExited(with event: NSEvent) {
         isMouseInside = false
         updateTextColors(highlighted: false)
         needsDisplay = true
+        onMouseExit?()
     }
 
     private func updateTextColors(highlighted: Bool) {

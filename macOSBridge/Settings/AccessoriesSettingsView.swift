@@ -259,7 +259,7 @@ class AccessoriesSettingsView: NSView {
 
         // Rooms section
         if !roomTableItems.isEmpty {
-            let tableHeight = CGFloat(roomTableItems.count) * L.rowHeight
+            let tableHeight = CGFloat(roomTableItems.count) * L.rowHeight + CGFloat(max(0, roomTableItems.count - 1)) * 4
             let tableContainer = createRoomsTable(height: tableHeight)
             addView(tableContainer, height: tableHeight)
             roomsTableView?.reloadData()
@@ -615,7 +615,7 @@ class AccessoriesSettingsView: NSView {
         self.roomsTableView = tableView
         tableView.headerView = nil
         tableView.rowHeight = AccessoryRowLayout.rowHeight
-        tableView.intercellSpacing = NSSize(width: 0, height: 0)
+        tableView.intercellSpacing = NSSize(width: 0, height: 4)
         tableView.backgroundColor = .clear
         tableView.selectionHighlightStyle = .none
         tableView.style = .plain

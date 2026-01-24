@@ -11,7 +11,7 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 ## Features
 
 - **Menu bar access** - Control your smart home from the macOS menu bar
-- **Full HomeKit support** - Lights, switches, outlets, fans, thermostats, AC units, blinds, locks, garage doors, humidifiers, air purifiers, valves, and security systems
+- **Full HomeKit support** - Lights, switches, outlets, fans, thermostats, AC units, blinds, locks, garage doors, humidifiers, air purifiers, valves, cameras, and security systems
 - **Scenes** - Execute and toggle HomeKit scenes with state tracking
 - **Favourites** - Pin frequently used devices and scenes to the top of the menu
 - **Multi-home support** - Switch between multiple HomeKit homes
@@ -19,6 +19,7 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 - **Device groups** - Create custom groups to control multiple devices at once *(Pro)*
 - **iCloud sync** - Sync favourites and settings across your Macs *(Pro)*
 - **Deeplinks** - Control devices from Shortcuts, Alfred, Raycast, Stream Deck *(Pro)*
+- **Cameras** - Live video feed with overlay action buttons to control accessories *(Pro)*
 - **Webhooks/CLI** - Built-in HTTP server with a dedicated CLI tool *(Pro)*
 
 ## Supported devices
@@ -37,6 +38,7 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 | Air purifiers | Power, mode, speed control |
 | Valves | Open/close toggle |
 | Security systems | Arm home/away/night, disarm |
+| Cameras | Live video feed with overlay action buttons to control accessories *(Pro)* |
 | Temperature & Humidity sensors | Summary display per room |
 
 ## Itsyhome Pro
@@ -44,6 +46,10 @@ A native macOS menu bar app for controlling your HomeKit smart home devices.
 ### iCloud sync
 
 Sync your favourites, hidden items, device groups, and shortcuts across all your Macs.
+
+### Cameras
+
+View live video feeds from your HomeKit cameras directly in the menu bar. Overlay action buttons let you control nearby accessories without leaving the camera view — toggle lights, lock doors, or trigger scenes while watching the feed.
 
 ### Device groups
 

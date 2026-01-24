@@ -14,17 +14,24 @@ class CameraViewController: UIViewController {
     private var emptyLabel: UILabel!
     private var streamContainerView: UIView!
     private var streamCameraView: HMCameraView!
+    private var streamSpinner: UIActivityIndicatorView!
     private var backButton: UIButton!
 
     private static let gridWidth: CGFloat = 300
-    private static let gridHeight: CGFloat = 520
-    private static let streamWidth: CGFloat = 550
-    private static let streamHeight: CGFloat = 309 // 16:9
+    private static let streamWidth: CGFloat = 530
+    private static let streamHeight: CGFloat = 298 // 16:9
+
+    private static let sectionTop: CGFloat = 15
+    private static let sectionBottom: CGFloat = 15
+    private static let sectionSide: CGFloat = 12
+    private static let lineSpacing: CGFloat = 8
+    private static let labelHeight: CGFloat = 28 // 2pt gap + 16pt label + 6pt bottom + 4pt
 
     private var cameraAccessories: [HMAccessory] = []
     private var snapshotControls: [UUID: HMCameraSnapshotControl] = [:]
     private var activeStreamControl: HMCameraStreamControl?
     private var snapshotTimer: Timer?
+    private var hasLoadedInitialData = false
 
     private var macOSController: iOS2Mac? {
         (UIApplication.shared.delegate as? AppDelegate)?.macOSController
@@ -43,6 +50,16 @@ class CameraViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        if !hasLoadedInitialData && !cameraAccessories.isEmpty {
+            hasLoadedInitialData = true
+            emptyLabel.isHidden = !cameraAccessories.isEmpty
+            collectionView.isHidden = cameraAccessories.isEmpty
+            collectionView.reloadData()
+            takeAllSnapshots()
+        }
+
+        collectionView.setContentOffset(.zero, animated: false)
         startSnapshotTimer()
     }
 
@@ -55,13 +72,14 @@ class CameraViewController: UIViewController {
 
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumInteritemSpacing = 8
-        layout.minimumLineSpacing = 8
-        layout.sectionInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        layout.minimumInteritemSpacing = Self.lineSpacing
+        layout.minimumLineSpacing = Self.lineSpacing
+        layout.sectionInset = UIEdgeInsets(top: Self.sectionTop, left: Self.sectionSide, bottom: Self.sectionBottom, right: Self.sectionSide)
 
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
+        collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(CameraSnapshotCell.self, forCellWithReuseIdentifier: CameraSnapshotCell.reuseId)
@@ -105,6 +123,17 @@ class CameraViewController: UIViewController {
             streamContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
+        streamSpinner = UIActivityIndicatorView(style: .medium)
+        streamSpinner.color = .white
+        streamSpinner.translatesAutoresizingMaskIntoConstraints = false
+        streamSpinner.hidesWhenStopped = true
+        streamContainerView.addSubview(streamSpinner)
+
+        NSLayoutConstraint.activate([
+            streamSpinner.centerXAnchor.constraint(equalTo: streamContainerView.centerXAnchor),
+            streamSpinner.centerYAnchor.constraint(equalTo: streamContainerView.centerYAnchor)
+        ])
+
         streamCameraView = HMCameraView()
         streamCameraView.translatesAutoresizingMaskIntoConstraints = false
         streamContainerView.addSubview(streamCameraView)
@@ -141,10 +170,36 @@ class CameraViewController: UIViewController {
               let homeKitManager = appDelegate.homeKitManager else { return }
 
         cameraAccessories = homeKitManager.cameraAccessories
-        emptyLabel.isHidden = !cameraAccessories.isEmpty
-        collectionView.isHidden = cameraAccessories.isEmpty
-        collectionView.reloadData()
-        takeAllSnapshots()
+
+        // Store desired size on macOS side (for re-shows); sizeRestrictions set by CameraSceneDelegate
+        let height = computeGridHeight()
+        macOSController?.resizeCameraPanel(width: Self.gridWidth, height: height, animated: false)
+    }
+
+    private func updatePanelSize(width: CGFloat, height: CGFloat, animated: Bool) {
+        #if targetEnvironment(macCatalyst)
+        if let windowScene = view.window?.windowScene {
+            windowScene.sizeRestrictions?.minimumSize = CGSize(width: width, height: height)
+            windowScene.sizeRestrictions?.maximumSize = CGSize(width: width, height: height)
+        }
+        #endif
+        macOSController?.resizeCameraPanel(width: width, height: height, animated: animated)
+    }
+
+    private func computeGridHeight() -> CGFloat {
+        let count = cameraAccessories.count
+        guard count > 0 else { return 150 }
+
+        let cellWidth = Self.gridWidth - Self.sectionSide * 2
+        let cellHeight = cellWidth * 9.0 / 16.0 + Self.labelHeight
+
+        if count <= 3 {
+            // Show all cameras fully
+            return Self.sectionTop + CGFloat(count) * cellHeight + CGFloat(count - 1) * Self.lineSpacing + Self.sectionBottom
+        } else {
+            // Show 3 full + half of 4th to hint at scrollability
+            return Self.sectionTop + 3 * cellHeight + 2 * Self.lineSpacing + Self.lineSpacing + cellHeight * 0.5
+        }
     }
 
     // MARK: - Snapshots
@@ -178,10 +233,12 @@ class CameraViewController: UIViewController {
               let streamControl = profile.streamControl else { return }
 
         streamContainerView.isHidden = false
+        streamCameraView.isHidden = true
+        streamSpinner.startAnimating()
         collectionView.isHidden = true
         stopSnapshotTimer()
 
-        macOSController?.resizeCameraPanel(width: Self.streamWidth, height: Self.streamHeight)
+        updatePanelSize(width: Self.streamWidth, height: Self.streamHeight, animated: true)
 
         activeStreamControl = streamControl
         streamControl.delegate = self
@@ -192,10 +249,14 @@ class CameraViewController: UIViewController {
         activeStreamControl?.stopStream()
         activeStreamControl = nil
         streamCameraView.cameraSource = nil
+        streamCameraView.isHidden = false
+        streamSpinner.stopAnimating()
         streamContainerView.isHidden = true
         collectionView.isHidden = cameraAccessories.isEmpty
+        collectionView.setContentOffset(.zero, animated: false)
 
-        macOSController?.resizeCameraPanel(width: Self.gridWidth, height: Self.gridHeight)
+        let height = computeGridHeight()
+        updatePanelSize(width: Self.gridWidth, height: height, animated: false)
         startSnapshotTimer()
     }
 
@@ -242,9 +303,8 @@ extension CameraViewController: UICollectionViewDelegate {
 
 extension CameraViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let insets: CGFloat = 12 * 2
-        let width = collectionView.bounds.width - insets
-        let height = width * 9.0 / 16.0 + 28
+        let width = max(1, collectionView.bounds.width - CameraViewController.sectionSide * 2)
+        let height = width * 9.0 / 16.0 + CameraViewController.labelHeight
         return CGSize(width: width, height: height)
     }
 }
@@ -271,6 +331,8 @@ extension CameraViewController: HMCameraSnapshotControlDelegate {
 extension CameraViewController: HMCameraStreamControlDelegate {
     func cameraStreamControlDidStartStream(_ cameraStreamControl: HMCameraStreamControl) {
         DispatchQueue.main.async {
+            self.streamSpinner.stopAnimating()
+            self.streamCameraView.isHidden = false
             self.streamCameraView.cameraSource = cameraStreamControl.cameraStream
         }
     }

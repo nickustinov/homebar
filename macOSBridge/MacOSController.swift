@@ -35,6 +35,9 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private var needsRebuild = false
     private var clickOutsideMonitor: Any?
     private var cameraPanelWindow: NSWindow?
+    private var cameraPanelSize: NSSize = NSSize(width: 300, height: 300)
+    private var isCameraPanelOpening = false
+    private var pendingCameraPanelShow = false
 
     @objc public weak var iOSBridge: Mac2iOS?
 
@@ -294,6 +297,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         }
     }
 
+
     @objc private func cameraStatusItemClicked() {
         if let existing = cameraPanelWindow, existing.isVisible {
             dismissCameraPanel()
@@ -302,18 +306,31 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         if cameraPanelWindow != nil {
             showCameraPanel()
-        } else {
-            iOSBridge?.openCameraWindow()
-            // Poll for the window to appear, then configure it
-            setupCameraPanelWindow()
+            return
         }
+
+        if isCameraPanelOpening {
+            return
+        }
+
+        isCameraPanelOpening = true
+        pendingCameraPanelShow = true
+        iOSBridge?.openCameraWindow()
+        setupCameraPanelWindow()
     }
 
     private func showCameraPanel() {
-        guard let panel = cameraPanelWindow else { return }
-        positionCameraPanel(panel)
-        panel.orderFront(nil)
+        guard let panel = cameraPanelWindow,
+              cameraStatusItem?.button?.window != nil else { return }
+        positionCameraPanelWithSize(panel, width: cameraPanelSize.width, height: cameraPanelSize.height)
+        iOSBridge?.setCameraWindowHidden(false)
+        panel.alphaValue = 1.0
+        panel.makeKeyAndOrderFront(nil)
         setupClickOutsideMonitor()
+        // Re-apply highlight after mouse event completes (system resets it on mouseUp)
+        DispatchQueue.main.async {
+            self.cameraStatusItem?.button?.highlight(true)
+        }
     }
 
     private var cameraPanelPollTimer: DispatchSourceTimer?
@@ -390,22 +407,21 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         cameraWindow.contentView?.layer?.cornerRadius = 10
         cameraWindow.contentView?.layer?.masksToBounds = true
 
-        // Position correctly, then reveal
-        positionCameraPanelWithSize(cameraWindow, width: 300, height: 520)
-        cameraWindow.alphaValue = 1.0
-        cameraWindow.orderFront(nil)
-        setupClickOutsideMonitor()
-    }
-
-    @objc public func resizeCameraPanel(width: CGFloat, height: CGFloat) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self, let window = self.cameraPanelWindow else { return }
-            self.positionCameraPanelWithSize(window, width: width, height: height, animate: true)
+        // Window stays hidden — will be shown by showCameraPanel() on user click
+        isCameraPanelOpening = false
+        if pendingCameraPanelShow {
+            pendingCameraPanelShow = false
+            showCameraPanel()
         }
     }
 
-    private func positionCameraPanel(_ window: NSWindow) {
-        positionCameraPanelWithSize(window, width: window.frame.width, height: window.frame.height)
+    @objc public func resizeCameraPanel(width: CGFloat, height: CGFloat, animated: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.cameraPanelSize = NSSize(width: width, height: height)
+            guard let window = self.cameraPanelWindow, window.isVisible else { return }
+            self.positionCameraPanelWithSize(window, width: width, height: height, animate: animated)
+        }
     }
 
     private func positionCameraPanelWithSize(_ window: NSWindow, width: CGFloat, height: CGFloat, animate: Bool = false) {
@@ -451,6 +467,8 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private func dismissCameraPanel() {
         removeClickOutsideMonitor()
         cameraPanelWindow?.orderOut(nil)
+        iOSBridge?.setCameraWindowHidden(true)
+        cameraStatusItem?.button?.highlight(false)
     }
 
     private func showProRequiredAlert() {
@@ -611,6 +629,9 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     public func menuWillOpen(_ menu: NSMenu) {
         if menu == mainMenu {
             menuIsOpen = true
+            if cameraPanelWindow?.isVisible == true {
+                dismissCameraPanel()
+            }
             refreshCharacteristics()
         }
     }

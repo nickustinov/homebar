@@ -339,6 +339,7 @@ public protocol Mac2iOS: NSObjectProtocol {
     func getCharacteristicValue(identifier: UUID) -> Any?
     func openCameraWindow()
     func closeCameraWindow()
+    func setCameraWindowHidden(_ hidden: Bool)
 }
 
 /// Protocol for iOS code to call macOS plugin
@@ -353,7 +354,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     func showError(message: String)
     func executeCommand(_ command: String) -> Bool
     func configureCameraPanel()
-    func resizeCameraPanel(width: CGFloat, height: CGFloat)
+    func resizeCameraPanel(width: CGFloat, height: CGFloat, animated: Bool)
 }
 
 // MARK: - Service type constants

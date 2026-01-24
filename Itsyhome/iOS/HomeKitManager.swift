@@ -310,6 +310,25 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
         #endif
     }
 
+    func setCameraWindowHidden(_ hidden: Bool) {
+        #if targetEnvironment(macCatalyst)
+        let cameraScenes = UIApplication.shared.connectedScenes.compactMap { scene -> UIWindowScene? in
+            guard let windowScene = scene as? UIWindowScene else { return nil }
+            guard windowScene.session.configuration.name == "Camera Configuration" else { return nil }
+            return windowScene
+        }
+
+        for windowScene in cameraScenes {
+            for window in windowScene.windows {
+                window.isHidden = hidden
+                if !hidden {
+                    window.makeKeyAndVisible()
+                }
+            }
+        }
+        #endif
+    }
+
     // MARK: - Helper Methods
 
     private func sendMenuDataAsJSON() {

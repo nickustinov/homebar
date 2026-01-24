@@ -15,7 +15,6 @@ class GeneralSection: SettingsCard {
     private let syncSwitch = NSSwitch()
     private var syncStatusLabel: NSTextField!
     private var syncProBadge: NSView!
-    private let syncNowButton = NSButton()
 
     // Pro section
     private var cancellables = Set<AnyCancellable>()
@@ -125,17 +124,6 @@ class GeneralSection: SettingsCard {
         syncStatusLabel.lineBreakMode = .byWordWrapping
         syncStatusLabel.maximumNumberOfLines = 2
         labelStack.addArrangedSubview(syncStatusLabel)
-
-        // Sync now button
-        syncNowButton.title = "Sync now"
-        syncNowButton.bezelStyle = .inline
-        syncNowButton.controlSize = .small
-        syncNowButton.isBordered = false
-        syncNowButton.contentTintColor = .systemBlue
-        syncNowButton.target = self
-        syncNowButton.action = #selector(syncNowTapped)
-        syncNowButton.isHidden = true
-        labelStack.addArrangedSubview(syncNowButton)
 
         syncSwitch.translatesAutoresizingMaskIntoConstraints = false
 
@@ -384,8 +372,6 @@ class GeneralSection: SettingsCard {
         let syncEnabled = CloudSyncManager.shared.isSyncEnabled
         syncSwitch.isEnabled = isPro
         syncProBadge.isHidden = isPro
-        syncNowButton.isHidden = !(isPro && syncEnabled)
-
         if !isPro {
             syncStatusLabel.stringValue = "Sync favourites, hidden items, groups, and shortcuts."
         } else if syncEnabled {
@@ -455,11 +441,6 @@ class GeneralSection: SettingsCard {
 
     @objc private func syncSwitchChanged(_ sender: NSSwitch) {
         CloudSyncManager.shared.isSyncEnabled = sender.state == .on
-        updateSyncUI()
-    }
-
-    @objc private func syncNowTapped() {
-        CloudSyncManager.shared.syncNow()
         updateSyncUI()
     }
 

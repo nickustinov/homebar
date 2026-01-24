@@ -62,18 +62,6 @@ final class CloudSyncManager {
         set { defaults.set(newValue, forKey: Keys.lastSyncTimestamp) }
     }
 
-    func syncNow() {
-        guard !isSyncing else { return }
-        guard ProStatusCache.shared.isPro && isSyncEnabled else { return }
-        guard translator.hasData else { return }
-        isSyncing = true
-        defer { isSyncing = false }
-        cloudStore.synchronize()
-        pullFromCloudStore()
-        uploadAllSyncableKeys()
-        NotificationCenter.default.post(name: Self.syncStatusChangedNotification, object: nil)
-    }
-
     func startListening() {
         guard !isListening else { return }
         guard ProStatusCache.shared.isPro && isSyncEnabled else { return }

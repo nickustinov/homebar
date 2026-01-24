@@ -20,6 +20,7 @@
 		0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88919649EAF34363518DE9FF /* BridgeProtocols.swift */; };
 		0D1340AA633BF40EC7B797C4 /* SecuritySystemMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD57CCBF703A5861D8AEFB0 /* SecuritySystemMenuItem.swift */; };
 		0E3C04C26FCF48722D26C6CE /* ToggleSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */; };
+		11112BE937E38F4684A4A67E /* CamerasSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0120D24898978AAE26F2A54D /* CamerasSection.swift */; };
 		111E21896B8031FB1B180CDD /* CloudSyncTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578B4AD774F2D31C1C4EE6C /* CloudSyncTranslator.swift */; };
 		12B4142969F3A501717A290A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 71AB516B350323CC9A1DAEE4 /* Assets.xcassets */; };
 		13236318334A338D80E0C741 /* WebhooksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1443A561323B39B108F71E /* WebhooksSection.swift */; };
@@ -144,6 +145,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0120D24898978AAE26F2A54D /* CamerasSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CamerasSection.swift; sourceTree = "<group>"; };
 		0407B252FDFC384E196876DD /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 		074390035F5E079496B2A9FD /* LocalChangeNotifiableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalChangeNotifiableTests.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 			isa = PBXGroup;
 			children = (
 				BB02A6E6A0F93A3A51FBACC1 /* AboutSection.swift */,
+				0120D24898978AAE26F2A54D /* CamerasSection.swift */,
 				2015876131A8AE52D26618FC /* DeeplinksSection.swift */,
 				62AD62C3749331FE2DA3CA6B /* GeneralSection.swift */,
 				45ADAE5712E4621056FF217C /* GroupEditorPanel.swift */,
@@ -645,6 +648,7 @@
 				3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */,
 				CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */,
 				0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */,
+				11112BE937E38F4684A4A67E /* CamerasSection.swift in Sources */,
 				E53F247D68A3464066E31310 /* CloudSyncManager.swift in Sources */,
 				099D30F6620813668F633D46 /* CloudSyncTranslator.swift in Sources */,
 				CE60FBDD7DA3242E781072D4 /* ColorConversion.swift in Sources */,

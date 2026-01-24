@@ -24,6 +24,7 @@ final class PreferencesManager {
         // Global settings
         static let launchAtLogin = "launchAtLogin"
         static let scenesDisplayMode = "scenesDisplayMode"
+        static let camerasEnabled = "camerasEnabled"
 
         // Per-home settings (use with homeKey helper)
         static let orderedFavouriteIds = "orderedFavouriteIds"
@@ -109,6 +110,16 @@ final class PreferencesManager {
         }
         set {
             defaults.set(newValue.rawValue, forKey: Keys.scenesDisplayMode)
+            postNotification()
+        }
+    }
+
+    // MARK: - Cameras enabled (global)
+
+    var camerasEnabled: Bool {
+        get { defaults.bool(forKey: Keys.camerasEnabled) }
+        set {
+            defaults.set(newValue, forKey: Keys.camerasEnabled)
             postNotification()
         }
     }

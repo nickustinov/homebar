@@ -5,8 +5,8 @@
   ],
   "products" : [
     {
-      "displayPrice" : "9.99",
-      "familyShareable" : false,
+      "displayPrice" : "12.99",
+      "familyShareable" : true,
       "internalID" : "lifetime",
       "localizations" : [
         {

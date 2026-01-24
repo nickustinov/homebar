@@ -115,15 +115,22 @@ class MenuBuilder {
 
         guard !visibleScenes.isEmpty else { return }
 
+        let savedOrder = preferences.sceneOrder
+        let orderedScenes = visibleScenes.sorted { s1, s2 in
+            let i1 = savedOrder.firstIndex(of: s1.uniqueIdentifier) ?? Int.max
+            let i2 = savedOrder.firstIndex(of: s2.uniqueIdentifier) ?? Int.max
+            return i1 < i2
+        }
+
         if preferences.scenesDisplayMode == .grid {
-            let gridItem = ScenesGridMenuItem(scenes: visibleScenes, bridge: bridge)
+            let gridItem = ScenesGridMenuItem(scenes: orderedScenes, bridge: bridge)
             menu.addItem(gridItem)
         } else {
             let icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
             let scenesItem = createSubmenuItem(title: "Scenes", icon: icon)
 
             let submenu = StayOpenMenu()
-            for scene in visibleScenes {
+            for scene in orderedScenes {
                 let item = SceneMenuItem(sceneData: scene, bridge: bridge)
                 submenu.addItem(item)
                 sceneMenuItems.append(item)
@@ -148,7 +155,14 @@ class MenuBuilder {
             }
         }
 
-        for room in rooms {
+        let savedOrder = PreferencesManager.shared.roomOrder
+        let orderedRooms = rooms.sorted { r1, r2 in
+            let i1 = savedOrder.firstIndex(of: r1.uniqueIdentifier) ?? Int.max
+            let i2 = savedOrder.firstIndex(of: r2.uniqueIdentifier) ?? Int.max
+            return i1 < i2
+        }
+
+        for room in orderedRooms {
             guard let roomAccessories = accessoriesByRoom[room.uniqueIdentifier], !roomAccessories.isEmpty else {
                 continue
             }

@@ -28,8 +28,8 @@ final class CloudSyncManager {
 
     // Keys that store ID arrays needing translation
     private let serviceIdKeys = ["orderedFavouriteIds", "favouriteServiceIds", "hiddenServiceIds"]
-    private let sceneIdKeys = ["favouriteSceneIds", "hiddenSceneIds"]
-    private let roomIdKeys = ["hiddenRoomIds"]
+    private let sceneIdKeys = ["favouriteSceneIds", "hiddenSceneIds", "sceneOrder"]
+    private let roomIdKeys = ["hiddenRoomIds", "roomOrder"]
     private let cameraIdKeys = ["hiddenCameraIds", "cameraOrder"]
 
     private init() {}

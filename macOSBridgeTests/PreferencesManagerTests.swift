@@ -25,7 +25,8 @@ final class PreferencesManagerTests: XCTestCase {
             "orderedFavouriteIds", "favouriteSceneIds", "favouriteServiceIds",
             "hiddenSceneIds", "hiddenServiceIds", "hideScenesSection",
             "hiddenRoomIds", "hiddenCameraIds", "cameraOrder",
-            "cameraOverlayAccessories", "deviceGroups", "shortcuts"
+            "cameraOverlayAccessories", "deviceGroups", "shortcuts",
+            "roomOrder", "sceneOrder"
         ]
         for suffix in keySuffixes {
             defaults.removeObject(forKey: "\(suffix)_\(testHomeId)")
@@ -109,6 +110,76 @@ final class PreferencesManagerTests: XCTestCase {
         prefs.cameraOrder = ["cam-a", "cam-b"]
         prefs.moveCameraOrder(from: 5, to: 0)
         XCTAssertEqual(prefs.cameraOrder, ["cam-a", "cam-b"])
+    }
+
+    // MARK: - Room order (per-home)
+
+    func testRoomOrderDefaultsEmpty() {
+        XCTAssertTrue(prefs.roomOrder.isEmpty)
+    }
+
+    func testRoomOrderPersists() {
+        prefs.roomOrder = ["room-a", "room-b", "room-c"]
+        XCTAssertEqual(prefs.roomOrder, ["room-a", "room-b", "room-c"])
+    }
+
+    func testMoveRoom() {
+        prefs.roomOrder = ["room-a", "room-b", "room-c"]
+        prefs.moveRoom(from: 0, to: 2)
+        XCTAssertEqual(prefs.roomOrder, ["room-b", "room-c", "room-a"])
+    }
+
+    func testMoveRoomToBeginning() {
+        prefs.roomOrder = ["room-a", "room-b", "room-c"]
+        prefs.moveRoom(from: 2, to: 0)
+        XCTAssertEqual(prefs.roomOrder, ["room-c", "room-a", "room-b"])
+    }
+
+    func testMoveRoomOutOfBoundsNoOp() {
+        prefs.roomOrder = ["room-a", "room-b"]
+        prefs.moveRoom(from: 5, to: 0)
+        XCTAssertEqual(prefs.roomOrder, ["room-a", "room-b"])
+    }
+
+    func testMoveRoomNegativeIndexNoOp() {
+        prefs.roomOrder = ["room-a", "room-b"]
+        prefs.moveRoom(from: -1, to: 0)
+        XCTAssertEqual(prefs.roomOrder, ["room-a", "room-b"])
+    }
+
+    // MARK: - Scene order (per-home)
+
+    func testSceneOrderDefaultsEmpty() {
+        XCTAssertTrue(prefs.sceneOrder.isEmpty)
+    }
+
+    func testSceneOrderPersists() {
+        prefs.sceneOrder = ["scene-a", "scene-b", "scene-c"]
+        XCTAssertEqual(prefs.sceneOrder, ["scene-a", "scene-b", "scene-c"])
+    }
+
+    func testMoveScene() {
+        prefs.sceneOrder = ["scene-a", "scene-b", "scene-c"]
+        prefs.moveScene(from: 0, to: 2)
+        XCTAssertEqual(prefs.sceneOrder, ["scene-b", "scene-c", "scene-a"])
+    }
+
+    func testMoveSceneToBeginning() {
+        prefs.sceneOrder = ["scene-a", "scene-b", "scene-c"]
+        prefs.moveScene(from: 2, to: 0)
+        XCTAssertEqual(prefs.sceneOrder, ["scene-c", "scene-a", "scene-b"])
+    }
+
+    func testMoveSceneOutOfBoundsNoOp() {
+        prefs.sceneOrder = ["scene-a", "scene-b"]
+        prefs.moveScene(from: 5, to: 0)
+        XCTAssertEqual(prefs.sceneOrder, ["scene-a", "scene-b"])
+    }
+
+    func testMoveSceneNegativeIndexNoOp() {
+        prefs.sceneOrder = ["scene-a", "scene-b"]
+        prefs.moveScene(from: -1, to: 0)
+        XCTAssertEqual(prefs.sceneOrder, ["scene-a", "scene-b"])
     }
 
     // MARK: - Camera overlay accessories (per-home)

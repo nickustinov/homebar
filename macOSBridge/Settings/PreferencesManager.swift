@@ -38,6 +38,8 @@ final class PreferencesManager {
         static let hiddenCameraIds = "hiddenCameraIds"
         static let cameraOrder = "cameraOrder"
         static let cameraOverlayAccessories = "cameraOverlayAccessories"
+        static let roomOrder = "roomOrder"
+        static let sceneOrder = "sceneOrder"
     }
 
     enum ScenesDisplayMode: String {
@@ -376,6 +378,44 @@ final class PreferencesManager {
         let item = order.remove(at: sourceIndex)
         order.insert(item, at: destinationIndex)
         cameraOrder = order
+    }
+
+    // MARK: - Room order (per-home)
+
+    var roomOrder: [String] {
+        get { defaults.stringArray(forKey: homeKey(Keys.roomOrder)) ?? [] }
+        set {
+            defaults.set(newValue, forKey: homeKey(Keys.roomOrder))
+            postNotification()
+        }
+    }
+
+    func moveRoom(from sourceIndex: Int, to destinationIndex: Int) {
+        var order = roomOrder
+        guard sourceIndex >= 0, sourceIndex < order.count,
+              destinationIndex >= 0, destinationIndex < order.count else { return }
+        let item = order.remove(at: sourceIndex)
+        order.insert(item, at: destinationIndex)
+        roomOrder = order
+    }
+
+    // MARK: - Scene order (per-home)
+
+    var sceneOrder: [String] {
+        get { defaults.stringArray(forKey: homeKey(Keys.sceneOrder)) ?? [] }
+        set {
+            defaults.set(newValue, forKey: homeKey(Keys.sceneOrder))
+            postNotification()
+        }
+    }
+
+    func moveScene(from sourceIndex: Int, to destinationIndex: Int) {
+        var order = sceneOrder
+        guard sourceIndex >= 0, sourceIndex < order.count,
+              destinationIndex >= 0, destinationIndex < order.count else { return }
+        let item = order.remove(at: sourceIndex)
+        order.insert(item, at: destinationIndex)
+        sceneOrder = order
     }
 
     // MARK: - Camera overlay accessories (per-home)

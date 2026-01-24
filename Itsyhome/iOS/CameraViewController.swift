@@ -303,7 +303,7 @@ extension CameraViewController: UICollectionViewDelegate {
 
 extension CameraViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = max(1, collectionView.bounds.width - CameraViewController.sectionSide * 2)
+        let width = CameraViewController.gridWidth - CameraViewController.sectionSide * 2
         let height = width * 9.0 / 16.0 + CameraViewController.labelHeight
         return CGSize(width: width, height: height)
     }

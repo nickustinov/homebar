@@ -51,6 +51,7 @@
 		28B5F7BA9021D479977F312E /* AccessoriesSettingsView+TableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69710E65E70E915FAA68786 /* AccessoriesSettingsView+TableDelegate.swift */; };
 		2FA906D09DF2D10CD127C5EB /* HumidifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */; };
 		3468ABB31915D39AF41D2621 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
+		35DD801A88C9D8C99F06889A /* CamerasSection+TableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9EE2F37DB271A185EC2CF7 /* CamerasSection+TableDelegate.swift */; };
 		3719FEBA07D012C6D4D5B663 /* MenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBAFF70B90E3449AD09EFEE /* MenuBuilder.swift */; };
 		38F444AACFBC37487F3A5204 /* GroupMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0737BC4060CFA7950A61F8 /* GroupMenuItem.swift */; };
 		3B59DD36C2400864DCEE2CA3 /* BaseMenuItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */; };
@@ -177,6 +178,7 @@
 		05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 		074390035F5E079496B2A9FD /* LocalChangeNotifiableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalChangeNotifiableTests.swift; sourceTree = "<group>"; };
 		0EFAF80C419C6EFB5B6DDABE /* ACStatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ACStatusItem.swift; sourceTree = "<group>"; };
+		0F9EE2F37DB271A185EC2CF7 /* CamerasSection+TableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CamerasSection+TableDelegate.swift"; sourceTree = "<group>"; };
 		1078ED585A5ECE7DF0A569F6 /* DeviceGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceGroup.swift; sourceTree = "<group>"; };
 		117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSummaryMenuItem.swift; sourceTree = "<group>"; };
 		1359B98719D1D9D23782463E /* ShortcutButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutButton.swift; sourceTree = "<group>"; };
@@ -356,6 +358,7 @@
 			children = (
 				BB02A6E6A0F93A3A51FBACC1 /* AboutSection.swift */,
 				0120D24898978AAE26F2A54D /* CamerasSection.swift */,
+				0F9EE2F37DB271A185EC2CF7 /* CamerasSection+TableDelegate.swift */,
 				2015876131A8AE52D26618FC /* DeeplinksSection.swift */,
 				62AD62C3749331FE2DA3CA6B /* GeneralSection.swift */,
 				45ADAE5712E4621056FF217C /* GroupEditorPanel.swift */,
@@ -739,6 +742,7 @@
 				CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */,
 				0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */,
 				CD46DAC3D441849FF023CC5A /* CameraPanelManager.swift in Sources */,
+				35DD801A88C9D8C99F06889A /* CamerasSection+TableDelegate.swift in Sources */,
 				11112BE937E38F4684A4A67E /* CamerasSection.swift in Sources */,
 				E53F247D68A3464066E31310 /* CloudSyncManager.swift in Sources */,
 				099D30F6620813668F633D46 /* CloudSyncTranslator.swift in Sources */,

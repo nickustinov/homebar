@@ -8,7 +8,7 @@
 import AppKit
 import Combine
 
-private extension NSPasteboard.PasteboardType {
+extension NSPasteboard.PasteboardType {
     static let cameraItem = NSPasteboard.PasteboardType("com.itsyhome.cameraItem")
 }
 
@@ -76,9 +76,9 @@ class CamerasSection: NSView {
 
     private let stackView = NSStackView()
     private let cameraSwitch = NSSwitch()
-    private var camerasTableView: NSTableView?
+    private(set) var camerasTableView: NSTableView?
     private var menuData: MenuData?
-    private var cameras: [CameraData] = []
+    private(set) var cameras: [CameraData] = []
     private var cancellables = Set<AnyCancellable>()
     private var lastLayoutWidth: CGFloat = 0
 
@@ -227,7 +227,7 @@ class CamerasSection: NSView {
         }
     }
 
-    private func rebuildContent() {
+    func rebuildContent() {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         camerasTableView = nil
         setupContent()
@@ -275,7 +275,7 @@ class CamerasSection: NSView {
 
     // MARK: - Row view
 
-    private func createCameraRowView(camera: CameraData, row: Int) -> NSView {
+    func createCameraRowView(camera: CameraData, row: Int) -> NSView {
         let isPro = ProStatusCache.shared.isPro
         let isHidden = PreferencesManager.shared.isHidden(cameraId: camera.uniqueIdentifier)
         let overlayIds = PreferencesManager.shared.overlayAccessories(for: camera.uniqueIdentifier)
@@ -531,7 +531,7 @@ class CamerasSection: NSView {
 
     // MARK: - Helpers
 
-    private func findService(id: String) -> ServiceData? {
+    func findService(id: String) -> ServiceData? {
         guard let data = menuData else { return nil }
         for accessory in data.accessories {
             for service in accessory.services where service.uniqueIdentifier == id {
@@ -539,6 +539,40 @@ class CamerasSection: NSView {
             }
         }
         return nil
+    }
+
+    func computeChipLines(for cameraId: String) -> Int {
+        let ids = PreferencesManager.shared.overlayAccessories(for: cameraId)
+        let chipWidths: [CGFloat] = ids.compactMap { id in
+            guard let service = findService(id: id) else { return nil }
+            let textWidth = min((service.name as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 10)]).width, 60)
+            // icon(5+12+3) + text + gap(2) + remove(14+3)
+            return 5 + 12 + 3 + textWidth + 2 + 14 + 3
+        }
+        if chipWidths.isEmpty { return 0 }
+
+        // Use best available width: table bounds > view bounds > fallback
+        let resolvedWidth: CGFloat
+        if let tw = camerasTableView?.bounds.width, tw > 0 {
+            resolvedWidth = tw
+        } else if bounds.width > 0 {
+            resolvedWidth = bounds.width
+        } else {
+            resolvedWidth = 560
+        }
+        let availableWidth = resolvedWidth - 66
+
+        var x: CGFloat = 0
+        var lines = 1
+        for width in chipWidths {
+            if x > 0 && x + width > availableWidth {
+                lines += 1
+                x = width + 4
+            } else {
+                x += width + 4
+            }
+        }
+        return lines
     }
 
     private func iconForServiceType(_ type: String) -> NSImage? {
@@ -620,105 +654,3 @@ class CamerasSection: NSView {
     }
 }
 
-// MARK: - Table delegate
-
-extension CamerasSection: NSTableViewDelegate, NSTableViewDataSource {
-
-    func numberOfRows(in tableView: NSTableView) -> Int {
-        cameras.count
-    }
-
-    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        createCameraRowView(camera: cameras[row], row: row)
-    }
-
-    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        let chipLines = computeChipLines(for: cameras[row].uniqueIdentifier)
-        if chipLines == 0 { return 36 }
-        return 36 + 6 + CGFloat(chipLines) * 20 + CGFloat(chipLines - 1) * 4 + 8
-    }
-
-    private func computeChipLines(for cameraId: String) -> Int {
-        let ids = PreferencesManager.shared.overlayAccessories(for: cameraId)
-        let chipWidths: [CGFloat] = ids.compactMap { id in
-            guard let service = findService(id: id) else { return nil }
-            let textWidth = min((service.name as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 10)]).width, 60)
-            // icon(5+12+3) + text + gap(2) + remove(14+3)
-            return 5 + 12 + 3 + textWidth + 2 + 14 + 3
-        }
-        if chipWidths.isEmpty { return 0 }
-
-        // Use best available width: table bounds > view bounds > fallback
-        let resolvedWidth: CGFloat
-        if let tw = camerasTableView?.bounds.width, tw > 0 {
-            resolvedWidth = tw
-        } else if bounds.width > 0 {
-            resolvedWidth = bounds.width
-        } else {
-            resolvedWidth = 560
-        }
-        let availableWidth = resolvedWidth - 66
-
-        var x: CGFloat = 0
-        var lines = 1
-        for width in chipWidths {
-            if x > 0 && x + width > availableWidth {
-                lines += 1
-                x = width + 4
-            } else {
-                x += width + 4
-            }
-        }
-        return lines
-    }
-
-    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-        false
-    }
-
-    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
-        let rowView = NSTableRowView()
-        rowView.isGroupRowStyle = false
-        return rowView
-    }
-
-    // MARK: - Drag and drop
-
-    func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> NSPasteboardWriting? {
-        guard ProStatusCache.shared.isPro else { return nil }
-        let camera = cameras[row]
-        let pb = NSPasteboardItem()
-        pb.setString(camera.uniqueIdentifier, forType: .cameraItem)
-        return pb
-    }
-
-    func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableView.DropOperation) -> NSDragOperation {
-        dropOperation == .above ? .move : []
-    }
-
-    func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
-        guard let items = info.draggingPasteboard.pasteboardItems,
-              let pb = items.first,
-              let draggedId = pb.string(forType: .cameraItem),
-              let originalRow = cameras.firstIndex(where: { $0.uniqueIdentifier == draggedId }) else {
-            return false
-        }
-
-        var newRow = row
-        if originalRow < newRow { newRow -= 1 }
-        if originalRow == newRow { return false }
-
-        // Update order in preferences
-        var order = cameras.map { $0.uniqueIdentifier }
-        let item = order.remove(at: originalRow)
-        order.insert(item, at: newRow)
-        PreferencesManager.shared.cameraOrder = order
-
-        // Rebuild to avoid stale row rendering
-        DispatchQueue.main.async { [weak self] in
-            self?.rebuildContent()
-        }
-
-        return true
-    }
-}

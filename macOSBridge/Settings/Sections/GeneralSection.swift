@@ -11,7 +11,6 @@ import Combine
 class GeneralSection: SettingsCard {
 
     private let launchSwitch = NSSwitch()
-    private let gridSwitch = NSSwitch()
     private let syncSwitch = NSSwitch()
     private var syncStatusLabel: NSTextField!
     private var syncProBadge: NSView!
@@ -52,20 +51,6 @@ class GeneralSection: SettingsCard {
         addContentToBox(launchBox, content: launchRow)
         stackView.addArrangedSubview(launchBox)
         launchBox.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-
-        // Grid view box
-        let gridBox = createCardBox()
-        gridSwitch.controlSize = .mini
-        gridSwitch.target = self
-        gridSwitch.action = #selector(gridSwitchChanged)
-        let gridRow = createSettingRow(
-            label: "Show scenes as grid",
-            subtitle: "Display scenes in a compact grid layout instead of a list.",
-            control: gridSwitch
-        )
-        addContentToBox(gridBox, content: gridRow)
-        stackView.addArrangedSubview(gridBox)
-        gridBox.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
 
         // iCloud sync box
         let syncBox = createCardBox()
@@ -362,7 +347,6 @@ class GeneralSection: SettingsCard {
 
     private func loadPreferences() {
         launchSwitch.state = PreferencesManager.shared.launchAtLogin ? .on : .off
-        gridSwitch.state = PreferencesManager.shared.scenesDisplayMode == .grid ? .on : .off
         syncSwitch.state = CloudSyncManager.shared.isSyncEnabled ? .on : .off
         updateSyncUI()
     }
@@ -433,10 +417,6 @@ class GeneralSection: SettingsCard {
 
     @objc private func launchSwitchChanged(_ sender: NSSwitch) {
         PreferencesManager.shared.launchAtLogin = sender.state == .on
-    }
-
-    @objc private func gridSwitchChanged(_ sender: NSSwitch) {
-        PreferencesManager.shared.scenesDisplayMode = sender.state == .on ? .grid : .list
     }
 
     @objc private func syncSwitchChanged(_ sender: NSSwitch) {

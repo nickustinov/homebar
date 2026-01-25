@@ -131,23 +131,18 @@ class MenuBuilder {
             return i1 < i2
         }
 
-        if preferences.scenesDisplayMode == .grid {
-            let gridItem = ScenesGridMenuItem(scenes: orderedScenes, bridge: bridge)
-            menu.addItem(gridItem)
-        } else {
-            let icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-            let scenesItem = createSubmenuItem(title: "Scenes", icon: icon)
+        let icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        let scenesItem = createSubmenuItem(title: "Scenes", icon: icon)
 
-            let submenu = StayOpenMenu()
-            for scene in orderedScenes {
-                let item = SceneMenuItem(sceneData: scene, bridge: bridge)
-                submenu.addItem(item)
-                sceneMenuItems.append(item)
-            }
-
-            scenesItem.submenu = submenu
-            menu.addItem(scenesItem)
+        let submenu = StayOpenMenu()
+        for scene in orderedScenes {
+            let item = SceneMenuItem(sceneData: scene, bridge: bridge)
+            submenu.addItem(item)
+            sceneMenuItems.append(item)
         }
+
+        scenesItem.submenu = submenu
+        menu.addItem(scenesItem)
     }
 
     // MARK: - Rooms and accessories

@@ -23,7 +23,6 @@ final class PreferencesManager {
     private enum Keys {
         // Global settings
         static let launchAtLogin = "launchAtLogin"
-        static let scenesDisplayMode = "scenesDisplayMode"
         static let camerasEnabled = "camerasEnabled"
 
         // Per-home settings (use with homeKey helper)
@@ -45,11 +44,6 @@ final class PreferencesManager {
         static let globalGroupOrder = "globalGroupOrder"
         static let groupOrderByRoom = "groupOrderByRoom"
         static let favouriteGroupIds = "favouriteGroupIds"
-    }
-
-    enum ScenesDisplayMode: String {
-        case list = "list"
-        case grid = "grid"
     }
 
     private let defaults = UserDefaults.standard
@@ -108,19 +102,6 @@ final class PreferencesManager {
             }
         } catch {
             print("Failed to update launch at login: \(error)")
-        }
-    }
-
-    // MARK: - Scenes display mode (global)
-
-    var scenesDisplayMode: ScenesDisplayMode {
-        get {
-            let raw = defaults.string(forKey: Keys.scenesDisplayMode) ?? ScenesDisplayMode.list.rawValue
-            return ScenesDisplayMode(rawValue: raw) ?? .list
-        }
-        set {
-            defaults.set(newValue.rawValue, forKey: Keys.scenesDisplayMode)
-            postNotification()
         }
     }
 

@@ -33,7 +33,6 @@ final class PreferencesManagerTests: XCTestCase {
             defaults.removeObject(forKey: "\(suffix)_\(testHomeId)")
         }
         defaults.removeObject(forKey: "camerasEnabled")
-        defaults.removeObject(forKey: "scenesDisplayMode")
         prefs.currentHomeId = nil
         super.tearDown()
     }
@@ -49,19 +48,6 @@ final class PreferencesManagerTests: XCTestCase {
         XCTAssertTrue(prefs.camerasEnabled)
         prefs.camerasEnabled = false
         XCTAssertFalse(prefs.camerasEnabled)
-    }
-
-    // MARK: - Scenes display mode (global)
-
-    func testScenesDisplayModeDefaultsList() {
-        XCTAssertEqual(prefs.scenesDisplayMode, .list)
-    }
-
-    func testScenesDisplayModePersists() {
-        prefs.scenesDisplayMode = .grid
-        XCTAssertEqual(prefs.scenesDisplayMode, .grid)
-        prefs.scenesDisplayMode = .list
-        XCTAssertEqual(prefs.scenesDisplayMode, .list)
     }
 
     // MARK: - Hidden cameras (per-home)

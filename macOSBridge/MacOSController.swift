@@ -488,13 +488,22 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
     private func positionCameraPanelWithSize(_ window: NSWindow, width: CGFloat, height: CGFloat, animate: Bool = false) {
         guard let button = cameraStatusItem?.button,
-              let buttonWindow = button.window else { return }
+              let buttonWindow = button.window,
+              let screen = buttonWindow.screen else { return }
 
         let buttonRect = button.convert(button.bounds, to: nil)
         let screenRect = buttonWindow.convertToScreen(buttonRect)
+        let visibleFrame = screen.visibleFrame
 
-        let x = screenRect.midX - width / 2
+        // Start with centered position
+        var x = screenRect.midX - width / 2
         let y = screenRect.minY - height - 4
+
+        // Clamp to screen edges
+        let minX = visibleFrame.minX
+        let maxX = visibleFrame.maxX - width
+
+        x = max(minX, min(x, maxX))
 
         window.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true, animate: animate)
     }

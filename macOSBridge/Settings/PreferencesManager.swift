@@ -52,7 +52,7 @@ final class PreferencesManager {
     private init() {
         // Register defaults
         defaults.register(defaults: [
-            Keys.launchAtLogin: true
+            Keys.launchAtLogin: false
         ])
 
         // Sync launch at login state with system on init

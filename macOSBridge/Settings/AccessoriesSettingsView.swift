@@ -31,6 +31,7 @@ struct FavouriteItem {
 enum RoomTableItem {
     case header(room: RoomData, isHidden: Bool, isCollapsed: Bool, serviceCount: Int)
     case accessory(service: ServiceData, roomHidden: Bool)
+    case separator
 
     var isHeader: Bool {
         if case .header = self { return true }
@@ -177,13 +178,32 @@ class AccessoriesSettingsView: NSView {
             items.append(.header(room: room, isHidden: isHidden, isCollapsed: isCollapsed, serviceCount: services.count))
 
             if !isCollapsed {
-                let sorted = services.sorted { s1, s2 in
-                    let i1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
-                    let i2 = typeOrder.firstIndex(of: s2.serviceType) ?? Int.max
-                    return i1 != i2 ? i1 < i2 : s1.name < s2.name
+                // Group services by type
+                var servicesByType: [String: [ServiceData]] = [:]
+                for service in services {
+                    servicesByType[service.serviceType, default: []].append(service)
                 }
-                for service in sorted {
-                    items.append(.accessory(service: service, roomHidden: isHidden))
+
+                // Sort types by typeOrder and add separators between groups
+                let sortedTypes = servicesByType.keys.sorted { type1, type2 in
+                    let i1 = typeOrder.firstIndex(of: type1) ?? Int.max
+                    let i2 = typeOrder.firstIndex(of: type2) ?? Int.max
+                    return i1 < i2
+                }
+
+                var isFirstGroup = true
+                for serviceType in sortedTypes {
+                    guard let typeServices = servicesByType[serviceType] else { continue }
+
+                    if !isFirstGroup {
+                        items.append(.separator)
+                    }
+                    isFirstGroup = false
+
+                    let sortedServices = typeServices.sorted { $0.name < $1.name }
+                    for service in sortedServices {
+                        items.append(.accessory(service: service, roomHidden: isHidden))
+                    }
                 }
             }
         }
@@ -265,7 +285,7 @@ class AccessoriesSettingsView: NSView {
 
         // Rooms section
         if !roomTableItems.isEmpty {
-            let tableHeight = CGFloat(roomTableItems.count) * L.rowHeight + CGFloat(max(0, roomTableItems.count - 1)) * 4
+            let tableHeight = calculateRoomsTableHeight()
             let tableContainer = createRoomsTable(height: tableHeight)
             addView(tableContainer, height: tableHeight)
             roomsTableView?.reloadData()
@@ -341,6 +361,23 @@ class AccessoriesSettingsView: NSView {
         stackView.addArrangedSubview(container)
         container.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
         container.heightAnchor.constraint(equalToConstant: 16).isActive = true
+    }
+
+    private func calculateRoomsTableHeight() -> CGFloat {
+        let L = AccessoryRowLayout.self
+        var height: CGFloat = 0
+        for (index, item) in roomTableItems.enumerated() {
+            if case .separator = item {
+                height += 12
+            } else {
+                height += L.rowHeight
+            }
+            // Add intercell spacing (except for last row)
+            if index < roomTableItems.count - 1 {
+                height += 4
+            }
+        }
+        return height
     }
 
     // MARK: - Room index helpers

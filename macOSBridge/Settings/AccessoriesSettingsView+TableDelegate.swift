@@ -32,7 +32,10 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
     }
 
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        AccessoryRowLayout.rowHeight
+        if tableView === roomsTableView, row < roomTableItems.count, case .separator = roomTableItems[row] {
+            return 12
+        }
+        return AccessoryRowLayout.rowHeight
     }
 
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
@@ -76,7 +79,26 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             return createRoomHeaderView(room: room, isHidden: isHidden, isCollapsed: isCollapsed, serviceCount: serviceCount)
         case .accessory(let service, let roomHidden):
             return createAccessoryRow(service: service, roomHidden: roomHidden)
+        case .separator:
+            return createSeparatorRow()
         }
+    }
+
+    private func createSeparatorRow() -> NSView {
+        let container = NSView()
+        let separator = NSBox()
+        separator.boxType = .separator
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(separator)
+
+        let indent = AccessoryRowLayout.indentWidth + AccessoryRowLayout.leftPadding
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: indent),
+            separator.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -AccessoryRowLayout.rightPadding),
+            separator.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        return container
     }
 
     private func createSceneRowView(row: Int) -> NSView {

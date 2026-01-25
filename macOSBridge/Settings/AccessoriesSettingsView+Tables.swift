@@ -91,6 +91,7 @@ extension AccessoriesSettingsView {
     func createScenesHeaderStrip(isHidden: Bool, isCollapsed: Bool, sceneCount: Int) -> NSView {
         let config = AccessoryRowConfig(
             name: "Scenes",
+            icon: NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil),
             count: sceneCount,
             reserveDragHandleSpace: true,
             showChevron: true,

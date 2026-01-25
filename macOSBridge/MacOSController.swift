@@ -34,7 +34,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private var menuIsOpen = false
     private var needsRebuild = false
     private var proStatusCancellable: AnyCancellable?
-    private var pinnedStatusItems: [String: ThermostatStatusItem] = [:]
+    private var pinnedStatusItems: [String: PinnedStatusItem] = [:]
     private let cameraPanelManager = CameraPanelManager()
 
     @objc public weak var iOSBridge: Mac2iOS?
@@ -75,8 +75,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         Task { @MainActor in
             proStatusCancellable = ProManager.shared.$isPro
                 .receive(on: DispatchQueue.main)
-                .sink { [weak self] isPro in
-                    print("[Camera] Pro status changed to: \(isPro)")
+                .sink { [weak self] _ in
                     self?.updateCameraStatusVisibility()
                 }
         }
@@ -87,7 +86,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         let camerasEnabled = PreferencesManager.shared.camerasEnabled
         let isPro = ProStatusCache.shared.isPro
         let shouldShow = data.hasCameras && camerasEnabled && isPro
-        print("[Camera] updateCameraStatusVisibility - shouldShow: \(shouldShow)")
         cameraPanelManager.setupCameraStatusItem(hasCameras: shouldShow)
     }
 
@@ -129,33 +127,80 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private func syncPinnedStatusItems() {
         guard let data = currentMenuData else { return }
 
-        let pinnedIds = PreferencesManager.shared.pinnedServiceIds
-        let thermostatTypes: Set<String> = [ServiceTypes.thermostat, ServiceTypes.heaterCooler]
+        let pinnedIds = PreferencesManager.shared.pinnedItemIds
 
-        // Find all thermostat services that are pinned
-        var pinnedServices: [String: ServiceData] = [:]
-        for accessory in data.accessories {
-            for service in accessory.services {
-                if pinnedIds.contains(service.uniqueIdentifier) && thermostatTypes.contains(service.serviceType) {
-                    pinnedServices[service.uniqueIdentifier] = service
+        // Build lookup maps
+        let allServices = data.accessories.flatMap { $0.services }
+        let serviceLookup = Dictionary(uniqueKeysWithValues: allServices.map { ($0.uniqueIdentifier, $0) })
+        let roomLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0) })
+        let sceneLookup = Dictionary(uniqueKeysWithValues: data.scenes.map { ($0.uniqueIdentifier, $0) })
+        let deviceGroups = PreferencesManager.shared.deviceGroups
+
+        // Build services by room
+        var servicesByRoom: [String: [ServiceData]] = [:]
+        for service in allServices {
+            if let roomId = service.roomIdentifier {
+                servicesByRoom[roomId, default: []].append(service)
+            }
+        }
+
+        // Determine which pinned items are valid
+        var validPinnedItems: [String: PinnedItemType] = [:]
+        for pinId in pinnedIds {
+            if pinId.hasPrefix("room:") {
+                // Room pin
+                let roomId = String(pinId.dropFirst(5))
+                if let room = roomLookup[roomId], let services = servicesByRoom[roomId], !services.isEmpty {
+                    validPinnedItems[pinId] = .room(room, services)
+                }
+            } else if pinId.hasPrefix("scene:") {
+                // Scene pin
+                let sceneId = String(pinId.dropFirst(6))
+                if let scene = sceneLookup[sceneId] {
+                    validPinnedItems[pinId] = .scene(scene)
+                }
+            } else if pinId.hasPrefix("group:") {
+                // Group pin
+                let groupId = String(pinId.dropFirst(6))
+                if let group = deviceGroups.first(where: { $0.id == groupId }) {
+                    let services = group.resolveServices(in: data)
+                    if !services.isEmpty {
+                        validPinnedItems[pinId] = .group(group, services)
+                    }
+                }
+            } else {
+                // Service pin
+                if let service = serviceLookup[pinId] {
+                    validPinnedItems[pinId] = .service(service)
                 }
             }
         }
 
-        // Remove status items for services that are no longer pinned
-        for (serviceId, _) in pinnedStatusItems {
-            if pinnedServices[serviceId] == nil {
-                pinnedStatusItems.removeValue(forKey: serviceId)
+        // Remove status items that are no longer valid
+        for (itemId, _) in pinnedStatusItems {
+            if validPinnedItems[itemId] == nil {
+                pinnedStatusItems.removeValue(forKey: itemId)
             }
         }
 
-        // Create status items for newly pinned services
-        for (serviceId, service) in pinnedServices {
-            if pinnedStatusItems[serviceId] == nil {
-                let statusItem = ThermostatStatusItem(serviceId: serviceId, serviceName: service.name)
+        // Create status items for newly pinned items
+        for (itemId, itemType) in validPinnedItems {
+            if pinnedStatusItems[itemId] == nil {
+                let itemName: String
+                switch itemType {
+                case .service(let service):
+                    itemName = service.name
+                case .room(let room, _):
+                    itemName = room.name
+                case .scene(let scene):
+                    itemName = scene.name
+                case .group(let group, _):
+                    itemName = group.name
+                }
+
+                let statusItem = PinnedStatusItem(itemId: itemId, itemName: itemName, itemType: itemType)
                 statusItem.delegate = self
-                statusItem.configure(with: service)
-                pinnedStatusItems[serviceId] = statusItem
+                pinnedStatusItems[itemId] = statusItem
 
                 // Request initial values for the characteristics
                 for charId in statusItem.characteristicIdentifiers {
@@ -366,7 +411,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     // MARK: - Menu Building
 
     private func rebuildMenu(with data: MenuData) {
-        print("[Camera] rebuildMenu called, hasCameras: \(data.hasCameras)")
         currentMenuData = data
         mainMenu.removeAllItems()
 
@@ -385,7 +429,6 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         let camerasEnabled = PreferencesManager.shared.camerasEnabled
         let isPro = ProStatusCache.shared.isPro
         let shouldShow = data.hasCameras && camerasEnabled && isPro
-        print("[Camera] camerasEnabled: \(camerasEnabled), isPro: \(isPro), shouldShow: \(shouldShow)")
         cameraPanelManager.setupCameraStatusItem(hasCameras: shouldShow)
 
         // Update pinned status items
@@ -532,7 +575,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
                 cameraPanelManager.dismissCameraPanel()
             }
             // Close any open thermostat popovers
-            NotificationCenter.default.post(name: ThermostatStatusItem.closePopoverNotification, object: nil)
+            NotificationCenter.default.post(name: PinnedStatusItem.closeAllPanelsNotification, object: nil)
             refreshCharacteristics()
         }
     }
@@ -568,11 +611,19 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 }
 
-// MARK: - ThermostatStatusItemDelegate
+// MARK: - PinnedStatusItemDelegate
 
-extension MacOSController: ThermostatStatusItemDelegate {
-    func thermostatStatusItem(_ item: ThermostatStatusItem, writeValue value: Any, forCharacteristic characteristicId: UUID) {
-        iOSBridge?.writeCharacteristic(identifier: characteristicId, value: value)
+extension MacOSController: PinnedStatusItemDelegate {
+    func pinnedStatusItemNeedsMenuBuilder(_ item: PinnedStatusItem) -> MenuBuilder? {
+        return menuBuilder
+    }
+
+    func pinnedStatusItemNeedsMenuData(_ item: PinnedStatusItem) -> MenuData? {
+        return currentMenuData
+    }
+
+    func pinnedStatusItem(_ item: PinnedStatusItem, readCharacteristic characteristicId: UUID) {
+        iOSBridge?.readCharacteristic(identifier: characteristicId)
     }
 }
 

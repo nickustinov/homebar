@@ -11,11 +11,9 @@
 		010BCFB919140D13C4961A9E /* AccessoriesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221351A6C7AB72AC5F0E1714 /* AccessoriesSettingsView.swift */; };
 		018431CF2F20A2331B4F42FE /* ActionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7FF79A158B9BA2B399F2EF /* ActionParser.swift */; };
 		0189B807373567481D495882 /* SceneMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AD56C9EA919B09E7896B55 /* SceneMenuItem.swift */; };
-		036159A13D67658A211B08A1 /* PinnedDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6032BB2D6D8EC68869A857D2 /* PinnedDesignSystem.swift */; };
 		0554ECE0D0F5808206BF4215 /* WebhookServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E5CD57B9AFE976E31909CE2 /* WebhookServerTests.swift */; };
 		05A1DB037EB7709B7048A05F /* CameraViewController+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374C2EC1F7A56B4ECE04924A /* CameraViewController+Data.swift */; };
 		069D686EF497B4BE291ED8F9 /* ValueConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1BB4554FA59FCE166E2B86 /* ValueConversionTests.swift */; };
-		076F92194A749EDA89AE608E /* PinnedDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6032BB2D6D8EC68869A857D2 /* PinnedDesignSystem.swift */; };
 		08D8F3C60170681EF3187BCE /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */; };
 		099D30F6620813668F633D46 /* CloudSyncTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578B4AD774F2D31C1C4EE6C /* CloudSyncTranslator.swift */; };
 		0A005DFA734D5F67E70BA99A /* DeviceResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E76F58466E9E704D579F526 /* DeviceResolverTests.swift */; };
@@ -49,6 +47,7 @@
 		280C74C7265950C9756B365E /* MacOSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D500F71D0EA63DEF283D8B /* MacOSController.swift */; };
 		28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374C26148C6FEAAFD207413 /* LockMenuItem.swift */; };
 		28B5F7BA9021D479977F312E /* AccessoriesSettingsView+TableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69710E65E70E915FAA68786 /* AccessoriesSettingsView+TableDelegate.swift */; };
+		2BC0C224A391D617793F96CD /* ColorPickerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */; };
 		2FA906D09DF2D10CD127C5EB /* HumidifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2203CC92AE39248AE04E2480 /* HumidifierMenuItem.swift */; };
 		3468ABB31915D39AF41D2621 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
 		35DD801A88C9D8C99F06889A /* CamerasSection+TableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9EE2F37DB271A185EC2CF7 /* CamerasSection+TableDelegate.swift */; };
@@ -90,7 +89,6 @@
 		772EAC65582AA05AFFA09210 /* AirPurifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */; };
 		77813AE35FF97A14DB35E1C2 /* CloudSyncTranslatorOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57701CE0637BE61201588A16 /* CloudSyncTranslatorOrderTests.swift */; };
 		786699F2C5038B043DDACCDB /* ColorConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBA4F5B869DA1C032B0B3EB /* ColorConversion.swift */; };
-		7B4F924672483F90EAC207BC /* PinnedPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D102B76D810A5EA88388C7 /* PinnedPanelView.swift */; };
 		7BB119B671B3D114D30396B0 /* DeviceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */; };
 		7F4F0B9C698512C72037CB9C /* CameraViewController+HomeKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFABEDCE616EA991243B06A /* CameraViewController+HomeKit.swift */; };
 		806CCEC2325035CD0F9D0690 /* LockMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374C26148C6FEAAFD207413 /* LockMenuItem.swift */; };
@@ -106,6 +104,7 @@
 		9279623381FB28CEBFF44097 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
 		93F37AF55F715D6075134E69 /* ValueConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */; };
 		947C04E9B2C3D8A610F86AAF /* PinnedStatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E98692B043E97671C5B1A /* PinnedStatusItem.swift */; };
+		948F087339D430365755DE96 /* ColorPickerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */; };
 		94D04698ADBC211F1A888348 /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */; };
 		95C36CCD4FADD1E5D599FCF1 /* CloudSyncTranslatorDeviceGroupsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A89008C02F5EDA5137756A /* CloudSyncTranslatorDeviceGroupsTests.swift */; };
 		985B67023A87C83880C511BE /* CloudSyncManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EBA01EDDE859ED8AC024C5 /* CloudSyncManagerTests.swift */; };
@@ -123,7 +122,6 @@
 		B7D6F7258AD7EE41FD484A9B /* CameraSnapshotCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E54535E59CC4328A2DCF58 /* CameraSnapshotCell.swift */; };
 		BC18FC26A00B6D7E9D7D3575 /* ActionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6B3519AD69969925F8F105 /* ActionEngine.swift */; };
 		BDB2AF940BB608A11A976278 /* DeviceResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */; };
-		C313D5CE6F814C94E259E7BD /* ACStatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EFAF80C419C6EFB5B6DDABE /* ACStatusItem.swift */; };
 		C8A37E1284E27AADA3A6906B /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181D73D7B6680B4F8CD37D4E /* DesignSystem.swift */; };
 		CA8E1F973147B8CE2E58FA52 /* BlindMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDA7864F1CCF19AD70E1F96 /* BlindMenuItem.swift */; };
 		CAFADC7AC3708C1CF63E3E15 /* SwitchMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B74BF9E1E02D2CF34C9F37 /* SwitchMenuItem.swift */; };
@@ -131,7 +129,6 @@
 		CD46DAC3D441849FF023CC5A /* CameraPanelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C281E3CFA576C918B16C66 /* CameraPanelManager.swift */; };
 		CD6AE61B7DE19AA5DCD88280 /* ToggleSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */; };
 		CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA517D9CAF4A470166D8C402 /* ModernSlider.swift */; };
-		CDF0FF43009152F73BD24B77 /* ACStatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EFAF80C419C6EFB5B6DDABE /* ACStatusItem.swift */; };
 		CE60FBDD7DA3242E781072D4 /* ColorConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBA4F5B869DA1C032B0B3EB /* ColorConversion.swift */; };
 		CECFFBB02999B556D5D55093 /* ActionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D7D48C5DF8A0F64F6CD9B2 /* ActionParserTests.swift */; };
 		D2096D71A418CA85F0ECD074 /* PreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC234CA03045239CB9D178E6 /* PreferencesManager.swift */; };
@@ -140,7 +137,6 @@
 		E003741ECCB38525B6A202D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A554C4D26C15417928E429D4 /* Assets.xcassets */; };
 		E19EB0697A29FB223575BEFA /* macOSBridge.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 5735B31C003BD03DE4B28206 /* macOSBridge.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E3926443EE62FD43B0C618E8 /* AboutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB02A6E6A0F93A3A51FBACC1 /* AboutSection.swift */; };
-		E4850517F12CB934749D8578 /* PinnedPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D102B76D810A5EA88388C7 /* PinnedPanelView.swift */; };
 		E53F247D68A3464066E31310 /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D91667CA03C981ACF4D8EDA /* CloudSyncManager.swift */; };
 		EA2BD76D206D991EBDA7FE4C /* CameraViewController+Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF6041C9E962ED63D2709FD /* CameraViewController+Audio.swift */; };
 		EBD10F700CEFAA9D8C99229F /* ShortcutButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1359B98719D1D9D23782463E /* ShortcutButton.swift */; };
@@ -177,7 +173,6 @@
 		0407B252FDFC384E196876DD /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		05A1A234EF733DB7475895AD /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 		074390035F5E079496B2A9FD /* LocalChangeNotifiableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalChangeNotifiableTests.swift; sourceTree = "<group>"; };
-		0EFAF80C419C6EFB5B6DDABE /* ACStatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ACStatusItem.swift; sourceTree = "<group>"; };
 		0F9EE2F37DB271A185EC2CF7 /* CamerasSection+TableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CamerasSection+TableDelegate.swift"; sourceTree = "<group>"; };
 		1078ED585A5ECE7DF0A569F6 /* DeviceGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceGroup.swift; sourceTree = "<group>"; };
 		117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSummaryMenuItem.swift; sourceTree = "<group>"; };
@@ -213,7 +208,6 @@
 		5735B31C003BD03DE4B28206 /* macOSBridge.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSBridge.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		57701CE0637BE61201588A16 /* CloudSyncTranslatorOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTranslatorOrderTests.swift; sourceTree = "<group>"; };
 		5E5CD57B9AFE976E31909CE2 /* WebhookServerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebhookServerTests.swift; sourceTree = "<group>"; };
-		6032BB2D6D8EC68869A857D2 /* PinnedDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedDesignSystem.swift; sourceTree = "<group>"; };
 		62AD62C3749331FE2DA3CA6B /* GeneralSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSection.swift; sourceTree = "<group>"; };
 		6A2E98692B043E97671C5B1A /* PinnedStatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedStatusItem.swift; sourceTree = "<group>"; };
 		6CFE6ECEB559109472BA360A /* BaseMenuItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseMenuItems.swift; sourceTree = "<group>"; };
@@ -234,6 +228,7 @@
 		8E38D91D9B55FBEBB1C7D33B /* CameraViewController+CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraViewController+CollectionView.swift"; sourceTree = "<group>"; };
 		8E67C906ECD67B8E10255EFC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		914A41E0AA9D87F86AA5935F /* CameraViewController+Streaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraViewController+Streaming.swift"; sourceTree = "<group>"; };
+		969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViews.swift; sourceTree = "<group>"; };
 		97019F49E19F08ED22A6720B /* CameraViewController+Overlays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraViewController+Overlays.swift"; sourceTree = "<group>"; };
 		99356FF270E11FD9201F3359 /* AccessoryRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessoryRowView.swift; sourceTree = "<group>"; };
 		99DC1291FE6F040A1673F599 /* URLSchemeHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandlerTests.swift; sourceTree = "<group>"; };
@@ -259,7 +254,6 @@
 		CC0737BC4060CFA7950A61F8 /* GroupMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMenuItem.swift; sourceTree = "<group>"; };
 		CE0096925C98FD6B955AB016 /* WebhookServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebhookServer.swift; sourceTree = "<group>"; };
 		D0E47D2FA39B625CC3FA0E66 /* Itsyhome.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Itsyhome.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4D102B76D810A5EA88388C7 /* PinnedPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedPanelView.swift; sourceTree = "<group>"; };
 		D69710E65E70E915FAA68786 /* AccessoriesSettingsView+TableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccessoriesSettingsView+TableDelegate.swift"; sourceTree = "<group>"; };
 		D7001522F49F44848A26EC3E /* IconMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconMapping.swift; sourceTree = "<group>"; };
 		D8DAE0D0C65A8D06C17611F3 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
@@ -457,9 +451,6 @@
 		793C583153901FFB74152678 /* PinnedAccessory */ = {
 			isa = PBXGroup;
 			children = (
-				0EFAF80C419C6EFB5B6DDABE /* ACStatusItem.swift */,
-				6032BB2D6D8EC68869A857D2 /* PinnedDesignSystem.swift */,
-				D4D102B76D810A5EA88388C7 /* PinnedPanelView.swift */,
 				6A2E98692B043E97671C5B1A /* PinnedStatusItem.swift */,
 			);
 			path = PinnedAccessory;
@@ -515,6 +506,7 @@
 		D2258862CCE787F231C5D76E /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */,
 				181D73D7B6680B4F8CD37D4E /* DesignSystem.swift */,
 				AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */,
 				EA517D9CAF4A470166D8C402 /* ModernSlider.swift */,
@@ -729,7 +721,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				646767AF7A71690332C474E0 /* ACMenuItem.swift in Sources */,
-				CDF0FF43009152F73BD24B77 /* ACStatusItem.swift in Sources */,
 				E3926443EE62FD43B0C618E8 /* AboutSection.swift in Sources */,
 				28B5F7BA9021D479977F312E /* AccessoriesSettingsView+TableDelegate.swift in Sources */,
 				4F3453F7475E6BAE4F33924F /* AccessoriesSettingsView+Tables.swift in Sources */,
@@ -747,6 +738,7 @@
 				E53F247D68A3464066E31310 /* CloudSyncManager.swift in Sources */,
 				099D30F6620813668F633D46 /* CloudSyncTranslator.swift in Sources */,
 				CE60FBDD7DA3242E781072D4 /* ColorConversion.swift in Sources */,
+				948F087339D430365755DE96 /* ColorPickerViews.swift in Sources */,
 				A39C19839A70844424127BF4 /* DebugMockAccessories.swift in Sources */,
 				F019042FCFF1C339C065CD64 /* DeeplinksSection.swift in Sources */,
 				DB962F06C77A87E8D2AAA55E /* DesignSystem.swift in Sources */,
@@ -768,8 +760,6 @@
 				3719FEBA07D012C6D4D5B663 /* MenuBuilder.swift in Sources */,
 				51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */,
 				98F783AA77C8DA2CF5D5A923 /* ModernSlider.swift in Sources */,
-				036159A13D67658A211B08A1 /* PinnedDesignSystem.swift in Sources */,
-				E4850517F12CB934749D8578 /* PinnedPanelView.swift in Sources */,
 				9C86FF5A1BF850043DC70F8C /* PinnedStatusItem.swift in Sources */,
 				D2096D71A418CA85F0ECD074 /* PreferencesManager.swift in Sources */,
 				20065FF911389BDD959B2D6B /* ProManager.swift in Sources */,
@@ -800,7 +790,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				00F3743A0841F193C487A90D /* ACMenuItem.swift in Sources */,
-				C313D5CE6F814C94E259E7BD /* ACStatusItem.swift in Sources */,
 				BC18FC26A00B6D7E9D7D3575 /* ActionEngine.swift in Sources */,
 				A59EA0092ED0DD63857F5043 /* ActionEngineTests.swift in Sources */,
 				018431CF2F20A2331B4F42FE /* ActionParser.swift in Sources */,
@@ -819,6 +808,7 @@
 				6ECD2A8E74161BA10E24C979 /* CloudSyncTranslatorTestHelpers.swift in Sources */,
 				1C6AB0890960150B4D251149 /* CloudSyncTranslatorTests.swift in Sources */,
 				786699F2C5038B043DDACCDB /* ColorConversion.swift in Sources */,
+				2BC0C224A391D617793F96CD /* ColorPickerViews.swift in Sources */,
 				C8A37E1284E27AADA3A6906B /* DesignSystem.swift in Sources */,
 				63AA00C163B17C7DF80BE19C /* DeviceGroup.swift in Sources */,
 				F3ACBFD7F9E327CEBE68595D /* DeviceGroupTests.swift in Sources */,
@@ -835,8 +825,6 @@
 				28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */,
 				67E9EC3321181637F2778AD9 /* ModeButton.swift in Sources */,
 				CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */,
-				076F92194A749EDA89AE608E /* PinnedDesignSystem.swift in Sources */,
-				7B4F924672483F90EAC207BC /* PinnedPanelView.swift in Sources */,
 				947C04E9B2C3D8A610F86AAF /* PinnedStatusItem.swift in Sources */,
 				158EC3D55E6D386D2AD13DC0 /* PreferencesManager.swift in Sources */,
 				81700D54D56303C83DD65445 /* PreferencesManagerTests.swift in Sources */,

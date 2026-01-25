@@ -46,8 +46,6 @@ struct CloudSyncTranslator {
         sceneNameToId.removeAll()
         roomIdToName = roomLookup
         roomNameToId = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.name, $0.uniqueIdentifier) })
-        print("[CloudSync Translator] updateMenuData: roomIdToName=\(roomIdToName)")
-        print("[CloudSync Translator] updateMenuData: roomNameToId=\(roomNameToId)")
 
         for accessory in data.accessories {
             let roomName = accessory.roomIdentifier.flatMap { roomLookup[$0] } ?? "Unknown"
@@ -81,11 +79,7 @@ struct CloudSyncTranslator {
             case .scene:
                 return sceneIdToName[id]
             case .room:
-                let name = roomIdToName[id]
-                if name == nil {
-                    print("[CloudSync Translator] translateIdsToStable: room id '\(id)' NOT FOUND in roomIdToName")
-                }
-                return name
+                return roomIdToName[id]
             case .camera:
                 return cameraIdToName[id]
             }
@@ -101,11 +95,7 @@ struct CloudSyncTranslator {
             case .scene:
                 return sceneNameToId[name]
             case .room:
-                let id = roomNameToId[name]
-                if id == nil {
-                    print("[CloudSync Translator] translateStableToIds: room name '\(name)' NOT FOUND in roomNameToId")
-                }
-                return id
+                return roomNameToId[name]
             case .camera:
                 return cameraNameToId[name]
             }

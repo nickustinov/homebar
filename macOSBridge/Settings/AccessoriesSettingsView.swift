@@ -281,7 +281,6 @@ class AccessoriesSettingsView: NSView {
     }
 
     private func buildOtherSection() {
-        let preferences = PreferencesManager.shared
         let L = AccessoryRowLayout.self
         let otherKey = "other"
         let isOtherCollapsed = !expandedSections.contains(otherKey)
@@ -296,9 +295,9 @@ class AccessoriesSettingsView: NSView {
                 return i1 != i2 ? i1 < i2 : s1.name < s2.name
             }
 
-            let pinnableTypes: Set<String> = [ServiceTypes.thermostat, ServiceTypes.heaterCooler]
+            // All accessories can be pinned to the menu bar
             for service in sorted {
-                let row = createAccessoryRow(service: service, roomHidden: false, pinnableTypes: pinnableTypes)
+                let row = createAccessoryRow(service: service, roomHidden: false)
                 addView(row, height: L.rowHeight)
             }
         }

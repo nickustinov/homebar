@@ -31,37 +31,27 @@ final class CameraPanelManager {
     // MARK: - Public API
 
     func setupCameraStatusItem(hasCameras: Bool) {
-        print("[Camera] setupCameraStatusItem called with hasCameras: \(hasCameras)")
         if hasCameras {
             if cameraStatusItem == nil {
-                print("[Camera] Creating new camera status item")
                 let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
                 if let button = item.button {
                     let pluginBundle = Bundle(for: CameraPanelManager.self)
                     if let icon = pluginBundle.image(forResource: "CameraMenuBarIcon") {
                         icon.isTemplate = true
                         button.image = icon
-                        print("[Camera] Set custom camera icon")
                     } else {
                         button.image = NSImage(systemSymbolName: "video.fill", accessibilityDescription: "Cameras")
                         button.image?.isTemplate = true
-                        print("[Camera] Set fallback video.fill icon")
                     }
                     button.action = #selector(cameraStatusItemClicked)
                     button.target = self
                 }
                 cameraStatusItem = item
-                print("[Camera] Camera status item created successfully")
-            } else {
-                print("[Camera] Camera status item already exists")
             }
         } else {
             if let item = cameraStatusItem {
-                print("[Camera] Removing camera status item")
                 NSStatusBar.system.removeStatusItem(item)
                 cameraStatusItem = nil
-            } else {
-                print("[Camera] No camera status item to remove")
             }
         }
     }

@@ -237,6 +237,8 @@ extension GroupsSettingsView: NSTableViewDelegate, NSTableViewDataSource {
 
     private func createGroupRowView(group: DeviceGroup, row: Int) -> NSView {
         let isPro = ProStatusCache.shared.isPro
+        let preferences = PreferencesManager.shared
+        let isPinned = preferences.isPinnedGroup(groupId: group.id)
         let container = CardBoxView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
@@ -265,6 +267,18 @@ extension GroupsSettingsView: NSTableViewDelegate, NSTableViewDataSource {
         countLabel.textColor = .secondaryLabelColor
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(countLabel)
+
+        // Pin button
+        let pinButton = NSButton()
+        pinButton.bezelStyle = .accessoryBarAction
+        pinButton.title = isPinned ? "Unpin" : "Pin"
+        pinButton.font = .systemFont(ofSize: 11)
+        pinButton.controlSize = .small
+        pinButton.tag = row
+        pinButton.target = self
+        pinButton.action = #selector(groupPinTapped(_:))
+        pinButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(pinButton)
 
         // Shortcut button (disabled for non-pro)
         let shortcutButton = ShortcutButton(frame: .zero)
@@ -319,11 +333,21 @@ extension GroupsSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             editButton.trailingAnchor.constraint(equalTo: deleteButton.leadingAnchor, constant: -8),
             editButton.centerYAnchor.constraint(equalTo: container.centerYAnchor),
 
-            shortcutButton.trailingAnchor.constraint(equalTo: editButton.leadingAnchor, constant: -8),
+            pinButton.trailingAnchor.constraint(equalTo: editButton.leadingAnchor, constant: -8),
+            pinButton.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+
+            shortcutButton.trailingAnchor.constraint(equalTo: pinButton.leadingAnchor, constant: -8),
             shortcutButton.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
 
         return container
+    }
+
+    @objc private func groupPinTapped(_ sender: NSButton) {
+        guard sender.tag < groups.count else { return }
+        let group = groups[sender.tag]
+        PreferencesManager.shared.togglePinnedGroup(groupId: group.id)
+        rebuildContent()
     }
 
     // MARK: - Drag and drop

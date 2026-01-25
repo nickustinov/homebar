@@ -157,18 +157,22 @@ extension AccessoriesSettingsView {
         let container = CardBoxView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
+        let preferences = PreferencesManager.shared
+        let isPinned = preferences.isPinnedRoom(roomId: room.uniqueIdentifier)
+        let roomIndex = orderedRooms.firstIndex(where: { $0.uniqueIdentifier == room.uniqueIdentifier }) ?? 0
+
         let dragHandle = DragHandleView()
         dragHandle.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(dragHandle)
 
         let chevronButton = createChevronButton(isCollapsed: isCollapsed)
-        chevronButton.tag = orderedRooms.firstIndex(where: { $0.uniqueIdentifier == room.uniqueIdentifier }) ?? 0
+        chevronButton.tag = roomIndex
         chevronButton.target = self
         chevronButton.action = #selector(roomChevronTapped(_:))
         container.addSubview(chevronButton)
 
         let eyeButton = createEyeButton(isHidden: isHidden)
-        eyeButton.tag = orderedRooms.firstIndex(where: { $0.uniqueIdentifier == room.uniqueIdentifier }) ?? 0
+        eyeButton.tag = roomIndex
         eyeButton.target = self
         eyeButton.action = #selector(roomEyeTapped(_:))
         container.addSubview(eyeButton)
@@ -183,6 +187,18 @@ extension AccessoriesSettingsView {
         countLabel.alphaValue = isHidden ? 0.5 : 1.0
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(countLabel)
+
+        // Pin button on the right side (like accessory rows)
+        let pinButton = NSButton()
+        pinButton.bezelStyle = .accessoryBarAction
+        pinButton.title = isPinned ? "Unpin" : "Pin"
+        pinButton.font = .systemFont(ofSize: 11)
+        pinButton.controlSize = .small
+        pinButton.tag = roomIndex
+        pinButton.target = self
+        pinButton.action = #selector(roomPinTapped(_:))
+        pinButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(pinButton)
 
         NSLayoutConstraint.activate([
             dragHandle.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: L.leftPadding),
@@ -205,10 +221,20 @@ extension AccessoriesSettingsView {
 
             countLabel.leadingAnchor.constraint(equalTo: nameLabel.trailingAnchor, constant: 4),
             countLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            countLabel.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor, constant: -L.rightPadding)
+
+            pinButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -L.rightPadding),
+            pinButton.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            countLabel.trailingAnchor.constraint(lessThanOrEqualTo: pinButton.leadingAnchor, constant: -8)
         ])
 
         return container
+    }
+
+    @objc private func roomPinTapped(_ sender: NSButton) {
+        guard sender.tag < orderedRooms.count else { return }
+        let room = orderedRooms[sender.tag]
+        PreferencesManager.shared.togglePinnedRoom(roomId: room.uniqueIdentifier)
+        rebuild()
     }
 
     // MARK: - Button factories

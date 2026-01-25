@@ -75,7 +75,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         var title: String {
             switch self {
             case .general: return "General"
-            case .accessories: return "Accessories"
+            case .accessories: return "Home"
             case .cameras: return "Cameras"
             case .deeplinks: return "Deeplinks"
             case .webhooks: return "Webhooks/CLI"
@@ -86,7 +86,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         var icon: String {
             switch self {
             case .general: return "gearshape"
-            case .accessories: return "lightbulb"
+            case .accessories: return "house"
             case .cameras: return "video"
             case .deeplinks: return "link"
             case .webhooks: return "network"

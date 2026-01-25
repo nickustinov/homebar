@@ -333,10 +333,9 @@ class AccessoriesSettingsView: NSView {
 
         let preferences = PreferencesManager.shared
         let L = AccessoryRowLayout.self
-        let isPro = ProStatusCache.shared.isPro
 
         // Description
-        let descLabel = NSTextField(wrappingLabelWithString: "Add accessories to Favourites to pin them at the top of your menu. Use the eye icon to hide sections or devices you don't need.")
+        let descLabel = NSTextField(wrappingLabelWithString: "Manage your Home menu from here. Star accessories to add them to Favourites, use the eye icon to hide sections or devices, and pin items to the menu bar.")
         descLabel.font = .systemFont(ofSize: 13)
         descLabel.textColor = .secondaryLabelColor
         descLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -344,11 +343,10 @@ class AccessoriesSettingsView: NSView {
         descLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
         addSpacer(height: 16)
 
-        // Create group button (Pro only)
+        // Create group button
         let createButton = NSButton(title: "Create group", target: self, action: #selector(createGroupTapped))
         createButton.bezelStyle = .rounded
         createButton.controlSize = .regular
-        createButton.isEnabled = isPro
         createButton.translatesAutoresizingMaskIntoConstraints = false
         stackView.addArrangedSubview(createButton)
         addSpacer(height: 16)
@@ -514,7 +512,24 @@ class AccessoriesSettingsView: NSView {
     // MARK: - Group actions
 
     @objc func createGroupTapped() {
+        guard ProStatusCache.shared.isPro else {
+            showProRequiredAlert()
+            return
+        }
         showGroupEditor(group: nil)
+    }
+
+    private func showProRequiredAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Itsyhome Pro required"
+        alert.informativeText = "Groups are a Pro feature. Upgrade to Itsyhome Pro to create custom device groups."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Upgrade")
+        alert.addButton(withTitle: "Later")
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            SettingsWindowController.shared.selectTab(index: 5) // About tab with Pro
+        }
     }
 
     func showGroupEditor(group: DeviceGroup?) {

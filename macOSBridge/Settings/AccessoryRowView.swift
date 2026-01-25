@@ -500,6 +500,10 @@ class AccessoryRowView: NSView {
 
         // Shortcut button (before edit if present)
         if let shortcut = shortcutButton {
+            // Add spacing between shortcut and preceding buttons (star/eye/pin)
+            if starButton != nil || eyeButton != nil || pinButton != nil {
+                rightEdge -= L.spacing
+            }
             let shortcutWidth: CGFloat = 100
             let shortcutHeight: CGFloat = 20
             shortcut.frame = NSRect(x: rightEdge - shortcutWidth, y: cardY + (L.cardHeight - shortcutHeight) / 2, width: shortcutWidth, height: shortcutHeight)

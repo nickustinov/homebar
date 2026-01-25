@@ -98,6 +98,7 @@ targets:
           - "CameraPanelManager.swift"
           - "Settings/**"
           - "Controls/ShortcutButton.swift"
+          - "PinnedAccessory/**"
       - path: macOSBridge/Settings/PreferencesManager.swift
       - path: Itsyhome/Shared
         buildPhase: sources

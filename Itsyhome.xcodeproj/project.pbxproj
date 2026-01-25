@@ -103,7 +103,6 @@
 		91DC242EDBAC2B3ADF8BE6B3 /* WebhookServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0096925C98FD6B955AB016 /* WebhookServer.swift */; };
 		9279623381FB28CEBFF44097 /* ProProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF08A602DCF69DA079C553B /* ProProducts.swift */; };
 		93F37AF55F715D6075134E69 /* ValueConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB6A2D48574EFA0940AA54 /* ValueConversion.swift */; };
-		947C04E9B2C3D8A610F86AAF /* PinnedStatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E98692B043E97671C5B1A /* PinnedStatusItem.swift */; };
 		948F087339D430365755DE96 /* ColorPickerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */; };
 		94D04698ADBC211F1A888348 /* ThermostatMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C440D0DF207C3DF9F3A5AD /* ThermostatMenuItem.swift */; };
 		95C36CCD4FADD1E5D599FCF1 /* CloudSyncTranslatorDeviceGroupsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A89008C02F5EDA5137756A /* CloudSyncTranslatorDeviceGroupsTests.swift */; };
@@ -821,7 +820,6 @@
 				28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */,
 				67E9EC3321181637F2778AD9 /* ModeButton.swift in Sources */,
 				CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */,
-				947C04E9B2C3D8A610F86AAF /* PinnedStatusItem.swift in Sources */,
 				158EC3D55E6D386D2AD13DC0 /* PreferencesManager.swift in Sources */,
 				81700D54D56303C83DD65445 /* PreferencesManagerTests.swift in Sources */,
 				64A2F6EC52618A2CA486EA00 /* ProManager.swift in Sources */,

@@ -238,13 +238,11 @@ class AccessoriesSettingsView: NSView {
 
         // Favourites section
         if !favouriteItems.isEmpty {
-            addHeader(title: "Favourites")
-            addSpacer(height: 4)
             let tableHeight = CGFloat(favouriteItems.count) * L.rowHeight
             let tableContainer = createFavouritesTable(height: tableHeight)
             addView(tableContainer, height: tableHeight)
             favouritesTableView?.reloadData()
-            addSpacer(height: 16)
+            addSeparator()
         }
 
         // Scenes section
@@ -253,7 +251,7 @@ class AccessoriesSettingsView: NSView {
             let isHidden = preferences.hideScenesSection
             let isScenesCollapsed = !expandedSections.contains(scenesKey)
 
-            let header = createScenesHeaderStrip(isHidden: isHidden, isCollapsed: isScenesCollapsed)
+            let header = createScenesHeaderStrip(isHidden: isHidden, isCollapsed: isScenesCollapsed, sceneCount: sceneItems.count)
             addView(header, height: L.rowHeight)
 
             if !isScenesCollapsed {
@@ -262,7 +260,7 @@ class AccessoriesSettingsView: NSView {
                 addView(tableContainer, height: tableHeight)
                 scenesTableView?.reloadData()
             }
-            addSpacer(height: 12)
+            addSeparator()
         }
 
         // Rooms section
@@ -323,6 +321,26 @@ class AccessoriesSettingsView: NSView {
         spacer.translatesAutoresizingMaskIntoConstraints = false
         stackView.addArrangedSubview(spacer)
         spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+    }
+
+    func addSeparator() {
+        let container = NSView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let separator = NSBox()
+        separator.boxType = .separator
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(separator)
+
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            separator.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            separator.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        stackView.addArrangedSubview(container)
+        container.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+        container.heightAnchor.constraint(equalToConstant: 16).isActive = true
     }
 
     // MARK: - Room index helpers

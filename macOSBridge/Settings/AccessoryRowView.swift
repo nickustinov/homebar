@@ -63,6 +63,7 @@ struct AccessoryRowConfig {
 
     // Left side options
     let showDragHandle: Bool
+    let reserveDragHandleSpace: Bool  // Reserve space for alignment without showing handle
     let showChevron: Bool
     let isCollapsed: Bool
 
@@ -89,6 +90,7 @@ struct AccessoryRowConfig {
         icon: NSImage? = nil,
         count: Int? = nil,
         showDragHandle: Bool = false,
+        reserveDragHandleSpace: Bool = false,
         showChevron: Bool = false,
         isCollapsed: Bool = false,
         isFavourite: Bool = false,
@@ -108,6 +110,7 @@ struct AccessoryRowConfig {
         self.icon = icon
         self.count = count
         self.showDragHandle = showDragHandle
+        self.reserveDragHandleSpace = reserveDragHandleSpace
         self.showChevron = showChevron
         self.isCollapsed = isCollapsed
         self.isFavourite = isFavourite
@@ -150,6 +153,7 @@ class AccessoryRowView: NSView {
     private var isPinned: Bool
     private var isCollapsed: Bool
     private let showDragHandle: Bool
+    private let reserveDragHandleSpace: Bool
     private let showChevron: Bool
     private let hasIcon: Bool
     private let indentLevel: Int
@@ -166,6 +170,7 @@ class AccessoryRowView: NSView {
         self.isPinned = config.isPinned
         self.isCollapsed = config.isCollapsed
         self.showDragHandle = config.showDragHandle
+        self.reserveDragHandleSpace = config.reserveDragHandleSpace
         self.showChevron = config.showChevron
         self.hasIcon = config.icon != nil
         self.indentLevel = config.indentLevel
@@ -388,7 +393,7 @@ class AccessoryRowView: NSView {
         var x = indent + L.leftPadding
 
         // Drag handle (or reserved space for alignment when other rows have it)
-        if showDragHandle {
+        if showDragHandle || reserveDragHandleSpace {
             if let drag = dragHandle {
                 drag.frame = NSRect(x: x, y: cardY + (L.cardHeight - 14) / 2, width: L.dragHandleWidth, height: 14)
             }

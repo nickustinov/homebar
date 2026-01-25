@@ -88,9 +88,11 @@ extension AccessoriesSettingsView {
 
 extension AccessoriesSettingsView {
 
-    func createScenesHeaderStrip(isHidden: Bool, isCollapsed: Bool) -> NSView {
+    func createScenesHeaderStrip(isHidden: Bool, isCollapsed: Bool, sceneCount: Int) -> NSView {
         let config = AccessoryRowConfig(
             name: "Scenes",
+            count: sceneCount,
+            reserveDragHandleSpace: true,
             showChevron: true,
             isCollapsed: isCollapsed,
             isItemHidden: isHidden,

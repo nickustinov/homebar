@@ -10,6 +10,7 @@ import HomeKit
 
 extension Notification.Name {
     static let cameraPanelDidShow = Notification.Name("cameraPanelDidShow")
+    static let cameraPanelDidHide = Notification.Name("cameraPanelDidHide")
 }
 
 class CameraViewController: UIViewController {
@@ -21,6 +22,11 @@ class CameraViewController: UIViewController {
     private var streamSpinner: UIActivityIndicatorView!
     private var backButton: UIButton!
     private var streamOverlayStack: UIStackView!
+
+    // Audio controls
+    private var audioControlsStack: UIStackView!
+    private var muteButton: UIButton!
+    private var talkButton: UIButton!
 
     private static let gridWidth: CGFloat = 300
     private static let streamWidth: CGFloat = 530
@@ -36,6 +42,12 @@ class CameraViewController: UIViewController {
     private var snapshotControls: [UUID: HMCameraSnapshotControl] = [:]
     private var activeStreamControl: HMCameraStreamControl?
     private var activeStreamAccessory: HMAccessory?
+
+    // Audio state
+    private var isMuted: Bool = false
+    private var isTalking: Bool = false
+    private var microphoneControl: HMCameraAudioControl?
+    private var speakerControl: HMCameraAudioControl?
     private var snapshotTimer: Timer?
     private var timestampTimer: Timer?
     private var snapshotTimestamps: [UUID: Date] = [:]
@@ -74,6 +86,12 @@ class CameraViewController: UIViewController {
             name: .cameraPanelDidShow,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(panelDidHide),
+            name: .cameraPanelDidHide,
+            object: nil
+        )
     }
 
     @objc private func preferencesDidChange() {
@@ -93,6 +111,13 @@ class CameraViewController: UIViewController {
         // Ensure correct size when panel re-appears
         let height = computeGridHeight()
         updatePanelSize(width: Self.gridWidth, height: height, animated: false)
+    }
+
+    @objc private func panelDidHide() {
+        // Reset to grid view when panel is hidden so it opens fresh next time
+        if activeStreamControl != nil {
+            backToGrid()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -228,6 +253,142 @@ class CameraViewController: UIViewController {
             streamOverlayStack.leadingAnchor.constraint(equalTo: streamContainerView.leadingAnchor, constant: 8),
             streamOverlayStack.bottomAnchor.constraint(equalTo: streamContainerView.bottomAnchor, constant: -8)
         ])
+
+        setupAudioControls()
+    }
+
+    private func setupAudioControls() {
+        // Audio controls stack (bottom-right)
+        audioControlsStack = UIStackView()
+        audioControlsStack.axis = .horizontal
+        audioControlsStack.spacing = 6
+        audioControlsStack.alignment = .center
+        audioControlsStack.translatesAutoresizingMaskIntoConstraints = false
+        audioControlsStack.isHidden = true
+        streamContainerView.addSubview(audioControlsStack)
+
+        NSLayoutConstraint.activate([
+            audioControlsStack.trailingAnchor.constraint(equalTo: streamContainerView.trailingAnchor, constant: -8),
+            audioControlsStack.bottomAnchor.constraint(equalTo: streamContainerView.bottomAnchor, constant: -8)
+        ])
+
+        // Mute button
+        muteButton = createAudioButton(systemName: "speaker.wave.3.fill")
+        muteButton.addTarget(self, action: #selector(muteButtonTapped), for: .touchUpInside)
+        audioControlsStack.addArrangedSubview(muteButton)
+
+        // Talk button (hidden by default, shown only for cameras with speaker)
+        talkButton = createAudioButton(systemName: "mic.fill")
+        talkButton.addTarget(self, action: #selector(talkButtonTapped), for: .touchUpInside)
+        talkButton.isHidden = true
+        audioControlsStack.addArrangedSubview(talkButton)
+    }
+
+    private func createAudioButton(systemName: String) -> UIButton {
+        let button = UIButton(type: .custom)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let image = UIImage(systemName: systemName, withConfiguration: config)?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        button.setImage(image, for: .normal)
+        button.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        button.layer.cornerRadius = 14
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 28),
+            button.heightAnchor.constraint(equalToConstant: 28)
+        ])
+
+        return button
+    }
+
+    // MARK: - Audio controls
+
+    private func updateAudioControls(for accessory: HMAccessory) {
+        guard let profile = accessory.cameraProfiles?.first else {
+            audioControlsStack.isHidden = true
+            return
+        }
+
+        microphoneControl = profile.microphoneControl
+        speakerControl = profile.speakerControl
+
+        audioControlsStack.isHidden = microphoneControl == nil
+        talkButton.isHidden = speakerControl == nil
+
+        // Reset talk state
+        isTalking = false
+        updateTalkButtonState()
+    }
+
+    private func updateMuteButtonState() {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iconName = isMuted ? "speaker.slash.fill" : "speaker.wave.3.fill"
+        let image = UIImage(systemName: iconName, withConfiguration: config)?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        muteButton.setImage(image, for: .normal)
+    }
+
+    private func updateTalkButtonState() {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iconName = isTalking ? "mic.fill" : "mic"
+        let color: UIColor = isTalking ? .systemGreen : .white
+        let image = UIImage(systemName: iconName, withConfiguration: config)?.withTintColor(color, renderingMode: .alwaysOriginal)
+        talkButton.setImage(image, for: .normal)
+        talkButton.backgroundColor = isTalking ? UIColor(white: 0, alpha: 0.7) : UIColor(white: 0, alpha: 0.5)
+    }
+
+    @objc private func muteButtonTapped() {
+        guard let stream = activeStreamControl?.cameraStream else { return }
+
+        let newMuteState = !isMuted
+        let newSetting: HMCameraAudioStreamSetting = newMuteState ? .muted : (HMCameraAudioStreamSetting(rawValue: 2) ?? .muted)
+
+        stream.updateAudioStreamSetting(newSetting) { [weak self] error in
+            DispatchQueue.main.async {
+                guard error == nil else { return }
+                self?.isMuted = newMuteState
+                self?.updateMuteButtonState()
+                if let accessory = self?.activeStreamAccessory {
+                    self?.saveMuteSetting(for: accessory, muted: newMuteState)
+                }
+            }
+        }
+    }
+
+    // MARK: - Audio preferences
+
+    private func saveMuteSetting(for accessory: HMAccessory, muted: Bool) {
+        let key = "cameraAudioMuted_\(accessory.uniqueIdentifier.uuidString)"
+        UserDefaults.standard.set(muted, forKey: key)
+    }
+
+    private func loadMuteSetting(for accessory: HMAccessory) -> Bool {
+        let key = "cameraAudioMuted_\(accessory.uniqueIdentifier.uuidString)"
+        // Default to false (unmuted)
+        return UserDefaults.standard.bool(forKey: key)
+    }
+
+    @objc private func talkButtonTapped() {
+        guard let speakerMuteChar = speakerControl?.mute else { return }
+
+        let newTalkState = !isTalking
+
+        // When talking, unmute speaker (mute = false)
+        // When not talking, mute speaker (mute = true)
+        speakerMuteChar.writeValue(!newTalkState) { [weak self] error in
+            DispatchQueue.main.async {
+                guard error == nil else { return }
+                self?.isTalking = newTalkState
+                self?.updateTalkButtonState()
+            }
+        }
+    }
+
+    private func resetAudioState() {
+        microphoneControl = nil
+        speakerControl = nil
+        isMuted = false
+        isTalking = false
+        audioControlsStack.isHidden = true
     }
 
     // MARK: - Camera loading
@@ -345,8 +506,15 @@ class CameraViewController: UIViewController {
     private func updatePanelSize(width: CGFloat, height: CGFloat, animated: Bool) {
         #if targetEnvironment(macCatalyst)
         if let windowScene = view.window?.windowScene {
-            windowScene.sizeRestrictions?.minimumSize = CGSize(width: width, height: height)
-            windowScene.sizeRestrictions?.maximumSize = CGSize(width: width, height: height)
+            // In stream mode, allow resizing with 16:9 aspect ratio
+            let isStreamMode = width > 400
+            if isStreamMode {
+                windowScene.sizeRestrictions?.minimumSize = CGSize(width: 400, height: 225)
+                windowScene.sizeRestrictions?.maximumSize = CGSize(width: 1200, height: 675)
+            } else {
+                windowScene.sizeRestrictions?.minimumSize = CGSize(width: width, height: height)
+                windowScene.sizeRestrictions?.maximumSize = CGSize(width: width, height: height)
+            }
         }
         #endif
         macOSController?.resizeCameraPanel(width: width, height: height, animated: animated)
@@ -427,8 +595,9 @@ class CameraViewController: UIViewController {
         collectionView.isHidden = true
         stopSnapshotTimer()
 
-        updatePanelSize(width: Self.streamWidth, height: Self.streamHeight, animated: true)
+        updatePanelSize(width: Self.streamWidth, height: Self.streamHeight, animated: false)
         updateStreamOverlays(for: accessory)
+        updateAudioControls(for: accessory)
 
         activeStreamControl = streamControl
         streamControl.delegate = self
@@ -475,6 +644,7 @@ class CameraViewController: UIViewController {
         streamSpinner.stopAnimating()
         streamContainerView.isHidden = true
         streamOverlayStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        resetAudioState()
         collectionView.isHidden = cameraAccessories.isEmpty
         collectionView.setContentOffset(.zero, animated: false)
 
@@ -704,6 +874,16 @@ extension CameraViewController: HMCameraSnapshotControlDelegate {
 extension CameraViewController: HMCameraStreamControlDelegate {
     func cameraStreamControlDidStartStream(_ cameraStreamControl: HMCameraStreamControl) {
         DispatchQueue.main.async {
+            if let stream = cameraStreamControl.cameraStream {
+                // Load saved mute preference
+                let savedMuted = self.activeStreamAccessory.map { self.loadMuteSetting(for: $0) } ?? false
+                self.isMuted = savedMuted
+                self.updateMuteButtonState()
+
+                // Apply audio setting based on saved mute preference
+                let audioSetting: HMCameraAudioStreamSetting = savedMuted ? .muted : (HMCameraAudioStreamSetting(rawValue: 2) ?? .muted)
+                stream.updateAudioStreamSetting(audioSetting) { _ in }
+            }
             self.streamSpinner.stopAnimating()
             self.streamCameraView.isHidden = false
             self.streamCameraView.cameraSource = cameraStreamControl.cameraStream

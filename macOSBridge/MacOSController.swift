@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import Combine
 
 final class StayOpenMenu: NSMenu {
 
@@ -39,6 +40,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     private var cameraPanelSize: NSSize = NSSize(width: 300, height: 300)
     private var isCameraPanelOpening = false
     private var pendingCameraPanelShow = false
+    private var proStatusCancellable: AnyCancellable?
 
     @objc public weak var iOSBridge: Mac2iOS?
 
@@ -72,6 +74,25 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         HotkeyManager.shared.onHotkeyTriggered = { [weak self] favouriteId in
             self?.handleHotkeyForFavourite(favouriteId)
         }
+
+        // Re-check camera status when Pro status changes
+        Task { @MainActor in
+            proStatusCancellable = ProManager.shared.$isPro
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] isPro in
+                    print("[Camera] Pro status changed to: \(isPro)")
+                    self?.updateCameraStatusVisibility()
+                }
+        }
+    }
+
+    private func updateCameraStatusVisibility() {
+        guard let data = currentMenuData else { return }
+        let camerasEnabled = PreferencesManager.shared.camerasEnabled
+        let isPro = ProStatusCache.shared.isPro
+        let shouldShow = data.hasCameras && camerasEnabled && isPro
+        print("[Camera] updateCameraStatusVisibility - shouldShow: \(shouldShow)")
+        setupCameraStatusItem(hasCameras: shouldShow)
     }
 
     @objc private func handleLocalCharacteristicChange(_ notification: Notification) {
@@ -283,27 +304,37 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     private func setupCameraStatusItem(hasCameras: Bool) {
+        print("[Camera] setupCameraStatusItem called with hasCameras: \(hasCameras)")
         if hasCameras {
             if cameraStatusItem == nil {
+                print("[Camera] Creating new camera status item")
                 let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
                 if let button = item.button {
                     let pluginBundle = Bundle(for: MacOSController.self)
                     if let icon = pluginBundle.image(forResource: "CameraMenuBarIcon") {
                         icon.isTemplate = true
                         button.image = icon
+                        print("[Camera] Set custom camera icon")
                     } else {
                         button.image = NSImage(systemSymbolName: "video.fill", accessibilityDescription: "Cameras")
                         button.image?.isTemplate = true
+                        print("[Camera] Set fallback video.fill icon")
                     }
                     button.action = #selector(cameraStatusItemClicked)
                     button.target = self
                 }
                 cameraStatusItem = item
+                print("[Camera] Camera status item created successfully")
+            } else {
+                print("[Camera] Camera status item already exists")
             }
         } else {
             if let item = cameraStatusItem {
+                print("[Camera] Removing camera status item")
                 NSStatusBar.system.removeStatusItem(item)
                 cameraStatusItem = nil
+            } else {
+                print("[Camera] No camera status item to remove")
             }
         }
     }
@@ -430,7 +461,27 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.cameraPanelSize = NSSize(width: width, height: height)
-            guard let window = self.cameraPanelWindow, window.isVisible else { return }
+            guard let window = self.cameraPanelWindow else { return }
+
+            // Enable resizing and moving only in stream mode (wider than grid)
+            let isStreamMode = width > 400
+            if isStreamMode {
+                window.styleMask.insert(.resizable)
+                window.isMovable = true
+                window.isMovableByWindowBackground = true
+                // 16:9 aspect ratio constraints
+                window.minSize = NSSize(width: 400, height: 225)
+                window.maxSize = NSSize(width: 1200, height: 675)
+                window.aspectRatio = NSSize(width: 16, height: 9)
+            } else {
+                window.styleMask.remove(.resizable)
+                window.isMovable = false
+                window.isMovableByWindowBackground = false
+                window.minSize = NSSize(width: width, height: height)
+                window.maxSize = NSSize(width: width, height: height)
+            }
+
+            guard window.isVisible else { return }
             self.positionCameraPanelWithSize(window, width: width, height: height, animate: animated)
         }
     }
@@ -518,6 +569,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     // MARK: - Menu Building
 
     private func rebuildMenu(with data: MenuData) {
+        print("[Camera] rebuildMenu called, hasCameras: \(data.hasCameras)")
         currentMenuData = data
         mainMenu.removeAllItems()
 
@@ -534,7 +586,10 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         WebhookServer.shared.configure(actionEngine: actionEngine)
         let camerasEnabled = PreferencesManager.shared.camerasEnabled
-        setupCameraStatusItem(hasCameras: data.hasCameras && camerasEnabled && ProStatusCache.shared.isPro)
+        let isPro = ProStatusCache.shared.isPro
+        let shouldShow = data.hasCameras && camerasEnabled && isPro
+        print("[Camera] camerasEnabled: \(camerasEnabled), isPro: \(isPro), shouldShow: \(shouldShow)")
+        setupCameraStatusItem(hasCameras: shouldShow)
 
         mainMenu.addItem(NSMenuItem.separator())
         addFooterItems()

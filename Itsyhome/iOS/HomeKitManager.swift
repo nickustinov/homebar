@@ -323,13 +323,12 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
         for windowScene in cameraScenes {
             for window in windowScene.windows {
                 window.isHidden = hidden
-                if !hidden {
-                    window.makeKeyAndVisible()
-                }
             }
         }
 
-        if !hidden {
+        if hidden {
+            NotificationCenter.default.post(name: .cameraPanelDidHide, object: nil)
+        } else {
             NotificationCenter.default.post(name: .cameraPanelDidShow, object: nil)
         }
         #endif

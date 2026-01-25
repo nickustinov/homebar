@@ -22,6 +22,7 @@ enum PinnedItemType {
     case service(ServiceData)
     case room(RoomData, [ServiceData])
     case scene(SceneData)
+    case scenesSection([SceneData])
     case group(DeviceGroup, [ServiceData])
 }
 
@@ -74,6 +75,9 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
 
         case .scene:
             icon = SceneIconInference.icon(for: itemName)
+
+        case .scenesSection:
+            icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
 
         case .group:
             icon = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
@@ -131,6 +135,14 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             let item = SceneMenuItem(sceneData: scene, bridge: builder.bridge)
             menu.addItem(item)
             menuItems.append(item)
+
+        case .scenesSection(let scenes):
+            // Add all scenes
+            for scene in scenes {
+                let item = SceneMenuItem(sceneData: scene, bridge: builder.bridge)
+                menu.addItem(item)
+                menuItems.append(item)
+            }
 
         case .group(let group, _):
             // Add group menu item with all its services
@@ -225,7 +237,7 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             return extractCharacteristicIds(from: service)
         case .room(_, let services):
             return services.flatMap { extractCharacteristicIds(from: $0) }
-        case .scene:
+        case .scene, .scenesSection:
             return []  // Scenes don't have characteristics to monitor
         case .group(_, let services):
             return services.flatMap { extractCharacteristicIds(from: $0) }

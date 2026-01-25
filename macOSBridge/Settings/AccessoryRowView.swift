@@ -24,6 +24,12 @@ struct AccessoryRowLayout {
     static let dragHandleWidth: CGFloat = 10
     static let indentWidth: CGFloat = 20
     static let pipeSpacing: CGFloat = 8
+
+    /// Load image from macOSBridge bundle
+    static func image(named name: String) -> NSImage? {
+        let bundle = Bundle(for: AccessoryRowView.self)
+        return bundle.image(forResource: name)
+    }
 }
 
 // MARK: - Drag handle view
@@ -320,25 +326,25 @@ class AccessoryRowView: NSView {
             chevron.contentTintColor = .secondaryLabelColor
         }
 
-        // Star
+        // Star (custom icons, filled/empty)
         if let star = starButton {
-            let symbol = isFavourite ? "star.fill" : "star"
-            star.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-            star.contentTintColor = isFavourite ? .systemYellow : .tertiaryLabelColor
+            let iconName = isFavourite ? "star-fill" : "star"
+            star.image = AccessoryRowLayout.image(named: iconName)
+            star.contentTintColor = .secondaryLabelColor
         }
 
-        // Eye
+        // Eye (custom icons, filled = visible, empty = hidden)
         if let eye = eyeButton {
-            let symbol = isItemHidden ? "eye.slash" : "eye"
-            eye.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-            eye.contentTintColor = isItemHidden ? .tertiaryLabelColor : .secondaryLabelColor
+            let iconName = isItemHidden ? "eye" : "eye-fill"
+            eye.image = AccessoryRowLayout.image(named: iconName)
+            eye.contentTintColor = .secondaryLabelColor
         }
 
-        // Pin
+        // Pin (custom icons, filled/empty)
         if let pin = pinButton {
-            let symbol = isPinned ? "pin.fill" : "pin"
-            pin.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-            pin.contentTintColor = isPinned ? .systemBlue : .tertiaryLabelColor
+            let iconName = isPinned ? "push-pin-fill" : "push-pin"
+            pin.image = AccessoryRowLayout.image(named: iconName)
+            pin.contentTintColor = .secondaryLabelColor
         }
 
         // Dim when hidden
@@ -358,25 +364,22 @@ class AccessoryRowView: NSView {
 
     @objc private func starTapped() {
         isFavourite.toggle()
-        let symbol = isFavourite ? "star.fill" : "star"
-        starButton?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-        starButton?.contentTintColor = isFavourite ? .systemYellow : .tertiaryLabelColor
+        let iconName = isFavourite ? "star-fill" : "star"
+        starButton?.image = AccessoryRowLayout.image(named: iconName)
         onStarToggled?()
     }
 
     @objc private func eyeTapped() {
         isItemHidden.toggle()
-        let symbol = isItemHidden ? "eye.slash" : "eye"
-        eyeButton?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-        eyeButton?.contentTintColor = isItemHidden ? .tertiaryLabelColor : .secondaryLabelColor
+        let iconName = isItemHidden ? "eye" : "eye-fill"
+        eyeButton?.image = AccessoryRowLayout.image(named: iconName)
         onEyeToggled?()
     }
 
     @objc private func pinTapped() {
         isPinned.toggle()
-        let symbol = isPinned ? "pin.fill" : "pin"
-        pinButton?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-        pinButton?.contentTintColor = isPinned ? .systemBlue : .tertiaryLabelColor
+        let iconName = isPinned ? "push-pin-fill" : "push-pin"
+        pinButton?.image = AccessoryRowLayout.image(named: iconName)
         onPinToggled?()
     }
 

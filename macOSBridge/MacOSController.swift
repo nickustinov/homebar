@@ -147,7 +147,13 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
         // Determine which pinned items are valid
         var validPinnedItems: [String: PinnedItemType] = [:]
         for pinId in pinnedIds {
-            if pinId.hasPrefix("room:") {
+            if pinId == PreferencesManager.scenesSectionPinId {
+                // Scenes section pin
+                let visibleScenes = data.scenes.filter { !PreferencesManager.shared.isHidden(sceneId: $0.uniqueIdentifier) }
+                if !visibleScenes.isEmpty {
+                    validPinnedItems[pinId] = .scenesSection(visibleScenes)
+                }
+            } else if pinId.hasPrefix("room:") {
                 // Room pin
                 let roomId = String(pinId.dropFirst(5))
                 if let room = roomLookup[roomId], let services = servicesByRoom[roomId], !services.isEmpty {
@@ -194,6 +200,8 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
                     itemName = room.name
                 case .scene(let scene):
                     itemName = scene.name
+                case .scenesSection:
+                    itemName = "Scenes"
                 case .group(let group, _):
                     itemName = group.name
                 }

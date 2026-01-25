@@ -376,6 +376,17 @@ final class PreferencesManager {
         togglePinned(itemId: Self.scenePinId(sceneId))
     }
 
+    // Scenes section pinning (the whole Scenes menu)
+    static let scenesSectionPinId = "scenesSection"
+
+    var isPinnedScenesSection: Bool {
+        isPinned(itemId: Self.scenesSectionPinId)
+    }
+
+    func togglePinnedScenesSection() {
+        togglePinned(itemId: Self.scenesSectionPinId)
+    }
+
     // Group pinning helpers
     static func groupPinId(_ groupId: String) -> String {
         "group:\(groupId)"

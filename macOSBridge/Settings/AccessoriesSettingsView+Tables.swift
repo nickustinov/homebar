@@ -89,6 +89,7 @@ extension AccessoriesSettingsView {
 extension AccessoriesSettingsView {
 
     func createScenesHeaderStrip(isHidden: Bool, isCollapsed: Bool, sceneCount: Int) -> NSView {
+        let isPinned = PreferencesManager.shared.isPinnedScenesSection
         let config = AccessoryRowConfig(
             name: "Scenes",
             icon: NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil),
@@ -97,7 +98,9 @@ extension AccessoriesSettingsView {
             showChevron: true,
             isCollapsed: isCollapsed,
             isItemHidden: isHidden,
+            isPinned: isPinned,
             showEyeButton: true,
+            showPinButton: true,
             isSectionHeader: true
         )
         let rowView = AccessoryRowView(config: config)
@@ -106,6 +109,10 @@ extension AccessoriesSettingsView {
         }
         rowView.onEyeToggled = { [weak self] in
             self?.scenesEyeTapped()
+        }
+        rowView.onPinToggled = { [weak self] in
+            PreferencesManager.shared.togglePinnedScenesSection()
+            self?.rebuild()
         }
         return rowView
     }

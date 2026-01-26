@@ -89,6 +89,14 @@ final class ACMenuItemTests: XCTestCase {
         XCTAssertTrue(menuItem.characteristicIdentifiers.contains(thresholdId))
     }
 
+    func testCharacteristicIdentifiersContainsHeatingThresholdId() {
+        let thresholdId = UUID()
+        let serviceData = createTestServiceData(heatingThresholdTemperatureId: thresholdId)
+        let menuItem = ACMenuItem(serviceData: serviceData, bridge: nil)
+
+        XCTAssertTrue(menuItem.characteristicIdentifiers.contains(thresholdId))
+    }
+
     func testCharacteristicIdentifiersContainsSwingModeId() {
         let swingId = UUID()
         let serviceData = createTestServiceData(swingModeId: swingId)
@@ -165,6 +173,16 @@ final class ACMenuItemTests: XCTestCase {
         let menuItem = ACMenuItem(serviceData: serviceData, bridge: nil)
 
         menuItem.updateValue(for: thresholdId, value: 24.0)
+
+        XCTAssertNotNil(menuItem.view)
+    }
+
+    func testUpdateHeatingThresholdValue() {
+        let thresholdId = UUID()
+        let serviceData = createTestServiceData(heatingThresholdTemperatureId: thresholdId)
+        let menuItem = ACMenuItem(serviceData: serviceData, bridge: nil)
+
+        menuItem.updateValue(for: thresholdId, value: 20.0)
 
         XCTAssertNotNil(menuItem.view)
     }

@@ -56,6 +56,11 @@ public struct ServiceData: Codable {
     public let lockTargetStateId: String?      // Locks
     public let currentPositionId: String?      // Blinds/window coverings
     public let targetPositionId: String?       // Blinds/window coverings
+    public let currentHorizontalTiltId: String?  // Blinds tilt (-90 to 90)
+    public let targetHorizontalTiltId: String?   // Blinds tilt (-90 to 90)
+    public let currentVerticalTiltId: String?    // Blinds tilt (-90 to 90)
+    public let targetVerticalTiltId: String?     // Blinds tilt (-90 to 90)
+    public let positionStateId: String?          // 0=GOING_TO_MIN, 1=GOING_TO_MAX, 2=STOPPED
     public let humidityId: String?             // Humidity sensors
     public let motionDetectedId: String?       // Motion sensors
     // HeaterCooler (AC) characteristics
@@ -83,6 +88,7 @@ public struct ServiceData: Codable {
     public let targetHumidifierDehumidifierStateId: String?
     public let humidifierThresholdId: String?
     public let dehumidifierThresholdId: String?
+    public let waterLevelId: String?              // 0-100 percentage (read-only)
     // Air Purifier characteristics
     public let currentAirPurifierStateId: String?
     public let targetAirPurifierStateId: String?
@@ -118,6 +124,11 @@ public struct ServiceData: Codable {
         lockTargetStateId: UUID? = nil,
         currentPositionId: UUID? = nil,
         targetPositionId: UUID? = nil,
+        currentHorizontalTiltId: UUID? = nil,
+        targetHorizontalTiltId: UUID? = nil,
+        currentVerticalTiltId: UUID? = nil,
+        targetVerticalTiltId: UUID? = nil,
+        positionStateId: UUID? = nil,
         humidityId: UUID? = nil,
         motionDetectedId: UUID? = nil,
         activeId: UUID? = nil,
@@ -141,6 +152,7 @@ public struct ServiceData: Codable {
         targetHumidifierDehumidifierStateId: UUID? = nil,
         humidifierThresholdId: UUID? = nil,
         dehumidifierThresholdId: UUID? = nil,
+        waterLevelId: UUID? = nil,
         // Air Purifier
         currentAirPurifierStateId: UUID? = nil,
         targetAirPurifierStateId: UUID? = nil,
@@ -175,6 +187,11 @@ public struct ServiceData: Codable {
         self.lockTargetStateId = lockTargetStateId?.uuidString
         self.currentPositionId = currentPositionId?.uuidString
         self.targetPositionId = targetPositionId?.uuidString
+        self.currentHorizontalTiltId = currentHorizontalTiltId?.uuidString
+        self.targetHorizontalTiltId = targetHorizontalTiltId?.uuidString
+        self.currentVerticalTiltId = currentVerticalTiltId?.uuidString
+        self.targetVerticalTiltId = targetVerticalTiltId?.uuidString
+        self.positionStateId = positionStateId?.uuidString
         self.humidityId = humidityId?.uuidString
         self.motionDetectedId = motionDetectedId?.uuidString
         self.activeId = activeId?.uuidString
@@ -198,6 +215,7 @@ public struct ServiceData: Codable {
         self.targetHumidifierDehumidifierStateId = targetHumidifierDehumidifierStateId?.uuidString
         self.humidifierThresholdId = humidifierThresholdId?.uuidString
         self.dehumidifierThresholdId = dehumidifierThresholdId?.uuidString
+        self.waterLevelId = waterLevelId?.uuidString
         // Air Purifier
         self.currentAirPurifierStateId = currentAirPurifierStateId?.uuidString
         self.targetAirPurifierStateId = targetAirPurifierStateId?.uuidString
@@ -425,6 +443,11 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let lockTargetState = "0000001E-0000-1000-8000-0026BB765291"
     @objc public static let currentPosition = "0000006D-0000-1000-8000-0026BB765291"
     @objc public static let targetPosition = "0000007C-0000-1000-8000-0026BB765291"
+    @objc public static let currentHorizontalTiltAngle = "0000006C-0000-1000-8000-0026BB765291"
+    @objc public static let targetHorizontalTiltAngle = "0000007B-0000-1000-8000-0026BB765291"
+    @objc public static let currentVerticalTiltAngle = "0000006E-0000-1000-8000-0026BB765291"
+    @objc public static let targetVerticalTiltAngle = "0000007D-0000-1000-8000-0026BB765291"
+    @objc public static let positionState = "00000072-0000-1000-8000-0026BB765291"
     @objc public static let currentRelativeHumidity = "00000010-0000-1000-8000-0026BB765291"
     @objc public static let motionDetected = "00000022-0000-1000-8000-0026BB765291"
     // HeaterCooler (AC) characteristics
@@ -450,6 +473,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let targetHumidifierDehumidifierState = "000000B4-0000-1000-8000-0026BB765291"
     @objc public static let humidifierThreshold = "000000CA-0000-1000-8000-0026BB765291"
     @objc public static let dehumidifierThreshold = "000000C9-0000-1000-8000-0026BB765291"
+    @objc public static let waterLevel = "000000B5-0000-1000-8000-0026BB765291"
     // Air Purifier characteristics
     @objc public static let currentAirPurifierState = "000000A9-0000-1000-8000-0026BB765291"
     @objc public static let targetAirPurifierState = "000000A8-0000-1000-8000-0026BB765291"

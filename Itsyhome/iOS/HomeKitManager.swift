@@ -628,6 +628,11 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             lockTargetStateId: charId(CharacteristicTypes.lockTargetState),
             currentPositionId: charId(HMCharacteristicTypeCurrentPosition),
             targetPositionId: charId(HMCharacteristicTypeTargetPosition),
+            currentHorizontalTiltId: charId(CharacteristicTypes.currentHorizontalTiltAngle),
+            targetHorizontalTiltId: charId(CharacteristicTypes.targetHorizontalTiltAngle),
+            currentVerticalTiltId: charId(CharacteristicTypes.currentVerticalTiltAngle),
+            targetVerticalTiltId: charId(CharacteristicTypes.targetVerticalTiltAngle),
+            positionStateId: charId(CharacteristicTypes.positionState),
             humidityId: charId(HMCharacteristicTypeCurrentRelativeHumidity),
             motionDetectedId: charId(HMCharacteristicTypeMotionDetected),
             // HeaterCooler (AC) characteristics
@@ -655,6 +660,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             targetHumidifierDehumidifierStateId: charId(CharacteristicTypes.targetHumidifierDehumidifierState),
             humidifierThresholdId: charId(CharacteristicTypes.humidifierThreshold),
             dehumidifierThresholdId: charId(CharacteristicTypes.dehumidifierThreshold),
+            waterLevelId: charId(CharacteristicTypes.waterLevel),
             // Air Purifier characteristics
             currentAirPurifierStateId: charId(CharacteristicTypes.currentAirPurifierState),
             targetAirPurifierStateId: charId(CharacteristicTypes.targetAirPurifierState),

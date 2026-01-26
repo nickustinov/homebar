@@ -198,16 +198,15 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
         let preferences = PreferencesManager.shared
         let isFav = preferences.isFavouriteGroup(groupId: group.id)
         let isPinned = preferences.isPinnedGroup(groupId: group.id)
-        let isPro = ProStatusCache.shared.isPro
 
         let config = AccessoryRowConfig(
             name: group.name,
             icon: NSImage(systemSymbolName: group.icon, accessibilityDescription: group.name),
             count: group.deviceIds.count,
-            showDragHandle: showDragHandle && isPro,
+            showDragHandle: showDragHandle,
             isFavourite: isFav,
             isPinned: isPinned,
-            showEditButton: isPro,
+            showEditButton: true,
             showStarButton: true,
             showPinButton: true,
             rowTag: row,
@@ -232,9 +231,6 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
     // MARK: - Drag and drop
 
     func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> NSPasteboardWriting? {
-        // Disable drag for non-pro users on group tables
-        let isPro = ProStatusCache.shared.isPro
-
         if tableView === favouritesTableView {
             let item = favouriteItems[row]
             let pb = NSPasteboardItem()
@@ -249,7 +245,7 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
                 pb.setString(room.uniqueIdentifier, forType: .roomItem)
                 return pb
             case .group(let group, let roomId):
-                guard isPro, let roomId = roomId else { return nil }
+                guard let roomId = roomId else { return nil }
                 let pb = NSPasteboardItem()
                 pb.setString("\(group.id)|\(roomId)", forType: .roomGroupItem)
                 return pb
@@ -264,7 +260,6 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             return pb
         }
         if tableView === globalGroupsTableView {
-            guard isPro else { return nil }
             let group = globalGroups[row]
             let pb = NSPasteboardItem()
             pb.setString(group.id, forType: .globalGroupItem)

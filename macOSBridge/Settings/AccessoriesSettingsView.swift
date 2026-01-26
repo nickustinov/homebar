@@ -512,24 +512,7 @@ class AccessoriesSettingsView: NSView {
     // MARK: - Group actions
 
     @objc func createGroupTapped() {
-        guard ProStatusCache.shared.isPro else {
-            showProRequiredAlert()
-            return
-        }
         showGroupEditor(group: nil)
-    }
-
-    private func showProRequiredAlert() {
-        let alert = NSAlert()
-        alert.messageText = "Itsyhome Pro required"
-        alert.informativeText = "Groups are a Pro feature. Upgrade to Itsyhome Pro to create custom device groups."
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "Upgrade")
-        alert.addButton(withTitle: "Later")
-
-        if alert.runModal() == .alertFirstButtonReturn {
-            SettingsWindowController.shared.selectTab(index: 5) // About tab with Pro
-        }
     }
 
     func showGroupEditor(group: DeviceGroup?) {

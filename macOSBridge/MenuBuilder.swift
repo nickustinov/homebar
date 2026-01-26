@@ -32,7 +32,7 @@ class MenuBuilder {
             menu.addItem(NSMenuItem.separator())
         }
 
-        // Groups section (Pro feature)
+        // Groups section
         let hasGroups = addGroupsSection(to: menu, from: data)
         if hasGroups {
             menu.addItem(NSMenuItem.separator())
@@ -91,9 +91,6 @@ class MenuBuilder {
 
     @discardableResult
     func addGroupsSection(to menu: NSMenu, from data: MenuData) -> Bool {
-        // Only show groups for Pro users
-        guard ProStatusCache.shared.isPro else { return false }
-
         let preferences = PreferencesManager.shared
         // Only show global groups (no room assignment) at the top level
         let globalGroups = preferences.deviceGroups.filter { $0.roomId == nil }
@@ -159,23 +156,21 @@ class MenuBuilder {
             }
         }
 
-        // Build groups by room lookup (only for Pro users)
+        // Build groups by room lookup
         let preferences = PreferencesManager.shared
         var groupsByRoom: [String: [DeviceGroup]] = [:]
-        if ProStatusCache.shared.isPro {
-            for group in preferences.deviceGroups {
-                if let roomId = group.roomId {
-                    groupsByRoom[roomId, default: []].append(group)
-                }
+        for group in preferences.deviceGroups {
+            if let roomId = group.roomId {
+                groupsByRoom[roomId, default: []].append(group)
             }
-            // Order groups within each room
-            for (roomId, roomGroups) in groupsByRoom {
-                let savedOrder = preferences.groupOrder(forRoom: roomId)
-                groupsByRoom[roomId] = roomGroups.sorted { g1, g2 in
-                    let i1 = savedOrder.firstIndex(of: g1.id) ?? Int.max
-                    let i2 = savedOrder.firstIndex(of: g2.id) ?? Int.max
-                    return i1 < i2
-                }
+        }
+        // Order groups within each room
+        for (roomId, roomGroups) in groupsByRoom {
+            let savedOrder = preferences.groupOrder(forRoom: roomId)
+            groupsByRoom[roomId] = roomGroups.sorted { g1, g2 in
+                let i1 = savedOrder.firstIndex(of: g1.id) ?? Int.max
+                let i2 = savedOrder.firstIndex(of: g2.id) ?? Int.max
+                return i1 < i2
             }
         }
 

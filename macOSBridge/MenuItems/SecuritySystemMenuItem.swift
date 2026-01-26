@@ -84,36 +84,13 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         containerView.addSubview(nameLabel)
 
         // Mode buttons row
-        let buttonWidth: CGFloat = 44
-        let buttonHeight: CGFloat = 18
-        let containerPadding: CGFloat = 2
-        let modeContainerWidth = buttonWidth * 4 + containerPadding * 2
-        let modeContainerHeight = buttonHeight + containerPadding * 2
+        let containerWidth = ModeButtonGroup.widthForButtons(count: 4, buttonWidth: 44)
+        let modeContainer = ModeButtonGroup(frame: NSRect(x: labelX, y: DS.Spacing.sm + 3, width: containerWidth, height: 22))
 
-        let modeContainer = NSView(frame: NSRect(x: labelX, y: DS.Spacing.sm + 3, width: modeContainerWidth, height: modeContainerHeight))
-        modeContainer.wantsLayer = true
-        modeContainer.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(0.08).cgColor
-        modeContainer.layer?.cornerRadius = modeContainerHeight / 2
-
-        modeButtonOff = ModeButton(title: "Off", color: DS.Colors.mutedForeground)  // Gray - disarmed
-        modeButtonOff.frame = NSRect(x: containerPadding, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonOff.tag = 3  // Disarmed
-        modeContainer.addSubview(modeButtonOff)
-
-        modeButtonStay = ModeButton(title: "Stay", color: DS.Colors.success)  // Green - home & protected
-        modeButtonStay.frame = NSRect(x: containerPadding + buttonWidth, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonStay.tag = 0  // Stay Arm
-        modeContainer.addSubview(modeButtonStay)
-
-        modeButtonAway = ModeButton(title: "Away", color: DS.Colors.warning)  // Orange - fully armed
-        modeButtonAway.frame = NSRect(x: containerPadding + buttonWidth * 2, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonAway.tag = 1  // Away Arm
-        modeContainer.addSubview(modeButtonAway)
-
-        modeButtonNight = ModeButton(title: "Night", color: DS.Colors.info)  // Blue - night mode
-        modeButtonNight.frame = NSRect(x: containerPadding + buttonWidth * 3, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonNight.tag = 2  // Night Arm
-        modeContainer.addSubview(modeButtonNight)
+        modeButtonOff = modeContainer.addButton(title: "Off", color: DS.Colors.mutedForeground, tag: 3)
+        modeButtonStay = modeContainer.addButton(title: "Stay", color: DS.Colors.success, tag: 0)
+        modeButtonAway = modeContainer.addButton(title: "Away", color: DS.Colors.warning, tag: 1)
+        modeButtonNight = modeContainer.addButton(title: "Night", color: DS.Colors.info, tag: 2)
 
         containerView.addSubview(modeContainer)
 

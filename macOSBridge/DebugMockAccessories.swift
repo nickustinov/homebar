@@ -126,7 +126,11 @@ enum DebugMockups {
                 activeId: UUID(),
                 rotationSpeedId: UUID(),
                 rotationSpeedMin: 0,
-                rotationSpeedMax: 100
+                rotationSpeedMax: 100,
+                targetFanStateId: UUID(),
+                currentFanStateId: UUID(),
+                rotationDirectionId: UUID(),
+                swingModeId: UUID()
             ),
             ServiceData(
                 uniqueIdentifier: UUID(),

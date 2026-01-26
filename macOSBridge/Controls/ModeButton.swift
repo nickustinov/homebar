@@ -3,6 +3,7 @@
 //  macOSBridge
 //
 //  A pill-shaped button for mode selection with customizable color
+//  Supports both text labels and SF Symbol icons
 //
 
 import AppKit
@@ -33,6 +34,9 @@ class ModeButton: NSButton {
         }
     }
 
+    private var iconName: String?
+
+    /// Create a text-based mode button
     init(title: String, color: NSColor = DS.Colors.success) {
         self.selectedColor = color
         super.init(frame: .zero)
@@ -44,8 +48,26 @@ class ModeButton: NSButton {
         self.setButtonType(.momentaryChange)
     }
 
+    /// Create an icon-based mode button using SF Symbol
+    init(icon: String, color: NSColor = DS.Colors.success) {
+        self.selectedColor = color
+        self.iconName = icon
+        super.init(frame: .zero)
+
+        self.title = ""
+        self.isBordered = false
+        self.bezelStyle = .inline
+        self.setButtonType(.momentaryChange)
+    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    /// Update the icon (for toggling between states like clockwise/counter-clockwise)
+    func setIcon(_ name: String) {
+        self.iconName = name
+        needsDisplay = true
     }
 
     override func viewDidChangeEffectiveAppearance() {
@@ -73,36 +95,60 @@ class ModeButton: NSButton {
         }
         path.fill()
 
-        // Text color
+        // Content color
         let dimmedAlpha: CGFloat = isDisabled ? 0.5 : 1.0
-        let textColor: NSColor
+        let contentColor: NSColor
         if isSelected && !isDisabled {
-            textColor = .white
+            contentColor = .white
         } else if isMenuHighlighted {
-            textColor = NSColor.white.withAlphaComponent(0.9)
+            contentColor = NSColor.white.withAlphaComponent(0.9)
         } else {
-            textColor = isDark
+            contentColor = isDark
                 ? NSColor(white: 0.9, alpha: dimmedAlpha)
                 : NSColor(white: 0.4, alpha: dimmedAlpha)
         }
 
-        // Draw text
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .center
+        if let iconName = iconName {
+            // Draw icon
+            if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil) {
+                let config = NSImage.SymbolConfiguration(pointSize: 11, weight: .medium)
+                let configuredImage = image.withSymbolConfiguration(config) ?? image
 
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font ?? NSFont.systemFont(ofSize: 10, weight: .medium),
-            .foregroundColor: textColor,
-            .paragraphStyle: paragraphStyle
-        ]
+                // Tint the image
+                let tintedImage = configuredImage.copy() as! NSImage
+                tintedImage.lockFocus()
+                contentColor.set()
+                NSRect(origin: .zero, size: tintedImage.size).fill(using: .sourceAtop)
+                tintedImage.unlockFocus()
 
-        let titleSize = title.size(withAttributes: attributes)
-        let titleRect = NSRect(
-            x: (bounds.width - titleSize.width) / 2,
-            y: (bounds.height - titleSize.height) / 2,
-            width: titleSize.width,
-            height: titleSize.height
-        )
-        title.draw(in: titleRect, withAttributes: attributes)
+                let imageSize = tintedImage.size
+                let imageRect = NSRect(
+                    x: (bounds.width - imageSize.width) / 2,
+                    y: (bounds.height - imageSize.height) / 2,
+                    width: imageSize.width,
+                    height: imageSize.height
+                )
+                tintedImage.draw(in: imageRect)
+            }
+        } else {
+            // Draw text
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .center
+
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font ?? NSFont.systemFont(ofSize: 10, weight: .medium),
+                .foregroundColor: contentColor,
+                .paragraphStyle: paragraphStyle
+            ]
+
+            let titleSize = title.size(withAttributes: attributes)
+            let titleRect = NSRect(
+                x: (bounds.width - titleSize.width) / 2,
+                y: (bounds.height - titleSize.height) / 2,
+                width: titleSize.width,
+                height: titleSize.height
+            )
+            title.draw(in: titleRect, withAttributes: attributes)
+        }
     }
 }

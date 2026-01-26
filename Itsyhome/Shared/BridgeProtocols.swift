@@ -68,6 +68,10 @@ public struct ServiceData: Codable {
     public let rotationSpeedId: String?        // Fan speed
     public let rotationSpeedMin: Double?       // Min speed value
     public let rotationSpeedMax: Double?       // Max speed value
+    public let targetFanStateId: String?       // 0=MANUAL, 1=AUTO
+    public let currentFanStateId: String?      // 0=INACTIVE, 1=IDLE, 2=BLOWING_AIR (read-only)
+    public let rotationDirectionId: String?    // 0=CLOCKWISE, 1=COUNTER_CLOCKWISE
+    public let swingModeId: String?            // 0=DISABLED, 1=ENABLED
     // Garage door characteristics
     public let currentDoorStateId: String?     // 0=open, 1=closed, 2=opening, 3=closing, 4=stopped
     public let targetDoorStateId: String?      // 0=open, 1=closed
@@ -124,6 +128,10 @@ public struct ServiceData: Codable {
         rotationSpeedId: UUID? = nil,
         rotationSpeedMin: Double? = nil,
         rotationSpeedMax: Double? = nil,
+        targetFanStateId: UUID? = nil,
+        currentFanStateId: UUID? = nil,
+        rotationDirectionId: UUID? = nil,
+        swingModeId: UUID? = nil,
         currentDoorStateId: UUID? = nil,
         targetDoorStateId: UUID? = nil,
         obstructionDetectedId: UUID? = nil,
@@ -177,6 +185,10 @@ public struct ServiceData: Codable {
         self.rotationSpeedId = rotationSpeedId?.uuidString
         self.rotationSpeedMin = rotationSpeedMin
         self.rotationSpeedMax = rotationSpeedMax
+        self.targetFanStateId = targetFanStateId?.uuidString
+        self.currentFanStateId = currentFanStateId?.uuidString
+        self.rotationDirectionId = rotationDirectionId?.uuidString
+        self.swingModeId = swingModeId?.uuidString
         self.currentDoorStateId = currentDoorStateId?.uuidString
         self.targetDoorStateId = targetDoorStateId?.uuidString
         self.obstructionDetectedId = obstructionDetectedId?.uuidString
@@ -422,6 +434,9 @@ public protocol iOS2Mac: NSObjectProtocol {
     // Fan characteristics
     @objc public static let rotationSpeed = "00000029-0000-1000-8000-0026BB765291"
     @objc public static let rotationDirection = "00000028-0000-1000-8000-0026BB765291"
+    @objc public static let targetFanState = "000000BF-0000-1000-8000-0026BB765291"
+    @objc public static let currentFanState = "000000AF-0000-1000-8000-0026BB765291"
+    @objc public static let swingMode = "000000B6-0000-1000-8000-0026BB765291"
     // Garage door characteristics
     @objc public static let currentDoorState = "0000000E-0000-1000-8000-0026BB765291"
     @objc public static let targetDoorState = "00000032-0000-1000-8000-0026BB765291"

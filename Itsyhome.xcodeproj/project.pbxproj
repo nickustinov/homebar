@@ -1033,6 +1033,7 @@
 		5124D546EEB04A64C52AD33C /* ph.slideshow.svg in Resources */ = {isa = PBXBuildFile; fileRef = 0E15EA867E1ECF6C6F952189 /* ph.slideshow.svg */; };
 		51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7593F05E9EAB8871D43D8E8 /* ModeButton.swift */; };
 		513EAC9B835FB40EC610A1FB /* ph.circle-notch.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3C49C6658CDF4F98C6146B4 /* ph.circle-notch.svg */; };
+		5171AB4ED04287E23FDB5D33 /* ModeButtonGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BB059BF1F54562487FE8D2 /* ModeButtonGroup.swift */; };
 		526C68E9166143BA2A6A3683 /* ph.dice-three.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 96982E4498841CA4154561EA /* ph.dice-three.fill.svg */; };
 		527C4BC67B7C97B227AC50D6 /* ph.list-star.svg in Resources */ = {isa = PBXBuildFile; fileRef = A22FAEC693B2B174D9A47AC8 /* ph.list-star.svg */; };
 		5285DB9CF5A2EFDE8517F578 /* ph.file-js.svg in Resources */ = {isa = PBXBuildFile; fileRef = 9443EF808E66D436C2FFD36E /* ph.file-js.svg */; };
@@ -1262,6 +1263,7 @@
 		6465CA67674E849496C46CBE /* ph.backpack.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = CB30CD38AC1FF92D2F6E6D69 /* ph.backpack.fill.svg */; };
 		646767AF7A71690332C474E0 /* ACMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7082F795BA2C9AA55C64A0 /* ACMenuItem.swift */; };
 		6467BD1A19A627DBF859C4FC /* ph.snowflake.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 6167451DE9483784177BE96A /* ph.snowflake.fill.svg */; };
+		646873EACC1B4A1563A79DB8 /* ModeButtonGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BB059BF1F54562487FE8D2 /* ModeButtonGroup.swift */; };
 		6468A18F31B579C6BEC856F8 /* ph.linkedin-logo.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = E84C7EABF90CC27FA25105FE /* ph.linkedin-logo.fill.svg */; };
 		64884145E5868F0C6BE75C24 /* ph.caret-circle-right.svg in Resources */ = {isa = PBXBuildFile; fileRef = D73AC9672CD1ABFAF45A4618 /* ph.caret-circle-right.svg */; };
 		64A2F6EC52618A2CA486EA00 /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E663466EEEB0E7EAA36C4C8 /* ProManager.swift */; };
@@ -6217,6 +6219,7 @@
 		F2888D61E3A08217856C6E70 /* ph.washing-machine.svg */ = {isa = PBXFileReference; path = "ph.washing-machine.svg"; sourceTree = "<group>"; };
 		F29411290B0D98B4C75C9318 /* ph.pentagon.fill.svg */ = {isa = PBXFileReference; path = ph.pentagon.fill.svg; sourceTree = "<group>"; };
 		F2B85C529AD6481D7F63F119 /* ph.grains-slash.fill.svg */ = {isa = PBXFileReference; path = "ph.grains-slash.fill.svg"; sourceTree = "<group>"; };
+		F2BB059BF1F54562487FE8D2 /* ModeButtonGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeButtonGroup.swift; sourceTree = "<group>"; };
 		F2C2BA989A5E5FBD918CAD29 /* DeviceResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceResolver.swift; sourceTree = "<group>"; };
 		F2CD4EEBDF45BD6C4EB76327 /* ph.question.fill.svg */ = {isa = PBXFileReference; path = ph.question.fill.svg; sourceTree = "<group>"; };
 		F2FB969AD88EAC4FDFD14345 /* ph.shield-plus.svg */ = {isa = PBXFileReference; path = "ph.shield-plus.svg"; sourceTree = "<group>"; };
@@ -6529,6 +6532,7 @@
 			isa = PBXGroup;
 			children = (
 				B7593F05E9EAB8871D43D8E8 /* ModeButton.swift */,
+				F2BB059BF1F54562487FE8D2 /* ModeButtonGroup.swift */,
 				1359B98719D1D9D23782463E /* ShortcutButton.swift */,
 			);
 			path = Controls;
@@ -12952,6 +12956,7 @@
 				280C74C7265950C9756B365E /* MacOSController.swift in Sources */,
 				3719FEBA07D012C6D4D5B663 /* MenuBuilder.swift in Sources */,
 				51296CE1AEA687F0449B01EA /* ModeButton.swift in Sources */,
+				5171AB4ED04287E23FDB5D33 /* ModeButtonGroup.swift in Sources */,
 				98F783AA77C8DA2CF5D5A923 /* ModernSlider.swift in Sources */,
 				ED4750AE71C4CCEA0ECBF16C /* PhosphorIcon.swift in Sources */,
 				DF94581E3860681F94472B34 /* PinnedStatusItem+Characteristics.swift in Sources */,
@@ -13035,6 +13040,7 @@
 				FB77F2B3B67AF9C30D7A3108 /* LocalChangeNotifiableTests.swift in Sources */,
 				28A43FD6F2622B9CF35BC2C0 /* LockMenuItem.swift in Sources */,
 				67E9EC3321181637F2778AD9 /* ModeButton.swift in Sources */,
+				646873EACC1B4A1563A79DB8 /* ModeButtonGroup.swift in Sources */,
 				CD9CC7D9F4C6F66CB4098F96 /* ModernSlider.swift in Sources */,
 				6F158BF2BDDFDCCEB4843BB9 /* PhosphorIcon.swift in Sources */,
 				AC21DE13A7B7C5581A02D922 /* PreferencesManager+Cameras.swift in Sources */,

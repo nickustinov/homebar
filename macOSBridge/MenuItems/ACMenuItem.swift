@@ -119,32 +119,13 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         controlsRow = NSView(frame: NSRect(x: 0, y: DS.Spacing.sm, width: DS.ControlSize.menuItemWidth, height: 26))
         controlsRow.isHidden = true
 
-        // Mode buttons container (pill-shaped dark background)
-        let buttonWidth: CGFloat = 36
-        let buttonHeight: CGFloat = 18
-        let containerPadding: CGFloat = 2
-        let modeContainerWidth = buttonWidth * 3 + containerPadding * 2
-        let modeContainerHeight = buttonHeight + containerPadding * 2
+        // Mode buttons container
+        let containerWidth = ModeButtonGroup.widthForButtons(count: 3)
+        let modeContainer = ModeButtonGroup(frame: NSRect(x: labelX, y: 3, width: containerWidth, height: 22))
 
-        let modeContainer = NSView(frame: NSRect(x: labelX, y: 3, width: modeContainerWidth, height: modeContainerHeight))
-        modeContainer.wantsLayer = true
-        modeContainer.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(0.08).cgColor
-        modeContainer.layer?.cornerRadius = modeContainerHeight / 2
-
-        modeButtonCool = ModeButton(title: "Cool", color: DS.Colors.thermostatCool)  // Blue
-        modeButtonCool.frame = NSRect(x: containerPadding, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonCool.tag = 2
-        modeContainer.addSubview(modeButtonCool)
-
-        modeButtonHeat = ModeButton(title: "Heat", color: DS.Colors.thermostatHeat)  // Orange
-        modeButtonHeat.frame = NSRect(x: containerPadding + buttonWidth, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonHeat.tag = 1
-        modeContainer.addSubview(modeButtonHeat)
-
-        modeButtonAuto = ModeButton(title: "Auto", color: DS.Colors.success)  // Green
-        modeButtonAuto.frame = NSRect(x: containerPadding + buttonWidth * 2, y: containerPadding, width: buttonWidth, height: buttonHeight)
-        modeButtonAuto.tag = 0
-        modeContainer.addSubview(modeButtonAuto)
+        modeButtonCool = modeContainer.addButton(title: "Cool", color: DS.Colors.thermostatCool, tag: 2)
+        modeButtonHeat = modeContainer.addButton(title: "Heat", color: DS.Colors.thermostatHeat, tag: 1)
+        modeButtonAuto = modeContainer.addButton(title: "Auto", color: DS.Colors.success, tag: 0)
 
         controlsRow.addSubview(modeContainer)
 

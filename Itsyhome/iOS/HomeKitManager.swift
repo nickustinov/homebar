@@ -450,6 +450,10 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             rotationSpeedId: charId(CharacteristicTypes.rotationSpeed),
             rotationSpeedMin: rotationSpeedMin,
             rotationSpeedMax: rotationSpeedMax,
+            targetFanStateId: charId(CharacteristicTypes.targetFanState),
+            currentFanStateId: charId(CharacteristicTypes.currentFanState),
+            rotationDirectionId: charId(CharacteristicTypes.rotationDirection),
+            swingModeId: charId(CharacteristicTypes.swingMode),
             // Garage door characteristics
             currentDoorStateId: charId(CharacteristicTypes.currentDoorState),
             targetDoorStateId: charId(CharacteristicTypes.targetDoorState),

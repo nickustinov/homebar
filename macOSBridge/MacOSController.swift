@@ -210,7 +210,10 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
                 statusItem.delegate = self
                 pinnedStatusItems[itemId] = statusItem
 
-                // Request initial values for the characteristics
+                // Load cached values immediately for display
+                statusItem.loadInitialValues()
+
+                // Request fresh values for the characteristics
                 for charId in statusItem.characteristicIdentifiers {
                     iOSBridge?.readCharacteristic(identifier: charId)
                 }

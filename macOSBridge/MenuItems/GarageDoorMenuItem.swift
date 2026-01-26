@@ -86,7 +86,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         let switchY = (height - DS.ControlSize.switchHeight) / 2
         toggleSwitch = ToggleSwitch()
         toggleSwitch.frame = NSRect(x: switchX, y: switchY, width: DS.ControlSize.switchWidth, height: DS.ControlSize.switchHeight)
-        toggleSwitch.isOn = true  // Closed = on
+        toggleSwitch.setOn(true, animated: false)  // Closed = on
         containerView.addSubview(toggleSwitch)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")

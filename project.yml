@@ -74,8 +74,13 @@ targets:
         MACOSX_DEPLOYMENT_TARGET: "14.0"
     sources:
       - path: macOSBridge
+        excludes:
+          - "Resources/PhosphorIcons/**"
       - path: Itsyhome/Shared
         buildPhase: sources
+      - path: macOSBridge/Resources/PhosphorIcons
+        buildPhase: resources
+        type: folder
 
   # Unit tests for macOSBridge
   macOSBridgeTests:

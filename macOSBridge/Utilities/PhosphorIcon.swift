@@ -3,7 +3,7 @@
 //  macOSBridge
 //
 //  Phosphor Icons integration for consistent iconography
-//  Icons are bundled as SVG assets with naming: ph.{name} and ph.{name}.fill
+//  Icons are loaded at runtime from SVG files: ph.{name}.svg and ph.{name}.fill.svg
 //
 
 import AppKit
@@ -12,22 +12,66 @@ import AppKit
 
 enum PhosphorIcon {
 
-    /// The bundle containing Phosphor icon assets
+    /// The bundle containing Phosphor icon SVGs
     private static let bundle = Bundle(for: BundleToken.self)
+
+    /// Cache for loaded icons to avoid repeated disk reads
+    private static var iconCache: [String: NSImage] = [:]
+    private static let cacheLock = NSLock()
 
     /// Get a Phosphor icon by name (regular weight)
     static func regular(_ name: String) -> NSImage? {
-        bundle.image(forResource: "ph.\(name)")
+        loadIcon(named: "ph.\(name)")
     }
 
     /// Get a Phosphor icon by name (fill weight)
     static func fill(_ name: String) -> NSImage? {
-        bundle.image(forResource: "ph.\(name).fill")
+        loadIcon(named: "ph.\(name).fill")
     }
 
     /// Get icon with automatic variant based on state (fill when on, regular when off)
     static func icon(_ name: String, filled: Bool) -> NSImage? {
         filled ? fill(name) : regular(name)
+    }
+
+    /// Load an SVG icon from the bundle's Resources/PhosphorIcons folder
+    private static func loadIcon(named name: String) -> NSImage? {
+        // Check cache first
+        cacheLock.lock()
+        if let cached = iconCache[name] {
+            cacheLock.unlock()
+            return cached
+        }
+        cacheLock.unlock()
+
+        // Load SVG from bundle
+        guard let url = bundle.url(forResource: name, withExtension: "svg", subdirectory: "PhosphorIcons"),
+              let data = try? Data(contentsOf: url),
+              let image = NSImage(data: data) else {
+            return nil
+        }
+
+        // Mark as template for tinting
+        image.isTemplate = true
+
+        // Cache the loaded image
+        cacheLock.lock()
+        iconCache[name] = image
+        cacheLock.unlock()
+
+        return image
+    }
+
+    /// Preload commonly used icons for better performance
+    static func preloadCommonIcons() {
+        let commonIcons = [
+            "lightbulb", "power", "thermometer", "lock", "fan", "garage",
+            "house", "gear", "star", "caret-right", "caret-down", "x"
+        ]
+        for name in commonIcons {
+            _ = regular(name)
+            _ = fill(name)
+        }
     }
 }
 

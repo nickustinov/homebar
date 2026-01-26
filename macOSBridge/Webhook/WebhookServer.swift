@@ -210,7 +210,13 @@ final class WebhookServer {
         case "debug":
             let rest = path.dropFirst(6) // drop "debug/"
             let decoded = String(rest).removingPercentEncoding ?? String(rest)
-            handleDebug(target: decoded, connection: connection, engine: engine)
+            if decoded == "complete" {
+                handleDebugComplete(connection: connection, engine: engine)
+            } else if decoded == "all" {
+                handleDebugAll(connection: connection, engine: engine)
+            } else {
+                handleDebug(target: decoded, connection: connection, engine: engine)
+            }
             return true
         default:
             return false
@@ -372,6 +378,58 @@ final class WebhookServer {
             sendResponse(connection: connection, status: 200, body: items[0])
         } else {
             sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
+        }
+    }
+
+    private func handleDebugAll(connection: NWConnection, engine: ActionEngine) {
+        guard let data = engine.menuData else {
+            sendResponse(connection: connection, status: 500, body: errorJSON("No data available"))
+            return
+        }
+
+        let roomLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0.name) })
+
+        var accessoriesJSON: [String] = []
+        for accessory in data.accessories {
+            let roomName = accessory.roomIdentifier.flatMap { roomLookup[String(describing: $0)] }
+
+            var servicesJSON: [String] = []
+            for service in accessory.services {
+                servicesJSON.append(buildDebugJSON(service, in: data, engine: engine))
+            }
+
+            var fields: [String] = [
+                "\"name\":\"\(escapeJSON(accessory.name))\"",
+                "\"reachable\":\(accessory.isReachable)",
+                "\"services\":[\(servicesJSON.joined(separator: ","))]"
+            ]
+            if let room = roomName {
+                fields.append("\"room\":\"\(escapeJSON(room))\"")
+            }
+            accessoriesJSON.append("{\(fields.joined(separator: ","))}")
+        }
+
+        let result = "{\"accessories\":[\(accessoriesJSON.joined(separator: ","))],\"rooms\":\(data.rooms.count),\"scenes\":\(data.scenes.count)}"
+        sendResponse(connection: connection, status: 200, body: result)
+    }
+
+    private func handleDebugComplete(connection: NWConnection, engine: ActionEngine) {
+        guard let bridge = engine.bridge else {
+            sendResponse(connection: connection, status: 500, body: errorJSON("Bridge unavailable"))
+            return
+        }
+
+        // Request raw HomeKit dump from iOS - must run on main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                connection.cancel()
+                return
+            }
+            if let rawData = bridge.getRawHomeKitDump() {
+                self.sendResponse(connection: connection, status: 200, body: rawData)
+            } else {
+                self.sendResponse(connection: connection, status: 500, body: self.errorJSON("Failed to get raw HomeKit data"))
+            }
         }
     }
 
@@ -663,7 +721,7 @@ final class WebhookServer {
         case ServiceTypes.lightbulb: return "light"
         case ServiceTypes.switch: return "switch"
         case ServiceTypes.outlet: return "outlet"
-        case ServiceTypes.fan: return "fan"
+        case ServiceTypes.fan, ServiceTypes.fanV2: return "fan"
         case ServiceTypes.thermostat: return "thermostat"
         case ServiceTypes.heaterCooler: return "heater-cooler"
         case ServiceTypes.windowCovering: return "blinds"

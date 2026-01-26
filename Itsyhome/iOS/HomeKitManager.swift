@@ -105,6 +105,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             HMServiceTypeTemperatureSensor,
             HMServiceTypeHumiditySensor,
             HMServiceTypeFan,
+            ServiceTypes.fanV2,
             HMServiceTypeGarageDoorOpener,
             ServiceTypes.humidifierDehumidifier,
             ServiceTypes.airPurifier,
@@ -337,6 +338,195 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             NotificationCenter.default.post(name: .cameraPanelDidShow, object: nil)
         }
         #endif
+    }
+
+    func getRawHomeKitDump() -> String? {
+        guard let home = currentHome else {
+            return "{\"error\":\"No home selected\"}"
+        }
+
+        var result: [String: Any] = [
+            "homeName": home.name,
+            "homeId": home.uniqueIdentifier.uuidString
+        ]
+
+        // Dump all accessories with all services and characteristics
+        var accessoriesArray: [[String: Any]] = []
+        for accessory in home.accessories {
+            var accDict: [String: Any] = [
+                "name": accessory.name,
+                "id": accessory.uniqueIdentifier.uuidString,
+                "reachable": accessory.isReachable,
+                "room": accessory.room?.name ?? "No Room"
+            ]
+
+            var servicesArray: [[String: Any]] = []
+            for service in accessory.services {
+                var serviceDict: [String: Any] = [
+                    "name": service.name,
+                    "type": service.serviceType,
+                    "id": service.uniqueIdentifier.uuidString
+                ]
+
+                // Map service type to readable name
+                let typeName = serviceTypeName(service.serviceType)
+                if !typeName.isEmpty {
+                    serviceDict["typeName"] = typeName
+                }
+
+                var charsArray: [[String: Any]] = []
+                for char in service.characteristics {
+                    var charDict: [String: Any] = [
+                        "type": char.characteristicType,
+                        "id": char.uniqueIdentifier.uuidString
+                    ]
+
+                    // Map characteristic type to readable name
+                    let charName = characteristicTypeName(char.characteristicType)
+                    if !charName.isEmpty {
+                        charDict["typeName"] = charName
+                    }
+
+                    // Only include JSON-serializable values
+                    if let value = char.value {
+                        if let data = value as? Data {
+                            charDict["value"] = data.base64EncodedString()
+                            charDict["valueType"] = "data"
+                        } else if let number = value as? NSNumber {
+                            charDict["value"] = number
+                        } else if let string = value as? String {
+                            charDict["value"] = string
+                        } else if let bool = value as? Bool {
+                            charDict["value"] = bool
+                        } else if let array = value as? [Any], JSONSerialization.isValidJSONObject(array) {
+                            charDict["value"] = array
+                        } else if let dict = value as? [String: Any], JSONSerialization.isValidJSONObject(dict) {
+                            charDict["value"] = dict
+                        } else {
+                            charDict["value"] = String(describing: value)
+                            charDict["valueType"] = "unknown"
+                        }
+                    }
+
+                    if let metadata = char.metadata {
+                        var meta: [String: Any] = [:]
+                        if let min = metadata.minimumValue {
+                            meta["min"] = min
+                        }
+                        if let max = metadata.maximumValue {
+                            meta["max"] = max
+                        }
+                        if let step = metadata.stepValue {
+                            meta["step"] = step
+                        }
+                        if let format = metadata.format {
+                            meta["format"] = format
+                        }
+                        if let units = metadata.units {
+                            meta["units"] = units
+                        }
+                        if !meta.isEmpty {
+                            charDict["metadata"] = meta
+                        }
+                    }
+
+                    let props = char.properties
+                    if !props.isEmpty {
+                        charDict["properties"] = props
+                    }
+
+                    charsArray.append(charDict)
+                }
+
+                serviceDict["characteristics"] = charsArray
+                servicesArray.append(serviceDict)
+            }
+
+            accDict["services"] = servicesArray
+            accessoriesArray.append(accDict)
+        }
+
+        result["accessories"] = accessoriesArray
+        result["accessoryCount"] = home.accessories.count
+
+        // Also include rooms
+        result["rooms"] = home.rooms.map { ["name": $0.name, "id": $0.uniqueIdentifier.uuidString] }
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
+            return String(data: jsonData, encoding: .utf8)
+        } catch {
+            return "{\"error\":\"\(error.localizedDescription)\"}"
+        }
+    }
+
+    private func serviceTypeName(_ type: String) -> String {
+        switch type {
+        case HMServiceTypeLightbulb: return "Lightbulb"
+        case HMServiceTypeSwitch: return "Switch"
+        case HMServiceTypeOutlet: return "Outlet"
+        case HMServiceTypeFan: return "Fan"
+        case ServiceTypes.fanV2: return "FanV2"
+        case HMServiceTypeThermostat: return "Thermostat"
+        case HMServiceTypeHeaterCooler: return "HeaterCooler"
+        case HMServiceTypeLockMechanism: return "Lock"
+        case HMServiceTypeWindowCovering: return "WindowCovering"
+        case HMServiceTypeGarageDoorOpener: return "GarageDoor"
+        case HMServiceTypeTemperatureSensor: return "TemperatureSensor"
+        case HMServiceTypeHumiditySensor: return "HumiditySensor"
+        case HMServiceTypeMotionSensor: return "MotionSensor"
+        case HMServiceTypeContactSensor: return "ContactSensor"
+        case HMServiceTypeSecuritySystem: return "SecuritySystem"
+        case HMServiceTypeHumidifierDehumidifier: return "HumidifierDehumidifier"
+        case HMServiceTypeAirPurifier: return "AirPurifier"
+        case HMServiceTypeValve: return "Valve"
+        case HMServiceTypeCameraControl: return "CameraControl"
+        case HMServiceTypeCameraRTPStreamManagement: return "CameraStream"
+        default: return ""
+        }
+    }
+
+    private func characteristicTypeName(_ type: String) -> String {
+        switch type {
+        case HMCharacteristicTypePowerState: return "PowerState"
+        case HMCharacteristicTypeTargetRelativeHumidity: return "TargetRelativeHumidity"
+        case HMCharacteristicTypeCurrentRelativeHumidity: return "CurrentRelativeHumidity"
+        case HMCharacteristicTypeBrightness: return "Brightness"
+        case HMCharacteristicTypeHue: return "Hue"
+        case HMCharacteristicTypeSaturation: return "Saturation"
+        case HMCharacteristicTypeColorTemperature: return "ColorTemperature"
+        case HMCharacteristicTypeCurrentTemperature: return "CurrentTemperature"
+        case HMCharacteristicTypeTargetTemperature: return "TargetTemperature"
+        case HMCharacteristicTypeCurrentHeatingCooling: return "CurrentHeatingCooling"
+        case HMCharacteristicTypeTargetHeatingCooling: return "TargetHeatingCooling"
+        case HMCharacteristicTypeCurrentHeaterCoolerState: return "CurrentHeaterCoolerState"
+        case HMCharacteristicTypeTargetHeaterCoolerState: return "TargetHeaterCoolerState"
+        case HMCharacteristicTypeCoolingThreshold: return "CoolingThreshold"
+        case HMCharacteristicTypeHeatingThreshold: return "HeatingThreshold"
+        case HMCharacteristicTypeCurrentLockMechanismState: return "CurrentLockMechanismState"
+        case HMCharacteristicTypeTargetLockMechanismState: return "TargetLockMechanismState"
+        case HMCharacteristicTypeCurrentPosition: return "CurrentPosition"
+        case HMCharacteristicTypeTargetPosition: return "TargetPosition"
+        case HMCharacteristicTypePositionState: return "PositionState"
+        case HMCharacteristicTypeRotationSpeed: return "RotationSpeed"
+        case HMCharacteristicTypeRotationDirection: return "RotationDirection"
+        case HMCharacteristicTypeActive: return "Active"
+        case HMCharacteristicTypeSwingMode: return "SwingMode"
+        case HMCharacteristicTypeTargetFanState: return "TargetFanState"
+        case HMCharacteristicTypeCurrentFanState: return "CurrentFanState"
+        case HMCharacteristicTypeCurrentDoorState: return "CurrentDoorState"
+        case HMCharacteristicTypeTargetDoorState: return "TargetDoorState"
+        case HMCharacteristicTypeObstructionDetected: return "ObstructionDetected"
+        case HMCharacteristicTypeMotionDetected: return "MotionDetected"
+        case HMCharacteristicTypeContactState: return "ContactState"
+        case CharacteristicTypes.securitySystemCurrentState: return "SecuritySystemCurrentState"
+        case CharacteristicTypes.securitySystemTargetState: return "SecuritySystemTargetState"
+        case HMCharacteristicTypeInUse: return "InUse"
+        case HMCharacteristicTypeValveType: return "ValveType"
+        case HMCharacteristicTypeSetDuration: return "SetDuration"
+        case HMCharacteristicTypeRemainingDuration: return "RemainingDuration"
+        default: return ""
+        }
     }
 
     // MARK: - Helper Methods

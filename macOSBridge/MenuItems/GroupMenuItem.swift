@@ -204,7 +204,7 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
                 updateBlindsIcon(position: avgPosition)
             case ServiceTypes.lightbulb:
                 iconView.image = IconMapping.iconForServiceType(ServiceTypes.lightbulb, filled: isOn)
-            case ServiceTypes.fan:
+            case ServiceTypes.fan, ServiceTypes.fanV2:
                 iconView.image = IconMapping.iconForServiceType(ServiceTypes.fan, filled: isOn)
             case ServiceTypes.lock:
                 let mode = isOn ? "locked" : "unlocked"

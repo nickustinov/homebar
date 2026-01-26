@@ -367,6 +367,7 @@ public protocol Mac2iOS: NSObjectProtocol {
     func openCameraWindow()
     func closeCameraWindow()
     func setCameraWindowHidden(_ hidden: Bool)
+    func getRawHomeKitDump() -> String?
 }
 
 /// Protocol for iOS code to call macOS plugin
@@ -398,6 +399,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let humiditySensor = "00000082-0000-1000-8000-0026BB765291"
     @objc public static let motionSensor = "00000085-0000-1000-8000-0026BB765291"
     @objc public static let fan = "00000040-0000-1000-8000-0026BB765291"
+    @objc public static let fanV2 = "000000B7-0000-1000-8000-0026BB765291"
     @objc public static let garageDoorOpener = "00000041-0000-1000-8000-0026BB765291"
     @objc public static let contactSensor = "00000080-0000-1000-8000-0026BB765291"
     @objc public static let humidifierDehumidifier = "000000BD-0000-1000-8000-0026BB765291"

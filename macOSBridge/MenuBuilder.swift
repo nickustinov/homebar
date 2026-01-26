@@ -257,6 +257,7 @@ class MenuBuilder {
             ServiceTypes.switch,
             ServiceTypes.outlet,
             ServiceTypes.fan,
+            ServiceTypes.fanV2,
             ServiceTypes.heaterCooler,
             ServiceTypes.thermostat,
             ServiceTypes.humidifierDehumidifier,
@@ -401,7 +402,7 @@ class MenuBuilder {
         case ServiceTypes.windowCovering:
             menuItem = BlindMenuItem(serviceData: service, bridge: bridge)
 
-        case ServiceTypes.fan:
+        case ServiceTypes.fan, ServiceTypes.fanV2:
             menuItem = FanMenuItem(serviceData: service, bridge: bridge)
 
         case ServiceTypes.garageDoorOpener:

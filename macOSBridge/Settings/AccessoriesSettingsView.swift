@@ -89,7 +89,7 @@ class AccessoriesSettingsView: NSView {
     var globalGroups: [DeviceGroup] = []
     var groupsByRoom: [String: [DeviceGroup]] = [:]
 
-    let typeOrder = [ServiceTypes.lightbulb, ServiceTypes.switch, ServiceTypes.outlet, ServiceTypes.fan,
+    let typeOrder = [ServiceTypes.lightbulb, ServiceTypes.switch, ServiceTypes.outlet, ServiceTypes.fan, ServiceTypes.fanV2,
                      ServiceTypes.heaterCooler, ServiceTypes.thermostat, ServiceTypes.windowCovering,
                      ServiceTypes.lock, ServiceTypes.garageDoorOpener]
 

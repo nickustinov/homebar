@@ -188,6 +188,10 @@ extension PhosphorIcon {
             defaultIcon: "fan",
             suggestedIcons: ["fan", "wind"]
         ),
+        ServiceTypes.fanV2: AccessoryIconConfig(
+            defaultIcon: "fan",
+            suggestedIcons: ["fan", "wind"]
+        ),
 
         // Window Coverings / Blinds
         ServiceTypes.windowCovering: AccessoryIconConfig(

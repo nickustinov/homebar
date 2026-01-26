@@ -214,6 +214,46 @@ enum DS {
     }
 }
 
+// MARK: - Stepper Button
+
+/// A small +/- button for temperature steppers. Creates a borderless button
+/// with a subtle background, matching the style used in temperature controls.
+enum StepperButton {
+    enum Size {
+        case regular  // 20x20
+        case mini     // 11x11
+    }
+
+    static func create(title: String, size: Size = .regular) -> NSButton {
+        let dimension: CGFloat = size == .regular ? 20 : 11
+        let button = NSButton(frame: NSRect(x: 0, y: 0, width: dimension, height: dimension))
+
+        button.isBordered = false
+        button.wantsLayer = true
+
+        let isDark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let bgAlpha: CGFloat = isDark ? 0.2 : 0.08
+        button.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(bgAlpha).cgColor
+        button.layer?.cornerRadius = size == .regular ? 4 : 2
+
+        let fontSize: CGFloat = size == .regular ? 12 : 8
+        let font = NSFont.systemFont(ofSize: fontSize, weight: .bold)
+
+        if isDark {
+            button.attributedTitle = NSAttributedString(string: title, attributes: [
+                .foregroundColor: NSColor.white,
+                .font: font
+            ])
+        } else {
+            button.title = title
+            button.font = font
+            button.contentTintColor = .secondaryLabelColor
+        }
+
+        return button
+    }
+}
+
 // MARK: - NSAppearance extension
 
 extension NSAppearance {

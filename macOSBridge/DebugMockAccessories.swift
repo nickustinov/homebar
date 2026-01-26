@@ -29,10 +29,16 @@ enum DebugMockups {
                     switchItem.updateValue(for: outletInUseId, value: true)
                 }
 
-                if let thermostatItem = item as? ThermostatMenuItem,
-                   let currentTempIdStr = service.currentTemperatureId,
-                   let currentTempId = UUID(uuidString: currentTempIdStr) {
-                    thermostatItem.updateValue(for: currentTempId, value: 21.5)
+                if let thermostatItem = item as? ThermostatMenuItem {
+                    if let id = service.currentTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        thermostatItem.updateValue(for: id, value: 21.5)
+                    }
+                    if let id = service.heatingThresholdTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        thermostatItem.updateValue(for: id, value: 18.0)
+                    }
+                    if let id = service.coolingThresholdTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        thermostatItem.updateValue(for: id, value: 24.0)
+                    }
                 }
 
                 if let acItem = item as? ACMenuItem,
@@ -107,7 +113,9 @@ enum DebugMockups {
                 currentTemperatureId: UUID(),
                 targetTemperatureId: UUID(),
                 heatingCoolingStateId: UUID(),
-                targetHeatingCoolingStateId: UUID()
+                targetHeatingCoolingStateId: UUID(),
+                coolingThresholdTemperatureId: UUID(),
+                heatingThresholdTemperatureId: UUID()
             ),
             ServiceData(
                 uniqueIdentifier: UUID(),

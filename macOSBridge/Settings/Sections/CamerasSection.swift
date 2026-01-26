@@ -294,7 +294,7 @@ class CamerasSection: NSView {
         eyeButton.isBordered = false
         eyeButton.imagePosition = .imageOnly
         eyeButton.imageScaling = .scaleProportionallyUpOrDown
-        eyeButton.image = isHidden ? PhosphorIcon.regular("eye-slash") : PhosphorIcon.fill("eye")
+        eyeButton.image = isHidden ? PhosphorIcon.regular("eye") : PhosphorIcon.fill("eye")
         eyeButton.contentTintColor = isHidden ? .tertiaryLabelColor : .secondaryLabelColor
         eyeButton.target = self
         eyeButton.action = #selector(eyeTapped(_:))

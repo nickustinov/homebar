@@ -16,11 +16,15 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private var targetTempId: UUID?
     private var currentStateId: UUID?      // What it's doing (0=off, 1=heating, 2=cooling)
     private var targetStateId: UUID?       // User-selected mode (0=off, 1=heat, 2=cool, 3=auto)
+    private var coolingThresholdId: UUID?
+    private var heatingThresholdId: UUID?
 
     private var currentTemp: Double = 0
     private var targetTemp: Double = 20
     private var currentState: Int = 0      // 0=off, 1=heating, 2=cooling
     private var targetState: Int = 0       // 0=off, 1=heat, 2=cool, 3=auto
+    private var coolingThreshold: Double = 24
+    private var heatingThreshold: Double = 18
 
     private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
@@ -33,9 +37,23 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private let modeButtonHeat: ModeButton
     private let modeButtonCool: ModeButton
     private let modeButtonAuto: ModeButton
+
+    // Single temp control (Heat/Cool modes)
+    private let singleTempContainer: NSView
     private let minusButton: NSButton
     private let targetLabel: NSTextField
     private let plusButton: NSButton
+
+    // Range control (Auto mode): -18+ -24+
+    private let rangeTempContainer: NSView
+    private let heatMinusButton: NSButton
+    private let heatLabel: NSTextField
+    private let heatPlusButton: NSButton
+    private let coolMinusButton: NSButton
+    private let coolLabel: NSTextField
+    private let coolPlusButton: NSButton
+
+    private let hasThresholds: Bool
 
     private let collapsedHeight: CGFloat = DS.ControlSize.menuItemHeight
     private let expandedHeight: CGFloat = DS.ControlSize.menuItemHeight + 36
@@ -49,6 +67,8 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         if let id = targetTempId { ids.append(id) }
         if let id = currentStateId { ids.append(id) }
         if let id = targetStateId { ids.append(id) }
+        if let id = coolingThresholdId { ids.append(id) }
+        if let id = heatingThresholdId { ids.append(id) }
         return ids
     }
 
@@ -61,6 +81,9 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.targetTempId = serviceData.targetTemperatureId.flatMap { UUID(uuidString: $0) }
         self.currentStateId = serviceData.heatingCoolingStateId.flatMap { UUID(uuidString: $0) }
         self.targetStateId = serviceData.targetHeatingCoolingStateId.flatMap { UUID(uuidString: $0) }
+        self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
+        self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
+        self.hasThresholds = coolingThresholdId != nil && heatingThresholdId != nil
 
         // Create wrapper view - start collapsed
         containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
@@ -127,49 +150,70 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         // Set initial selection
         modeButtonHeat.isSelected = true
 
-        // Temperature controls: - | temp | +
-        let tempControlsX = DS.ControlSize.menuItemWidth - DS.Spacing.md - 78
-        let isDark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        let buttonBgAlpha: CGFloat = isDark ? 0.2 : 0.08
-        let buttonFont = NSFont.systemFont(ofSize: 12, weight: .bold)
+        // Single temperature control: [−] 20° [+]
+        let singleTempX = DS.ControlSize.menuItemWidth - DS.Spacing.md - 78
+        singleTempContainer = NSView(frame: NSRect(x: singleTempX, y: 0, width: 78, height: 26))
 
-        // Minus button
-        minusButton = NSButton(frame: NSRect(x: tempControlsX, y: 4, width: 20, height: 20))
-        minusButton.isBordered = false
-        minusButton.wantsLayer = true
-        minusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(buttonBgAlpha).cgColor
-        minusButton.layer?.cornerRadius = 4
-        if isDark {
-            minusButton.attributedTitle = NSAttributedString(string: "−", attributes: [.foregroundColor: NSColor.white, .font: buttonFont])
-        } else {
-            minusButton.title = "−"
-            minusButton.font = buttonFont
-            minusButton.contentTintColor = .secondaryLabelColor
-        }
-        controlsRow.addSubview(minusButton)
+        minusButton = StepperButton.create(title: "−", size: .regular)
+        minusButton.frame.origin = NSPoint(x: 0, y: 4)
+        singleTempContainer.addSubview(minusButton)
 
-        // Target temp label
         targetLabel = NSTextField(labelWithString: "20°")
-        targetLabel.frame = NSRect(x: tempControlsX + 22, y: 5, width: 32, height: 17)
+        targetLabel.frame = NSRect(x: 22, y: 5, width: 32, height: 17)
         targetLabel.font = DS.Typography.labelSmall
         targetLabel.textColor = .secondaryLabelColor
         targetLabel.alignment = .center
-        controlsRow.addSubview(targetLabel)
+        singleTempContainer.addSubview(targetLabel)
 
-        // Plus button
-        plusButton = NSButton(frame: NSRect(x: tempControlsX + 56, y: 4, width: 20, height: 20))
-        plusButton.isBordered = false
-        plusButton.wantsLayer = true
-        plusButton.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(buttonBgAlpha).cgColor
-        plusButton.layer?.cornerRadius = 4
-        if isDark {
-            plusButton.attributedTitle = NSAttributedString(string: "+", attributes: [.foregroundColor: NSColor.white, .font: buttonFont])
-        } else {
-            plusButton.title = "+"
-            plusButton.font = buttonFont
-            plusButton.contentTintColor = .secondaryLabelColor
-        }
-        controlsRow.addSubview(plusButton)
+        plusButton = StepperButton.create(title: "+", size: .regular)
+        plusButton.frame.origin = NSPoint(x: 56, y: 4)
+        singleTempContainer.addSubview(plusButton)
+
+        controlsRow.addSubview(singleTempContainer)
+
+        // Range temperature control: -18+ -24+ (for Auto mode with thresholds)
+        let miniBtn: CGFloat = 11
+        let miniLabel: CGFloat = 24
+        let miniStepper = miniBtn + miniLabel + miniBtn  // 44
+        let rangeWidth = miniStepper * 2 + 6  // 94
+        let rangeTempX = DS.ControlSize.menuItemWidth - DS.Spacing.md - rangeWidth
+        rangeTempContainer = NSView(frame: NSRect(x: rangeTempX, y: 1, width: rangeWidth, height: 26))
+        rangeTempContainer.isHidden = true
+
+        // Heat stepper (left): -18+
+        heatMinusButton = StepperButton.create(title: "−", size: .mini)
+        heatMinusButton.frame.origin = NSPoint(x: 0, y: 8)
+        rangeTempContainer.addSubview(heatMinusButton)
+
+        heatLabel = NSTextField(labelWithString: "18°")
+        heatLabel.frame = NSRect(x: miniBtn, y: 6, width: miniLabel, height: 14)
+        heatLabel.font = DS.Typography.labelSmall
+        heatLabel.textColor = .secondaryLabelColor
+        heatLabel.alignment = .center
+        rangeTempContainer.addSubview(heatLabel)
+
+        heatPlusButton = StepperButton.create(title: "+", size: .mini)
+        heatPlusButton.frame.origin = NSPoint(x: miniBtn + miniLabel, y: 8)
+        rangeTempContainer.addSubview(heatPlusButton)
+
+        // Cool stepper (right): -24+
+        let coolX = miniStepper + 6
+        coolMinusButton = StepperButton.create(title: "−", size: .mini)
+        coolMinusButton.frame.origin = NSPoint(x: coolX, y: 8)
+        rangeTempContainer.addSubview(coolMinusButton)
+
+        coolLabel = NSTextField(labelWithString: "24°")
+        coolLabel.frame = NSRect(x: coolX + miniBtn, y: 6, width: miniLabel, height: 14)
+        coolLabel.font = DS.Typography.labelSmall
+        coolLabel.textColor = .secondaryLabelColor
+        coolLabel.alignment = .center
+        rangeTempContainer.addSubview(coolLabel)
+
+        coolPlusButton = StepperButton.create(title: "+", size: .mini)
+        coolPlusButton.frame.origin = NSPoint(x: coolX + miniBtn + miniLabel, y: 8)
+        rangeTempContainer.addSubview(coolPlusButton)
+
+        controlsRow.addSubview(rangeTempContainer)
 
         containerView.addSubview(controlsRow)
 
@@ -199,6 +243,16 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
         plusButton.target = self
         plusButton.action = #selector(increaseTemp(_:))
+
+        heatMinusButton.target = self
+        heatMinusButton.action = #selector(decreaseHeatThreshold(_:))
+        heatPlusButton.target = self
+        heatPlusButton.action = #selector(increaseHeatThreshold(_:))
+
+        coolMinusButton.target = self
+        coolMinusButton.action = #selector(decreaseCoolThreshold(_:))
+        coolPlusButton.target = self
+        coolPlusButton.action = #selector(increaseCoolThreshold(_:))
     }
 
     required init(coder: NSCoder) {
@@ -230,6 +284,16 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
                 updateModeButtons()
                 updateUI()
             }
+        } else if characteristicId == coolingThresholdId {
+            if let temp = ValueConversion.toDouble(value) {
+                coolingThreshold = temp
+                coolLabel.stringValue = TemperatureFormatter.format(temp)
+            }
+        } else if characteristicId == heatingThresholdId {
+            if let temp = ValueConversion.toDouble(value) {
+                heatingThreshold = temp
+                heatLabel.stringValue = TemperatureFormatter.format(temp)
+            }
         }
     }
 
@@ -251,6 +315,11 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         nameLabel.frame.origin.y = labelY
         tempLabel.frame.origin.y = labelY
         powerToggle.frame.origin.y = switchY
+
+        // Show range control in Auto mode with thresholds, single control otherwise
+        let showRange = targetState == 3 && hasThresholds
+        singleTempContainer.isHidden = showRange
+        rangeTempContainer.isHidden = !showRange
 
         updateStateIcon()
     }
@@ -324,10 +393,50 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     @objc private func decreaseTemp(_ sender: NSButton) {
-        setTargetTemp(targetTemp - 0.5)
+        setTargetTemp(targetTemp - 1)
     }
 
     @objc private func increaseTemp(_ sender: NSButton) {
-        setTargetTemp(targetTemp + 0.5)
+        setTargetTemp(targetTemp + 1)
+    }
+
+    // MARK: - Threshold controls (Auto mode)
+
+    private func setHeatingThreshold(_ temp: Double) {
+        let maxHeat = coolingThreshold - 1
+        let clamped = min(max(temp, 10), maxHeat)
+        heatingThreshold = clamped
+        heatLabel.stringValue = TemperatureFormatter.format(clamped)
+        if let id = heatingThresholdId {
+            bridge?.writeCharacteristic(identifier: id, value: Float(clamped))
+            notifyLocalChange(characteristicId: id, value: Float(clamped))
+        }
+    }
+
+    private func setCoolingThreshold(_ temp: Double) {
+        let minCool = heatingThreshold + 1
+        let clamped = min(max(temp, minCool), 30)
+        coolingThreshold = clamped
+        coolLabel.stringValue = TemperatureFormatter.format(clamped)
+        if let id = coolingThresholdId {
+            bridge?.writeCharacteristic(identifier: id, value: Float(clamped))
+            notifyLocalChange(characteristicId: id, value: Float(clamped))
+        }
+    }
+
+    @objc private func decreaseHeatThreshold(_ sender: NSButton) {
+        setHeatingThreshold(heatingThreshold - 1)
+    }
+
+    @objc private func increaseHeatThreshold(_ sender: NSButton) {
+        setHeatingThreshold(heatingThreshold + 1)
+    }
+
+    @objc private func decreaseCoolThreshold(_ sender: NSButton) {
+        setCoolingThreshold(coolingThreshold - 1)
+    }
+
+    @objc private func increaseCoolThreshold(_ sender: NSButton) {
+        setCoolingThreshold(coolingThreshold + 1)
     }
 }

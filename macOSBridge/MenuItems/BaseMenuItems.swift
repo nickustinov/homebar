@@ -53,42 +53,9 @@ extension ReachabilityUpdatableMenuItem {
 // MARK: - Scene icon inference
 
 enum SceneIconInference {
-    private static let mappings: [(keywords: [String], symbol: String)] = [
-        (["night", "sleep", "goodnight", "bed"], "moon.fill"),
-        (["morning", "wake", "sunrise"], "sun.horizon.fill"),
-        (["evening", "sunset"], "sun.haze.fill"),
-        (["day", "bright"], "sun.max.fill"),
-        (["movie", "cinema", "tv"], "tv.fill"),
-        (["party", "disco"], "party.popper.fill"),
-        (["relax", "chill", "calm"], "leaf.fill"),
-        (["work", "office", "focus"], "desktopcomputer"),
-        (["away", "leave", "depart", "goodbye"], "figure.walk"),
-        (["home", "arrive", "welcome"], "house.fill"),
-        (["lock", "secure"], "lock.fill"),
-        (["unlock", "open"], "lock.open.fill"),
-        (["gate"], "door.garage.closed"),
-        (["outdoor", "outside", "garden", "terrace", "patio"], "tree.fill"),
-        (["indoor", "inside"], "sofa.fill"),
-        (["gym", "workout", "exercise"], "dumbbell.fill"),
-        (["pool", "swim"], "figure.pool.swim"),
-        (["dinner", "dining", "eat"], "fork.knife"),
-        (["cook", "kitchen"], "frying.pan.fill"),
-        (["reading", "read", "book"], "book.fill"),
-        (["romantic", "date", "love"], "heart.fill"),
-        (["off", "all off"], "power"),
-        (["on", "all on"], "lightbulb.fill"),
-    ]
-
+    /// Get icon for a scene - delegates to PhosphorIcon for consistent iconography
     static func icon(for sceneName: String) -> NSImage? {
-        let name = sceneName.lowercased()
-
-        for (keywords, symbol) in mappings {
-            if keywords.contains(where: { name.contains($0) }) {
-                return NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-            }
-        }
-
-        return NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        PhosphorIcon.iconForScene(sceneName)
     }
 }
 
@@ -101,7 +68,7 @@ class HomeMenuItem: NSMenuItem {
         self.home = home
         super.init(title: home.name, action: action, keyEquivalent: "")
         self.target = target
-        self.image = NSImage(systemSymbolName: home.isPrimary ? "house.fill" : "house", accessibilityDescription: nil)
+        self.image = PhosphorIcon.icon("house", filled: home.isPrimary)
     }
 
     required init(coder: NSCoder) {

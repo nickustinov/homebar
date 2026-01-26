@@ -85,12 +85,12 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
         var icon: String {
             switch self {
-            case .general: return "gearshape"
+            case .general: return "gear"
             case .accessories: return "house"
-            case .cameras: return "video"
+            case .cameras: return "video-camera"
             case .deeplinks: return "link"
-            case .webhooks: return "network"
-            case .about: return "info.circle"
+            case .webhooks: return "globe"
+            case .about: return "info"
             }
         }
 
@@ -328,7 +328,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
         let imageView = NSImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = NSImage(systemSymbolName: section.icon, accessibilityDescription: section.title)
+        imageView.image = PhosphorIcon.regular(section.icon)
         imageView.contentTintColor = .secondaryLabelColor
         cell.addSubview(imageView)
 

@@ -52,7 +52,7 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "thermometer", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("thermometer")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -122,12 +122,12 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     private func updateModeUI() {
-        let (symbolName, color): (String, NSColor) = switch mode {
-        case 1: ("flame", DS.Colors.thermostatHeat)
-        case 2: ("snowflake", DS.Colors.thermostatCool)
-        default: ("thermometer", DS.Colors.mutedForeground)
+        let (iconName, filled, color): (String, Bool, NSColor) = switch mode {
+        case 1: ("fire", true, DS.Colors.thermostatHeat)
+        case 2: ("snowflake", true, DS.Colors.thermostatCool)
+        default: ("thermometer", false, DS.Colors.mutedForeground)
         }
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon(iconName, filled: filled)
         iconView.contentTintColor = color
     }
 

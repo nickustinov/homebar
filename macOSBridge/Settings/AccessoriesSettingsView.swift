@@ -437,7 +437,7 @@ class AccessoriesSettingsView: NSView {
             if id.hasPrefix("groupFav:") {
                 let groupId = String(id.dropFirst("groupFav:".count))
                 if let group = groupLookup[groupId] {
-                    let icon = NSImage(systemSymbolName: group.icon, accessibilityDescription: group.name)
+                    let icon = PhosphorIcon.regular(group.icon)
                     items.append(FavouriteItem(kind: .group(group), id: id, name: group.name, icon: icon))
                 }
             } else if let scene = sceneLookup[id] {

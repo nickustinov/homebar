@@ -44,7 +44,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.fill("lock")
         iconView.contentTintColor = DS.Colors.success
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -111,7 +111,7 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
     }
 
     private func updateUI() {
-        iconView.image = NSImage(systemSymbolName: isLocked ? "lock.fill" : "lock.open", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon(isLocked ? "lock" : "lock-open", filled: isLocked)
         iconView.contentTintColor = DS.Colors.mutedForeground
         statusLabel.stringValue = isLocked ? "Locked" : "Unlocked"
         statusLabel.textColor = .secondaryLabelColor

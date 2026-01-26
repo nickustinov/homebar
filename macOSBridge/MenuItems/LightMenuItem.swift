@@ -76,7 +76,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("lightbulb")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -231,7 +231,7 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     }
 
     private func updateUI() {
-        iconView.image = NSImage(systemSymbolName: isOn ? "lightbulb.fill" : "lightbulb", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon("lightbulb", filled: isOn)
         iconView.contentTintColor = isOn ? DS.Colors.lightOn : DS.Colors.mutedForeground
         toggleSwitch.setOn(isOn, animated: false)
 

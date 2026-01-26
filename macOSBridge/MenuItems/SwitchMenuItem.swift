@@ -39,8 +39,8 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         // Icon
         let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b" : "power"
-        iconView.image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
+        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "plug" : "power"
+        iconView.image = PhosphorIcon.regular(iconName)
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -98,9 +98,8 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
     }
 
     private func updateUI() {
-        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b.fill" : "power"
-        let iconNameOff = serviceData.serviceType == ServiceTypes.outlet ? "poweroutlet.type.b" : "power"
-        iconView.image = NSImage(systemSymbolName: isOn ? iconName : iconNameOff, accessibilityDescription: nil)
+        let iconName = serviceData.serviceType == ServiceTypes.outlet ? "plug" : "power"
+        iconView.image = PhosphorIcon.icon(iconName, filled: isOn)
         iconView.contentTintColor = isOn ? DS.Colors.success : DS.Colors.mutedForeground
         toggleSwitch.setOn(isOn, animated: false)
     }

@@ -45,7 +45,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "blinds.horizontal.closed", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("caret-up-down")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -123,13 +123,8 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     }
 
     private func updateIcon() {
-        let symbolName: String
-        if position == 0 {
-            symbolName = "blinds.horizontal.closed"
-        } else {
-            symbolName = "blinds.horizontal.open"
-        }
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        // Using caret-up-down for blinds, filled when open
+        iconView.image = PhosphorIcon.icon("caret-up-down", filled: position > 0)
         iconView.contentTintColor = position > 0 ? DS.Colors.info : DS.Colors.mutedForeground
     }
 

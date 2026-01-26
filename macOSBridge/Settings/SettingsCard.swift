@@ -143,9 +143,8 @@ private class ProBannerView: ProTintBoxView {
 
     private func setup() {
         let iconView = NSImageView()
-        iconView.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: "Pro required")
+        iconView.image = PhosphorIcon.fill("lock")
         iconView.contentTintColor = .systemBlue
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         iconView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(iconView)
 

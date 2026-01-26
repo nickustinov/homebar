@@ -58,7 +58,7 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
 
         // Icon
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "lock.open", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("lock-open")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -66,7 +66,7 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         // Triggered icon (shown when alarm is triggered)
         let triggeredX = DS.ControlSize.menuItemWidth - DS.Spacing.md - DS.ControlSize.iconMedium
         triggeredIcon = NSImageView(frame: NSRect(x: triggeredX, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        triggeredIcon.image = NSImage(systemSymbolName: "exclamationmark.shield.fill", accessibilityDescription: nil)
+        triggeredIcon.image = PhosphorIcon.fill("shield-warning")
         triggeredIcon.contentTintColor = DS.Colors.destructive
         triggeredIcon.imageScaling = .scaleProportionallyUpOrDown
         triggeredIcon.isHidden = true
@@ -162,17 +162,17 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         let isArmed = currentState != 3 && currentState != 4
         let isTriggered = currentState == 4
 
-        let (symbolName, color): (String, NSColor) = {
+        let (iconName, filled, color): (String, Bool, NSColor) = {
             if isTriggered {
-                return ("exclamationmark.shield.fill", DS.Colors.destructive)
+                return ("shield-warning", true, DS.Colors.destructive)
             } else if isArmed {
-                return ("lock.shield.fill", DS.Colors.success)
+                return ("shield-check", true, DS.Colors.success)
             } else {
-                return ("lock.open", DS.Colors.mutedForeground)
+                return ("shield", false, DS.Colors.mutedForeground)
             }
         }()
 
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon(iconName, filled: filled)
         iconView.contentTintColor = color
 
         // Show triggered indicator

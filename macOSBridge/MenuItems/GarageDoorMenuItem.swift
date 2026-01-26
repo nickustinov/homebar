@@ -51,7 +51,7 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.fill("garage")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -131,27 +131,31 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     private func updateUI() {
-        let (symbolName, stateText, isOpen): (String, String, Bool) = {
+        let (filled, stateText, isOpen): (Bool, String, Bool) = {
             if isObstructed {
-                return ("exclamationmark.triangle", "Obstructed", false)
+                return (false, "Obstructed", false)
             }
             switch currentState {
             case 0:  // Open
-                return ("door.garage.open", "Open", true)
+                return (false, "Open", true)
             case 1:  // Closed
-                return ("door.garage.closed", "Closed", false)
+                return (true, "Closed", false)
             case 2:  // Opening
-                return ("door.garage.open", "Opening...", true)
+                return (false, "Opening...", true)
             case 3:  // Closing
-                return ("door.garage.closed", "Closing...", false)
+                return (true, "Closing...", false)
             case 4:  // Stopped
-                return ("door.garage.open", "Stopped", true)
+                return (false, "Stopped", true)
             default:
-                return ("door.garage.closed", "Unknown", false)
+                return (true, "Unknown", false)
             }
         }()
 
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        if isObstructed {
+            iconView.image = PhosphorIcon.regular("warning")
+        } else {
+            iconView.image = PhosphorIcon.icon("garage", filled: filled)
+        }
         iconView.contentTintColor = DS.Colors.mutedForeground
         statusLabel.stringValue = stateText
         statusLabel.textColor = .secondaryLabelColor

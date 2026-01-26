@@ -304,7 +304,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
                 icon.isTemplate = true
                 button.image = icon
             } else {
-                button.image = NSImage(systemSymbolName: "house.fill", accessibilityDescription: "Itsyhome")
+                button.image = PhosphorIcon.fill("house")
             }
         }
         statusItem.menu = mainMenu
@@ -456,7 +456,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
             addHomeSelector(homes: data.homes, selectedId: data.selectedHomeId)
         }
 
-        let settingsIcon = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
+        let settingsIcon = PhosphorIcon.regular("gear")
         let settingsItem = menuBuilder.createActionItem(title: "Settings...", icon: settingsIcon) { [weak self] in
             self?.openSettings(nil)
         }
@@ -464,7 +464,7 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
 
         mainMenu.addItem(NSMenuItem.separator())
 
-        let refreshIcon = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
+        let refreshIcon = PhosphorIcon.regular("arrows-clockwise")
         let refreshItem = menuBuilder.createActionItem(title: "Refresh", icon: refreshIcon) { [weak self] in
             self?.refreshHomeKit(nil)
         }
@@ -477,14 +477,13 @@ public class MacOSController: NSObject, iOS2Mac, NSMenuDelegate {
     }
 
     private func addHomeSelector(homes: [HomeData], selectedId: String?) {
-        let homeIcon = NSImage(systemSymbolName: "house", accessibilityDescription: nil)
+        let homeIcon = PhosphorIcon.regular("house")
         let homeItem = menuBuilder.createSubmenuItem(title: "Home", icon: homeIcon)
 
         let submenu = StayOpenMenu()
         for home in homes {
             let isSelected = home.uniqueIdentifier == selectedId
-            let iconName = isSelected ? "checkmark" : (home.isPrimary ? "house.fill" : "house")
-            let icon = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
+            let icon: NSImage? = isSelected ? PhosphorIcon.check : PhosphorIcon.icon("house", filled: home.isPrimary)
             let item = menuBuilder.createActionItem(title: home.name, icon: icon) { [weak self] in
                 if let uuid = UUID(uuidString: home.uniqueIdentifier) {
                     SettingsWindowController.shared.close()

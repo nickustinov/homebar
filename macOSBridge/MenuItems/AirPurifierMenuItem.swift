@@ -71,7 +71,7 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
 
         // Icon
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "aqi.low", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("wind")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -228,16 +228,9 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
     }
 
     private func updateStateIcon() {
-        let (symbolName, color): (String, NSColor) = {
-            if !isActive {
-                return ("aqi.low", DS.Colors.mutedForeground)
-            }
-            switch currentState {
-            case 2: return ("aqi.high", DS.Colors.success)  // purifying - green
-            default: return ("aqi.medium", DS.Colors.success) // idle but on
-            }
-        }()
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        let filled = isActive
+        let color: NSColor = isActive ? DS.Colors.success : DS.Colors.mutedForeground
+        iconView.image = PhosphorIcon.icon("wind", filled: filled)
         iconView.contentTintColor = color
     }
 

@@ -61,7 +61,7 @@ class SensorSummaryMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
         // Temperature section - center icon with two-line text block
         let iconY: CGFloat = 8
         tempIconView = NSImageView(frame: NSRect(x: currentX, y: iconY, width: iconSize, height: iconSize))
-        tempIconView.image = NSImage(systemSymbolName: "thermometer.medium", accessibilityDescription: nil)
+        tempIconView.image = PhosphorIcon.regular("thermometer")
         tempIconView.contentTintColor = .secondaryLabelColor
         tempIconView.imageScaling = .scaleProportionallyUpOrDown
         tempIconView.isHidden = !hasTemp
@@ -91,7 +91,7 @@ class SensorSummaryMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristic
 
         // Humidity section
         humidityIconView = NSImageView(frame: NSRect(x: currentX, y: iconY, width: iconSize, height: iconSize))
-        humidityIconView.image = NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
+        humidityIconView.image = PhosphorIcon.regular("drop-half")
         humidityIconView.contentTintColor = .secondaryLabelColor
         humidityIconView.imageScaling = .scaleProportionallyUpOrDown
         humidityIconView.isHidden = !hasHumidity

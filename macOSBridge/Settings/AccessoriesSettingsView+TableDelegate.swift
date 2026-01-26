@@ -204,7 +204,7 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
 
         let config = AccessoryRowConfig(
             name: group.name,
-            icon: NSImage(systemSymbolName: group.icon, accessibilityDescription: group.name),
+            icon: PhosphorIcon.regular(group.icon),
             count: group.deviceIds.count,
             showDragHandle: showDragHandle,
             reserveDragHandleSpace: reserveDragSpace && !showDragHandle,

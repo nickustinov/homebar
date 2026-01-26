@@ -61,7 +61,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("fan")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -140,7 +140,7 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
     }
 
     private func updateUI() {
-        iconView.image = NSImage(systemSymbolName: isActive ? "fan.fill" : "fan", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon("fan", filled: isActive)
         iconView.contentTintColor = isActive ? DS.Colors.fanOn : DS.Colors.mutedForeground
         toggleSwitch.setOn(isActive, animated: false)
 

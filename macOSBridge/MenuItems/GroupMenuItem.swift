@@ -96,7 +96,7 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         // Icon
         let iconY = (height - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: group.icon, accessibilityDescription: group.name)
+        iconView.image = PhosphorIcon.regular(group.icon)
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -516,16 +516,16 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
             let avgPosition = positionStates.isEmpty ? 0 : positionStates.values.reduce(0, +) / positionStates.count
             updateBlindsIcon(position: avgPosition)
         case ServiceTypes.lightbulb:
-            iconView.image = NSImage(systemSymbolName: isOn ? "lightbulb.fill" : "lightbulb", accessibilityDescription: nil)
+            iconView.image = PhosphorIcon.icon("lightbulb", filled: isOn)
             iconView.contentTintColor = isOn ? DS.Colors.lightOn : DS.Colors.mutedForeground
         case ServiceTypes.fan:
-            iconView.image = NSImage(systemSymbolName: "fan", accessibilityDescription: nil)
+            iconView.image = PhosphorIcon.icon("fan", filled: isOn)
             iconView.contentTintColor = isOn ? DS.Colors.success : DS.Colors.mutedForeground
         case ServiceTypes.lock:
-            iconView.image = NSImage(systemSymbolName: isOn ? "lock" : "lock.open", accessibilityDescription: nil)
+            iconView.image = PhosphorIcon.icon(isOn ? "lock" : "lock-open", filled: isOn)
             iconView.contentTintColor = isOn ? DS.Colors.success : DS.Colors.mutedForeground
         default:
-            iconView.image = NSImage(systemSymbolName: group.icon, accessibilityDescription: nil)
+            iconView.image = PhosphorIcon.icon(group.icon, filled: isOn)
             iconView.contentTintColor = isOn ? DS.Colors.success : DS.Colors.mutedForeground
         }
 
@@ -729,7 +729,7 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
     private func updateBlindsIcon(position: Int) {
         let isOpen = position > 0
-        iconView.image = NSImage(systemSymbolName: isOpen ? "blinds.horizontal.open" : "blinds.horizontal.closed", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon("caret-up-down", filled: isOpen)
         iconView.contentTintColor = isOpen ? DS.Colors.info : DS.Colors.mutedForeground
     }
 }

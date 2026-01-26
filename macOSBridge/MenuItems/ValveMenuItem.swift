@@ -47,7 +47,7 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         // Icon
         let iconY = (DS.ControlSize.menuItemHeight - DS.ControlSize.iconMedium) / 2
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: Self.iconName(for: valveType, active: false), accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular(Self.iconName(for: valveType))
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -106,16 +106,12 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         fatalError("init(coder:) has not been implemented")
     }
 
-    private static func iconName(for valveType: Int, active: Bool) -> String {
+    private static func iconName(for valveType: Int) -> String {
         switch valveType {
-        case 1: // irrigation
-            return active ? "sprinkler.and.droplets.fill" : "sprinkler.and.droplets"
-        case 2: // shower
-            return active ? "shower.fill" : "shower"
-        case 3: // faucet
-            return active ? "drop.fill" : "drop"
-        default: // generic
-            return active ? "drop.fill" : "drop"
+        case 1: return "pipe"     // irrigation
+        case 2: return "shower"   // shower
+        case 3: return "drop"     // faucet
+        default: return "pipe"    // generic
         }
     }
 
@@ -134,8 +130,8 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
     }
 
     private func updateUI() {
-        let iconName = Self.iconName(for: valveType, active: isActive)
-        iconView.image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
+        let iconName = Self.iconName(for: valveType)
+        iconView.image = PhosphorIcon.icon(iconName, filled: isActive)
         iconView.contentTintColor = isActive ? DS.Colors.info : DS.Colors.mutedForeground
 
         toggleSwitch.setOn(isActive, animated: false)

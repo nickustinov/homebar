@@ -72,7 +72,7 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
         // Icon
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "humidity", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("drop-half")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -236,17 +236,17 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     }
 
     private func updateStateIcon() {
-        let (symbolName, color): (String, NSColor) = {
+        let (iconName, filled, color): (String, Bool, NSColor) = {
             if !isActive {
-                return ("humidity", DS.Colors.mutedForeground)
+                return ("drop-half", false, DS.Colors.mutedForeground)
             }
             switch currentState {
-            case 2: return ("humidity.fill", DS.Colors.info)      // humidifying - blue
-            case 3: return ("dehumidifier.fill", DS.Colors.warning)  // dehumidifying - orange
-            default: return ("humidity.fill", DS.Colors.success) // idle/inactive but on - green
+            case 2: return ("drop-half", true, DS.Colors.info)      // humidifying - blue
+            case 3: return ("drop", true, DS.Colors.warning)        // dehumidifying - orange
+            default: return ("drop-half", true, DS.Colors.success)  // idle/inactive but on - green
             }
         }()
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon(iconName, filled: filled)
         iconView.contentTintColor = color
     }
 

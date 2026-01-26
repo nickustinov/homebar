@@ -75,7 +75,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
         // Icon
         iconView = NSImageView(frame: NSRect(x: DS.Spacing.md, y: iconY, width: DS.ControlSize.iconMedium, height: DS.ControlSize.iconMedium))
-        iconView.image = NSImage(systemSymbolName: "air.conditioner.horizontal", accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.regular("thermometer")
         iconView.contentTintColor = DS.Colors.mutedForeground
         iconView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(iconView)
@@ -292,18 +292,22 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     }
 
     private func updateStateIcon() {
-        let (symbolName, color): (String, NSColor) = {
+        // Show icon based on target mode (what user selected), not current operation state
+        let (iconName, color): (String, NSColor) = {
             if !isActive {
-                return ("air.conditioner.horizontal", DS.Colors.mutedForeground)
+                return ("thermometer", DS.Colors.mutedForeground)
             }
-            switch currentState {
-            case 2: return ("flame", DS.Colors.thermostatHeat)      // heating
-            case 3: return ("snowflake", DS.Colors.thermostatCool)  // cooling
-            default: return ("air.conditioner.horizontal", DS.Colors.success) // idle/inactive but on
+            // targetState: 0 = auto, 1 = heat, 2 = cool
+            switch targetState {
+            case 1: return ("fire", DS.Colors.thermostatHeat)
+            case 2: return ("snowflake", DS.Colors.thermostatCool)
+            default: return ("arrows-left-right", DS.Colors.success)  // auto mode
             }
         }()
-        iconView.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)
+        iconView.image = PhosphorIcon.icon(iconName, filled: isActive)
         iconView.contentTintColor = color
+        // Update cached color so hover restore uses the new color
+        containerView.refreshCachedColor(for: iconView)
     }
 
     private func updateModeButtons() {
@@ -362,6 +366,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     @objc private func modeChanged(_ sender: ModeButton) {
         targetState = sender.tag
         updateModeButtons()
+        updateStateIcon()
         if let id = targetStateId {
             bridge?.writeCharacteristic(identifier: id, value: targetState)
             notifyLocalChange(characteristicId: id, value: targetState)

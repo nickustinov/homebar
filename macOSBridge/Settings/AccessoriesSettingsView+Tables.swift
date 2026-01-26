@@ -15,7 +15,7 @@ extension AccessoriesSettingsView {
         let isPinned = PreferencesManager.shared.isPinnedScenesSection
         let config = AccessoryRowConfig(
             name: "Scenes",
-            icon: NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil),
+            icon: PhosphorIcon.regular("sparkle"),
             count: sceneCount,
             reserveDragHandleSpace: true,
             showChevron: true,

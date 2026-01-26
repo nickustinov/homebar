@@ -40,7 +40,7 @@ final class CameraPanelManager {
                         icon.isTemplate = true
                         button.image = icon
                     } else {
-                        button.image = NSImage(systemSymbolName: "video.fill", accessibilityDescription: "Cameras")
+                        button.image = PhosphorIcon.fill("video-camera")
                         button.image?.isTemplate = true
                     }
                     button.action = #selector(cameraStatusItemClicked)

@@ -268,7 +268,7 @@ class GeneralSection: SettingsCard {
                 cell.alignment = .centerY
 
                 let check = NSImageView()
-                check.image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: nil)
+                check.image = PhosphorIcon.fill("check-circle")
                 check.contentTintColor = .systemGreen
                 check.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
                 check.translatesAutoresizingMaskIntoConstraints = false

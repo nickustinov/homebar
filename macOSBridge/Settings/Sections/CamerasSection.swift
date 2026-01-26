@@ -294,8 +294,7 @@ class CamerasSection: NSView {
         eyeButton.isBordered = false
         eyeButton.imagePosition = .imageOnly
         eyeButton.imageScaling = .scaleProportionallyUpOrDown
-        let eyeSymbol = isHidden ? "eye.slash" : "eye"
-        eyeButton.image = NSImage(systemSymbolName: eyeSymbol, accessibilityDescription: nil)
+        eyeButton.image = isHidden ? PhosphorIcon.regular("eye-slash") : PhosphorIcon.fill("eye")
         eyeButton.contentTintColor = isHidden ? .tertiaryLabelColor : .secondaryLabelColor
         eyeButton.target = self
         eyeButton.action = #selector(eyeTapped(_:))
@@ -305,7 +304,7 @@ class CamerasSection: NSView {
         container.addSubview(eyeButton)
 
         let iconView = NSImageView()
-        iconView.image = NSImage(systemSymbolName: "video", accessibilityDescription: camera.name)
+        iconView.image = PhosphorIcon.regular("video-camera")
         iconView.contentTintColor = .secondaryLabelColor
         iconView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(iconView)
@@ -396,7 +395,7 @@ class CamerasSection: NSView {
         label.translatesAutoresizingMaskIntoConstraints = false
         chip.addSubview(label)
 
-        let removeButton = NSButton(image: NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: "Remove")!, target: self, action: #selector(removeOverlayTapped(_:)))
+        let removeButton = NSButton(image: PhosphorIcon.fill("x-circle") ?? NSImage(), target: self, action: #selector(removeOverlayTapped(_:)))
         removeButton.bezelStyle = .inline
         removeButton.isBordered = false
         removeButton.contentTintColor = .tertiaryLabelColor
@@ -576,16 +575,7 @@ class CamerasSection: NSView {
     }
 
     private func iconForServiceType(_ type: String) -> NSImage? {
-        let name: String
-        switch type {
-        case ServiceTypes.lightbulb: name = "lightbulb.fill"
-        case ServiceTypes.switch: name = "power"
-        case ServiceTypes.outlet: name = "poweroutlet.type.b.fill"
-        case ServiceTypes.garageDoorOpener: name = "door.garage.closed"
-        case ServiceTypes.lock: name = "lock.fill"
-        default: name = "bolt.fill"
-        }
-        return NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        IconMapping.iconForServiceType(type, filled: true)
     }
 
     private func createSettingRow(label: String, subtitle: String? = nil, control: NSView) -> NSView {

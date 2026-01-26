@@ -86,14 +86,18 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             icon = SceneIconInference.icon(for: itemName)
 
         case .scenesSection:
-            icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+            icon = PhosphorIcon.regular("sparkle")
 
         case .group:
-            icon = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
+            icon = PhosphorIcon.regular("squares-four")
         }
 
-        button.image = icon
-        button.image?.isTemplate = true
+        // Resize icon for menu bar (18x18 is standard)
+        if let icon = icon {
+            icon.size = NSSize(width: 18, height: 18)
+            button.image = icon
+            button.image?.isTemplate = true
+        }
 
         // Determine what to show in the title
         if let statusText = statusText {
@@ -149,11 +153,11 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             // 0 = auto, 1 = heat, 2 = cool
             switch mode {
             case 1:
-                modeIcon = NSImage(systemSymbolName: "flame", accessibilityDescription: "Heating")
+                modeIcon = PhosphorIcon.fill("fire")
             case 2:
-                modeIcon = NSImage(systemSymbolName: "snowflake", accessibilityDescription: "Cooling")
+                modeIcon = PhosphorIcon.fill("snowflake")
             default:
-                modeIcon = NSImage(systemSymbolName: "arrow.left.arrow.right", accessibilityDescription: "Auto")
+                modeIcon = PhosphorIcon.fill("arrows-left-right")
             }
         } else {
             modeIcon = IconMapping.iconForServiceType(service.serviceType)
@@ -176,11 +180,11 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             // 0 = off, 1 = heat, 2 = cool, 3 = auto
             switch mode {
             case 1:
-                modeIcon = NSImage(systemSymbolName: "flame", accessibilityDescription: "Heating")
+                modeIcon = PhosphorIcon.fill("fire")
             case 2:
-                modeIcon = NSImage(systemSymbolName: "snowflake", accessibilityDescription: "Cooling")
+                modeIcon = PhosphorIcon.fill("snowflake")
             case 3:
-                modeIcon = NSImage(systemSymbolName: "arrow.left.arrow.right", accessibilityDescription: "Auto")
+                modeIcon = PhosphorIcon.fill("arrows-left-right")
             default:
                 modeIcon = IconMapping.iconForServiceType(service.serviceType)
             }
@@ -217,13 +221,13 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             let text: String?
             switch state {
             case 1:
-                icon = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: "Locked")
+                icon = PhosphorIcon.fill("lock")
                 text = nil  // Icon is clear enough when locked
             case 2:
-                icon = NSImage(systemSymbolName: "lock.trianglebadge.exclamationmark", accessibilityDescription: "Jammed")
+                icon = PhosphorIcon.regular("warning")
                 text = "Jammed"
             default:
-                icon = NSImage(systemSymbolName: "lock.open", accessibilityDescription: "Unlocked")
+                icon = PhosphorIcon.regular("lock-open")
                 text = nil  // Icon is clear enough when unlocked
             }
             return (icon, text)
@@ -239,19 +243,19 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             let text: String?
             switch state {
             case 1:
-                icon = NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: "Closed")
+                icon = PhosphorIcon.fill("garage")
                 text = nil
             case 2:
-                icon = NSImage(systemSymbolName: "door.garage.open", accessibilityDescription: "Opening")
+                icon = PhosphorIcon.regular("garage")
                 text = "Opening"
             case 3:
-                icon = NSImage(systemSymbolName: "door.garage.closed", accessibilityDescription: "Closing")
+                icon = PhosphorIcon.fill("garage")
                 text = "Closing"
             case 4:
-                icon = NSImage(systemSymbolName: "door.garage.open", accessibilityDescription: "Stopped")
+                icon = PhosphorIcon.regular("garage")
                 text = "Stopped"
             default:
-                icon = NSImage(systemSymbolName: "door.garage.open", accessibilityDescription: "Open")
+                icon = PhosphorIcon.regular("garage")
                 text = nil
             }
             return (icon, text)
@@ -267,19 +271,19 @@ class PinnedStatusItem: NSObject, NSMenuDelegate {
             let text: String?
             switch state {
             case 0:
-                icon = NSImage(systemSymbolName: "shield.lefthalf.filled", accessibilityDescription: "Stay")
+                icon = PhosphorIcon.fill("shield-check")
                 text = "Stay"
             case 1:
-                icon = NSImage(systemSymbolName: "shield.fill", accessibilityDescription: "Away")
+                icon = PhosphorIcon.fill("shield-check")
                 text = "Away"
             case 2:
-                icon = NSImage(systemSymbolName: "moon.fill", accessibilityDescription: "Night")
+                icon = PhosphorIcon.fill("moon")
                 text = "Night"
             case 4:
-                icon = NSImage(systemSymbolName: "exclamationmark.shield.fill", accessibilityDescription: "Triggered")
+                icon = PhosphorIcon.fill("shield-warning")
                 text = "Alarm!"
             default:
-                icon = NSImage(systemSymbolName: "shield", accessibilityDescription: "Disarmed")
+                icon = PhosphorIcon.regular("shield")
                 text = nil
             }
             return (icon, text)

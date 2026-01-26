@@ -53,6 +53,15 @@ class HighlightingMenuItemView: NSView {
         updateSubviewColors(in: self, highlighted: highlighted)
     }
 
+    /// Call this when a specific image view's color changes while highlighted
+    func refreshCachedColor(for imageView: NSImageView) {
+        let key = ObjectIdentifier(imageView)
+        originalTintColors[key] = imageView.contentTintColor
+        if isMouseInside {
+            imageView.contentTintColor = .selectedMenuItemTextColor
+        }
+    }
+
     private func updateSubviewColors(in view: NSView, highlighted: Bool) {
         for subview in view.subviews {
             // Skip controls that manage their own appearance

@@ -216,7 +216,7 @@ class AccessoryRowView: NSView {
             btn.bezelStyle = .inline
             btn.isBordered = false
             btn.imagePosition = .imageOnly
-            btn.imageScaling = .scaleNone
+            btn.imageScaling = .scaleProportionallyUpOrDown
             btn.target = self
             btn.action = #selector(chevronTapped)
             chevronButton = btn
@@ -344,9 +344,7 @@ class AccessoryRowView: NSView {
     private func updateState(config: AccessoryRowConfig) {
         // Chevron
         if let chevron = chevronButton {
-            let symbol = isCollapsed ? "chevron.right" : "chevron.down"
-            let imgConfig = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
-            chevron.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?.withSymbolConfiguration(imgConfig)
+            chevron.image = isCollapsed ? PhosphorIcon.chevronRight : PhosphorIcon.chevronDown
             chevron.contentTintColor = .secondaryLabelColor
         }
 
@@ -380,9 +378,7 @@ class AccessoryRowView: NSView {
 
     @objc private func chevronTapped() {
         isCollapsed.toggle()
-        let symbol = isCollapsed ? "chevron.right" : "chevron.down"
-        let imgConfig = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
-        chevronButton?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?.withSymbolConfiguration(imgConfig)
+        chevronButton?.image = isCollapsed ? PhosphorIcon.chevronRight : PhosphorIcon.chevronDown
         onChevronToggled?()
     }
 

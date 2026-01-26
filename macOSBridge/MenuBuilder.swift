@@ -128,7 +128,7 @@ class MenuBuilder {
             return i1 < i2
         }
 
-        let icon = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        let icon = PhosphorIcon.regular("sparkle")
         let scenesItem = createSubmenuItem(title: "Scenes", icon: icon)
 
         let submenu = StayOpenMenu()
@@ -213,7 +213,7 @@ class MenuBuilder {
         }
 
         if !noRoomAccessories.isEmpty {
-            let icon = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: nil)
+            let icon = PhosphorIcon.regular("squares-four")
             let otherItem = createSubmenuItem(title: "Other", icon: icon)
 
             let submenu = StayOpenMenu()
@@ -317,7 +317,7 @@ class MenuBuilder {
         let chevronX = width - DS.Spacing.md - chevronSize
         let chevronY = (height - chevronSize) / 2
         let chevronView = NSImageView(frame: NSRect(x: chevronX, y: chevronY, width: chevronSize, height: chevronSize))
-        chevronView.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
+        chevronView.image = PhosphorIcon.regular("caret-right")
         chevronView.contentTintColor = DS.Colors.mutedForeground
         chevronView.imageScaling = .scaleProportionallyUpOrDown
         containerView.addSubview(chevronView)

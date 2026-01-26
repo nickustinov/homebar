@@ -136,7 +136,7 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
         modeContainer.layer?.backgroundColor = NSColor.secondaryLabelColor.withAlphaComponent(0.08).cgColor
         modeContainer.layer?.cornerRadius = modeContainerHeight / 2
 
-        modeButtonManual = ModeButton(title: "Manual", color: DS.Colors.fanOn)  // Cyan - manual control
+        modeButtonManual = ModeButton(title: "Manual", color: DS.Colors.info)  // Blue - matches humidifier
         modeButtonManual.frame = NSRect(x: containerPadding, y: containerPadding, width: buttonWidth, height: buttonHeight)
         modeButtonManual.tag = 0
         modeContainer.addSubview(modeButtonManual)

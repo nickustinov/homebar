@@ -41,10 +41,16 @@ enum DebugMockups {
                     }
                 }
 
-                if let acItem = item as? ACMenuItem,
-                   let currentTempIdStr = service.currentTemperatureId,
-                   let currentTempId = UUID(uuidString: currentTempIdStr) {
-                    acItem.updateValue(for: currentTempId, value: 23.0)
+                if let acItem = item as? ACMenuItem {
+                    if let id = service.currentTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        acItem.updateValue(for: id, value: 23.0)
+                    }
+                    if let id = service.heatingThresholdTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        acItem.updateValue(for: id, value: 20.0)
+                    }
+                    if let id = service.coolingThresholdTemperatureId.flatMap({ UUID(uuidString: $0) }) {
+                        acItem.updateValue(for: id, value: 24.0)
+                    }
                 }
 
                 if let humidifierItem = item as? HumidifierMenuItem {

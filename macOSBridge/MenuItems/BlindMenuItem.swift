@@ -101,7 +101,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         positionSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
         positionSlider.doubleValue = 0
         positionSlider.isContinuous = false
-        positionSlider.progressTintColor = DS.Colors.sliderBlind
+        positionSlider.progressTintColor = DS.Colors.sliderFan
         containerView.addSubview(positionSlider)
 
         // Row 2: Tilt label and slider (if tilt is present)
@@ -124,7 +124,7 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
             tiltSliderView.frame = NSRect(x: sliderX, y: row2Y, width: sliderWidth, height: 12)
             tiltSliderView.doubleValue = 0
             tiltSliderView.isContinuous = false
-            tiltSliderView.progressTintColor = DS.Colors.sliderBlind
+            tiltSliderView.progressTintColor = DS.Colors.sliderFan
             containerView.addSubview(tiltSliderView)
             tiltSlider = tiltSliderView
         }

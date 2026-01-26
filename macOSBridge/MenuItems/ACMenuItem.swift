@@ -201,6 +201,8 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
         self.view = containerView
 
+        // Exclude icon from highlight - it has semantic color (mode indicator)
+        containerView.excludeFromHighlight = [iconView]
         containerView.closesMenuOnAction = false
         containerView.onAction = { [weak self] in
             guard let self else { return }
@@ -306,8 +308,6 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         }()
         iconView.image = PhosphorIcon.icon(iconName, filled: isActive)
         iconView.contentTintColor = color
-        // Update cached color so hover restore uses the new color
-        containerView.refreshCachedColor(for: iconView)
     }
 
     private func updateModeButtons() {

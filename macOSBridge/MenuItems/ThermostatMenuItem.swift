@@ -20,7 +20,7 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private var targetTemp: Double = 20
     private var mode: Int = 0 // 0=off, 1=heat, 2=cool
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let currentTempLabel: NSTextField
@@ -92,6 +92,9 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        // Exclude icon from highlight - it has semantic color (mode indicator)
+        containerView.excludeFromHighlight = [iconView]
 
         // Set up action
         targetSlider.target = self

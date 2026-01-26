@@ -93,6 +93,8 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
         self.view = containerView
 
+        // Exclude icon from highlight - it has semantic color (open/closed)
+        containerView.excludeFromHighlight = [iconView]
         containerView.closesMenuOnAction = false
         containerView.onAction = { [weak self] in
             guard let self else { return }

@@ -122,6 +122,9 @@ class GroupMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         super.init(title: group.name, action: nil, keyEquivalent: "")
         self.view = containerView
 
+        // Exclude icon from highlight - it has semantic color (on/off state)
+        containerView.excludeFromHighlight = [iconView]
+
         // Initialize device states from bridge
         initializeDeviceStates()
 

@@ -85,6 +85,8 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
 
         self.view = containerView
 
+        // Exclude icon from highlight - it has semantic color (on/off)
+        containerView.excludeFromHighlight = [iconView]
         containerView.closesMenuOnAction = false
         containerView.onAction = { [weak self] in
             guard let self else { return }

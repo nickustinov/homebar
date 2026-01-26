@@ -20,7 +20,7 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
     private var currentState: Int = 3  // Default to disarmed
     private var targetState: Int = 3
 
-    private let containerView: NSView
+    private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
     private let nameLabel: NSTextField
     private let triggeredIcon: NSImageView
@@ -123,6 +123,9 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")
 
         self.view = containerView
+
+        // Exclude icon from highlight - it has semantic color (state indicator)
+        containerView.excludeFromHighlight = [iconView]
 
         // Set up actions
         modeButtonOff.target = self

@@ -18,6 +18,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     private var targetStateId: UUID?
     private var coolingThresholdId: UUID?
     private var heatingThresholdId: UUID?
+    private var swingModeId: UUID?
 
     private var isActive: Bool = false
     private var currentTemp: Double = 0
@@ -25,6 +26,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     private var targetState: Int = 0   // 0=auto, 1=heat, 2=cool
     private var coolingThreshold: Double = 24
     private var heatingThreshold: Double = 20
+    private var swingMode: Int = 0     // 0=DISABLED, 1=ENABLED
 
     private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
@@ -37,6 +39,8 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
     private let modeButtonAuto: ModeButton
     private let modeButtonHeat: ModeButton
     private let modeButtonCool: ModeButton
+    private var swingButtonGroup: ModeButtonGroup?
+    private var swingButton: ModeButton?
     private let minusButton: NSButton
     private let targetLabel: NSTextField
     private let plusButton: NSButton
@@ -52,6 +56,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         if let id = targetStateId { ids.append(id) }
         if let id = coolingThresholdId { ids.append(id) }
         if let id = heatingThresholdId { ids.append(id) }
+        if let id = swingModeId { ids.append(id) }
         return ids
     }
 
@@ -66,6 +71,7 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         self.targetStateId = serviceData.targetHeaterCoolerStateId.flatMap { UUID(uuidString: $0) }
         self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
         self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
+        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
 
         // Create wrapper view (full width for menu sizing) - start collapsed
         containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
@@ -83,9 +89,13 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         // Power toggle position (calculate first for alignment)
         let switchX = DS.ControlSize.menuItemWidth - DS.Spacing.md - DS.ControlSize.switchWidth
 
-        // Current temp position (right-aligned before toggle)
+        // Swing button group position (right before toggle, only if present)
+        let swingGroupWidth = ModeButtonGroup.widthForIconButtons(count: 1)
+        let swingGroupX = switchX - (swingModeId != nil ? swingGroupWidth + DS.Spacing.sm : 0)
+
+        // Current temp position (before swing button or toggle)
         let tempWidth: CGFloat = 50
-        let tempX = switchX - tempWidth - DS.Spacing.sm
+        let tempX = (swingModeId != nil ? swingGroupX : switchX) - tempWidth - DS.Spacing.sm
 
         // Name label (fills space up to temp label)
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
@@ -97,6 +107,15 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         nameLabel.textColor = DS.Colors.foreground
         nameLabel.lineBreakMode = .byTruncatingTail
         containerView.addSubview(nameLabel)
+
+        // Swing button group (on Row 1, before temp)
+        if swingModeId != nil {
+            let swingY = (collapsedHeight - 18) / 2
+            let swingGroup = ModeButtonGroup(frame: NSRect(x: swingGroupX, y: swingY, width: swingGroupWidth, height: 18))
+            swingButton = swingGroup.addButton(icon: "wind", color: DS.Colors.sliderFan)
+            containerView.addSubview(swingGroup)
+            swingButtonGroup = swingGroup
+        }
 
         // Current temp
         tempLabel = NSTextField(labelWithString: "--°")
@@ -210,6 +229,9 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
         plusButton.target = self
         plusButton.action = #selector(increaseTemp(_:))
+
+        swingButton?.target = self
+        swingButton?.action = #selector(swingTapped(_:))
     }
 
     required init(coder: NSCoder) {
@@ -248,6 +270,11 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
                 heatingThreshold = temp
                 updateTargetDisplay()
             }
+        } else if characteristicId == swingModeId {
+            if let mode = ValueConversion.toInt(value) {
+                swingMode = mode
+                updateSwingButton()
+            }
         }
     }
 
@@ -268,6 +295,9 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         nameLabel.frame.origin.y = labelY
         tempLabel.frame.origin.y = labelY
         powerToggle.frame.origin.y = switchY
+        if let swingGroup = swingButtonGroup {
+            swingGroup.frame.origin.y = topAreaY + (collapsedHeight - 18) / 2
+        }
 
         updateStateIcon()
     }
@@ -360,5 +390,18 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
 
     @objc private func increaseTemp(_ sender: NSButton) {
         setTargetTemp(currentTargetTemp() + 1)
+    }
+
+    @objc private func swingTapped(_ sender: NSButton) {
+        swingMode = swingMode == 0 ? 1 : 0
+        if let id = swingModeId {
+            bridge?.writeCharacteristic(identifier: id, value: swingMode)
+            notifyLocalChange(characteristicId: id, value: swingMode)
+        }
+        updateSwingButton()
+    }
+
+    private func updateSwingButton() {
+        swingButton?.isSelected = swingMode == 1
     }
 }

@@ -120,8 +120,8 @@ enum DS {
         // Slider colors by device type
         static let sliderLight = NSColor(red: 0.95, green: 0.60, blue: 0.20, alpha: 1) // Orange
         static let sliderThermostat = NSColor(red: 0.90, green: 0.45, blue: 0.15, alpha: 1) // Dark orange
-        static let sliderFan = NSColor(red: 0.30, green: 0.65, blue: 0.95, alpha: 1) // Blue
-        static let sliderBlind = NSColor(red: 0.20, green: 0.45, blue: 0.80, alpha: 1) // Dark blue
+        static let sliderFan = NSColor(red: 0.25, green: 0.60, blue: 0.95, alpha: 1) // Blue (info)
+        static let sliderBlind = NSColor(red: 0.30, green: 0.75, blue: 0.85, alpha: 1) // Cyan (fanOn)
 
     }
 

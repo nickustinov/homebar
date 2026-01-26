@@ -428,4 +428,5 @@ private class MockWebhookBridge: NSObject, Mac2iOS {
     func openCameraWindow() {}
     func closeCameraWindow() {}
     func setCameraWindowHidden(_ hidden: Bool) {}
+    func getRawHomeKitDump() -> String? { nil }
 }

@@ -87,7 +87,7 @@ class SettingsView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             switch self {
             case .general: return "gear"
             case .accessories: return "house"
-            case .cameras: return "video-camera"
+            case .cameras: return "security-camera"
             case .deeplinks: return "link"
             case .webhooks: return "globe"
             case .about: return "info"

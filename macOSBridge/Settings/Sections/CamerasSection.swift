@@ -303,12 +303,6 @@ class CamerasSection: NSView {
         eyeButton.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(eyeButton)
 
-        let iconView = NSImageView()
-        iconView.image = PhosphorIcon.regular("video-camera")
-        iconView.contentTintColor = .secondaryLabelColor
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(iconView)
-
         let nameLabel = NSTextField(labelWithString: camera.name)
         nameLabel.font = .systemFont(ofSize: 13)
         nameLabel.textColor = .labelColor
@@ -335,12 +329,7 @@ class CamerasSection: NSView {
             eyeButton.widthAnchor.constraint(equalToConstant: 20),
             eyeButton.heightAnchor.constraint(equalToConstant: 20),
 
-            iconView.leadingAnchor.constraint(equalTo: eyeButton.trailingAnchor, constant: 8),
-            iconView.centerYAnchor.constraint(equalTo: addButton.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 18),
-            iconView.heightAnchor.constraint(equalToConstant: 18),
-
-            nameLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
+            nameLabel.leadingAnchor.constraint(equalTo: eyeButton.trailingAnchor, constant: 8),
             nameLabel.centerYAnchor.constraint(equalTo: addButton.centerYAnchor),
 
             addButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
@@ -365,7 +354,7 @@ class CamerasSection: NSView {
 
             NSLayoutConstraint.activate([
                 chipsFlow.topAnchor.constraint(equalTo: addButton.bottomAnchor, constant: 6),
-                chipsFlow.leadingAnchor.constraint(equalTo: iconView.leadingAnchor),
+                chipsFlow.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
                 chipsFlow.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
             ])
         }

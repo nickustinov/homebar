@@ -55,14 +55,27 @@ class AccessoriesSettingsView: NSView {
 
     private let stackView = NSStackView()
     private var menuData: MenuData?
-    private var needsRebuild = false
+    private var isUISetup = false
 
-    // Tables
-    var favouritesTableView: NSTableView?
-    var roomsTableView: RoomsTableView?
-    var scenesTableView: NSTableView?
+    // MARK: - Persistent section containers
 
-    // Data
+    private var favouritesSection: SettingsSectionContainer!
+    private var globalGroupsSection: SettingsSectionContainer!
+    private var scenesHeaderContainer: SimpleHeightContainer!
+    private var scenesTableSection: SettingsSectionContainer!
+    private var roomsSection: SimpleHeightContainer!
+    private var otherHeaderContainer: SimpleHeightContainer!
+    private var otherContentContainer: SimpleHeightContainer!
+
+    // MARK: - Persistent table views
+
+    var favouritesTableView: NSTableView!
+    var globalGroupsTableView: NSTableView!
+    var scenesTableView: NSTableView!
+    var roomsTableView: RoomsTableView!
+
+    // MARK: - Data
+
     var favouriteItems: [FavouriteItem] = []
     var roomTableItems: [RoomTableItem] = []
     var sceneItems: [SceneData] = []
@@ -74,11 +87,12 @@ class AccessoriesSettingsView: NSView {
     // Groups data
     var globalGroups: [DeviceGroup] = []
     var groupsByRoom: [String: [DeviceGroup]] = [:]
-    var globalGroupsTableView: NSTableView?
 
     let typeOrder = [ServiceTypes.lightbulb, ServiceTypes.switch, ServiceTypes.outlet, ServiceTypes.fan,
                      ServiceTypes.heaterCooler, ServiceTypes.thermostat, ServiceTypes.windowCovering,
                      ServiceTypes.lock, ServiceTypes.garageDoorOpener]
+
+    // MARK: - Initialization
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -101,27 +115,311 @@ class AccessoriesSettingsView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
-        if needsRebuild {
-            needsRebuild = false
-            rebuildContent()
-        }
-    }
+    // MARK: - Public API
 
     func configure(with data: MenuData) {
         self.menuData = data
         PreferencesManager.shared.currentHomeId = data.selectedHomeId
-        needsRebuild = true
-        needsLayout = true
+
+        if !isUISetup {
+            setupUI()
+            isUISetup = true
+        }
+
+        updateAllSections()
     }
 
     func rebuild() {
-        needsRebuild = true
-        needsLayout = true
+        updateAllSections()
     }
 
-    // MARK: - Data building
+    // MARK: - UI Setup (called once)
+
+    private func setupUI() {
+        // Description
+        let descLabel = NSTextField(wrappingLabelWithString: "Manage your Home menu from here. Star accessories to add them to Favourites, use the eye icon to hide sections or devices, and pin items to the menu bar.")
+        descLabel.font = .systemFont(ofSize: 13)
+        descLabel.textColor = .secondaryLabelColor
+        descLabel.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(descLabel)
+        descLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+        addSpacer(height: 16)
+
+        // Create group button
+        let createButton = NSButton(title: "Create group", target: self, action: #selector(createGroupTapped))
+        createButton.bezelStyle = .rounded
+        createButton.controlSize = .regular
+        createButton.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(createButton)
+        addSpacer(height: 16)
+
+        // Favourites section
+        favouritesSection = SettingsSectionContainer()
+        favouritesTableView = createTableView(dragType: .favouriteItem)
+        favouritesSection.setContent(favouritesTableView)
+        addSection(favouritesSection)
+
+        // Global groups section
+        globalGroupsSection = SettingsSectionContainer()
+        globalGroupsTableView = createTableView(dragType: .globalGroupItem)
+        globalGroupsSection.setContent(globalGroupsTableView)
+        addSection(globalGroupsSection)
+
+        // Scenes header (always present if there are scenes, but content toggles)
+        scenesHeaderContainer = SimpleHeightContainer()
+        addSection(scenesHeaderContainer)
+
+        // Scenes table section
+        scenesTableSection = SettingsSectionContainer()
+        scenesTableView = createTableView(dragType: .sceneItem)
+        scenesTableSection.setContent(scenesTableView)
+        addSection(scenesTableSection)
+
+        // Rooms section
+        roomsSection = SimpleHeightContainer()
+        roomsTableView = RoomsTableView()
+        roomsTableView.roomTableItems = { [weak self] in self?.roomTableItems ?? [] }
+        configureTableView(roomsTableView, dragType: .roomItem, intercellSpacing: 4)
+        roomsTableView.registerForDraggedTypes([.roomItem, .roomGroupItem])
+        roomsTableView.translatesAutoresizingMaskIntoConstraints = false
+        roomsSection.addSubview(roomsTableView)
+        NSLayoutConstraint.activate([
+            roomsTableView.topAnchor.constraint(equalTo: roomsSection.topAnchor),
+            roomsTableView.leadingAnchor.constraint(equalTo: roomsSection.leadingAnchor),
+            roomsTableView.trailingAnchor.constraint(equalTo: roomsSection.trailingAnchor),
+            roomsTableView.bottomAnchor.constraint(equalTo: roomsSection.bottomAnchor)
+        ])
+        addSection(roomsSection)
+        addSpacer(height: 12)
+
+        // Other section header
+        otherHeaderContainer = SimpleHeightContainer()
+        addSection(otherHeaderContainer)
+
+        // Other section content
+        otherContentContainer = SimpleHeightContainer()
+        addSection(otherContentContainer)
+        addSpacer(height: 12)
+    }
+
+    private func createTableView(dragType: NSPasteboard.PasteboardType) -> NSTableView {
+        let tableView = NSTableView()
+        configureTableView(tableView, dragType: dragType)
+        return tableView
+    }
+
+    private func configureTableView(_ tableView: NSTableView, dragType: NSPasteboard.PasteboardType, intercellSpacing: CGFloat = 0) {
+        tableView.headerView = nil
+        tableView.rowHeight = AccessoryRowLayout.rowHeight
+        tableView.intercellSpacing = NSSize(width: 0, height: intercellSpacing)
+        tableView.backgroundColor = .clear
+        tableView.selectionHighlightStyle = .none
+        tableView.style = .plain
+        tableView.gridStyleMask = []
+        tableView.registerForDraggedTypes([dragType])
+        tableView.draggingDestinationFeedbackStyle = .gap
+        tableView.allowsMultipleSelection = false
+        tableView.usesAutomaticRowHeights = false
+        tableView.focusRingType = .none
+
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("main"))
+        column.resizingMask = .autoresizingMask
+        tableView.addTableColumn(column)
+        tableView.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
+
+        tableView.delegate = self
+        tableView.dataSource = self
+    }
+
+    private func addSection(_ view: NSView) {
+        view.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(view)
+        view.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    }
+
+    private func addSpacer(height: CGFloat) {
+        let spacer = NSView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(spacer)
+        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+    }
+
+    // MARK: - Section Updates
+
+    private func updateAllSections() {
+        rebuildAllData()
+        updateFavouritesSection()
+        updateGlobalGroupsSection()
+        updateScenesSection()
+        updateRoomsSection()
+        updateOtherSection()
+    }
+
+    func updateFavouritesSection() {
+        rebuildFavouritesList()
+
+        let isEmpty = favouriteItems.isEmpty
+        favouritesSection.isHidden = isEmpty
+
+        if !isEmpty {
+            let height = CGFloat(favouriteItems.count) * AccessoryRowLayout.rowHeight
+            favouritesSection.setContentHeight(height)
+            favouritesTableView.reloadData()
+        }
+    }
+
+    func updateGlobalGroupsSection() {
+        // globalGroups already rebuilt in rebuildAllData
+        let isEmpty = globalGroups.isEmpty
+        globalGroupsSection.isHidden = isEmpty
+
+        if !isEmpty {
+            let height = CGFloat(globalGroups.count) * AccessoryRowLayout.rowHeight
+            globalGroupsSection.setContentHeight(height)
+            globalGroupsTableView.reloadData()
+        }
+    }
+
+    func updateScenesSection() {
+        guard let data = menuData else {
+            scenesHeaderContainer.isHidden = true
+            scenesTableSection.isHidden = true
+            return
+        }
+
+        let hasScenes = !data.scenes.isEmpty
+        scenesHeaderContainer.isHidden = !hasScenes
+
+        if hasScenes {
+            let preferences = PreferencesManager.shared
+            let scenesKey = "scenes"
+            let isHidden = preferences.hideScenesSection
+            let isCollapsed = !expandedSections.contains(scenesKey)
+
+            // Update header
+            updateScenesHeader(isHidden: isHidden, isCollapsed: isCollapsed)
+
+            // Update table visibility and content
+            scenesTableSection.isHidden = isCollapsed
+            if !isCollapsed {
+                let height = CGFloat(sceneItems.count) * AccessoryRowLayout.rowHeight
+                scenesTableSection.setContentHeight(height)
+                scenesTableView.reloadData()
+            }
+        } else {
+            scenesTableSection.isHidden = true
+        }
+    }
+
+    func updateRoomsSection() {
+        rebuildRoomData()
+
+        let isEmpty = roomTableItems.isEmpty
+        roomsSection.isHidden = isEmpty
+
+        if !isEmpty {
+            let height = calculateRoomsTableHeight()
+            roomsSection.setHeight(height)
+            roomsTableView.reloadData()
+        }
+    }
+
+    func updateOtherSection() {
+        let hasOther = !noRoomServices.isEmpty
+        otherHeaderContainer.isHidden = !hasOther
+        otherContentContainer.isHidden = !hasOther
+
+        if hasOther {
+            let otherKey = "other"
+            let isCollapsed = !expandedSections.contains(otherKey)
+
+            updateOtherHeader(isCollapsed: isCollapsed)
+
+            if isCollapsed {
+                otherContentContainer.isHidden = true
+            } else {
+                otherContentContainer.isHidden = false
+                updateOtherContent()
+            }
+        }
+    }
+
+    private func updateScenesHeader(isHidden: Bool, isCollapsed: Bool) {
+        let L = AccessoryRowLayout.self
+        scenesHeaderContainer.subviews.forEach { $0.removeFromSuperview() }
+
+        let header = createScenesHeaderStrip(isHidden: isHidden, isCollapsed: isCollapsed, sceneCount: sceneItems.count)
+        header.translatesAutoresizingMaskIntoConstraints = false
+        scenesHeaderContainer.addSubview(header)
+        NSLayoutConstraint.activate([
+            header.topAnchor.constraint(equalTo: scenesHeaderContainer.topAnchor),
+            header.leadingAnchor.constraint(equalTo: scenesHeaderContainer.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: scenesHeaderContainer.trailingAnchor),
+            header.bottomAnchor.constraint(equalTo: scenesHeaderContainer.bottomAnchor)
+        ])
+        scenesHeaderContainer.setHeight(L.rowHeight)
+    }
+
+    private func updateOtherHeader(isCollapsed: Bool) {
+        let L = AccessoryRowLayout.self
+        otherHeaderContainer.subviews.forEach { $0.removeFromSuperview() }
+
+        let header = createOtherHeaderStrip(isCollapsed: isCollapsed)
+        header.translatesAutoresizingMaskIntoConstraints = false
+        otherHeaderContainer.addSubview(header)
+        NSLayoutConstraint.activate([
+            header.topAnchor.constraint(equalTo: otherHeaderContainer.topAnchor),
+            header.leadingAnchor.constraint(equalTo: otherHeaderContainer.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: otherHeaderContainer.trailingAnchor),
+            header.bottomAnchor.constraint(equalTo: otherHeaderContainer.bottomAnchor)
+        ])
+        otherHeaderContainer.setHeight(L.rowHeight)
+    }
+
+    private func updateOtherContent() {
+        let L = AccessoryRowLayout.self
+        otherContentContainer.subviews.forEach { $0.removeFromSuperview() }
+
+        let sorted = noRoomServices.sorted { s1, s2 in
+            let i1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
+            let i2 = typeOrder.firstIndex(of: s2.serviceType) ?? Int.max
+            return i1 != i2 ? i1 < i2 : s1.name < s2.name
+        }
+
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 0
+        stack.alignment = .leading
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        for service in sorted {
+            let row = createAccessoryRow(service: service, roomHidden: false)
+            row.translatesAutoresizingMaskIntoConstraints = false
+            stack.addArrangedSubview(row)
+            row.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+            row.heightAnchor.constraint(equalToConstant: L.rowHeight).isActive = true
+        }
+
+        otherContentContainer.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: otherContentContainer.topAnchor),
+            stack.leadingAnchor.constraint(equalTo: otherContentContainer.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: otherContentContainer.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: otherContentContainer.bottomAnchor)
+        ])
+
+        let height = CGFloat(sorted.count) * L.rowHeight
+        otherContentContainer.setHeight(height)
+    }
+
+    // MARK: - Data Building
+
+    private func rebuildAllData() {
+        rebuildGroupData()
+        rebuildFavouritesList()
+        rebuildRoomData()
+        rebuildSceneData()
+    }
 
     func rebuildFavouritesList() {
         guard let data = menuData else {
@@ -316,156 +614,7 @@ class AccessoriesSettingsView: NSView {
         groupsByRoom = byRoom
     }
 
-    // MARK: - Content building
-
-    private func rebuildContent() {
-        rebuildGroupData()
-        rebuildFavouritesList()
-        rebuildRoomData()
-        rebuildSceneData()
-        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        favouritesTableView = nil
-        roomsTableView = nil
-        scenesTableView = nil
-        globalGroupsTableView = nil
-
-        guard let data = menuData else { return }
-
-        let preferences = PreferencesManager.shared
-        let L = AccessoryRowLayout.self
-
-        // Description
-        let descLabel = NSTextField(wrappingLabelWithString: "Manage your Home menu from here. Star accessories to add them to Favourites, use the eye icon to hide sections or devices, and pin items to the menu bar.")
-        descLabel.font = .systemFont(ofSize: 13)
-        descLabel.textColor = .secondaryLabelColor
-        descLabel.translatesAutoresizingMaskIntoConstraints = false
-        stackView.addArrangedSubview(descLabel)
-        descLabel.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        addSpacer(height: 16)
-
-        // Create group button
-        let createButton = NSButton(title: "Create group", target: self, action: #selector(createGroupTapped))
-        createButton.bezelStyle = .rounded
-        createButton.controlSize = .regular
-        createButton.translatesAutoresizingMaskIntoConstraints = false
-        stackView.addArrangedSubview(createButton)
-        addSpacer(height: 16)
-
-        // Favourites section
-        if !favouriteItems.isEmpty {
-            let tableHeight = CGFloat(favouriteItems.count) * L.rowHeight
-            let tableContainer = createFavouritesTable(height: tableHeight)
-            addView(tableContainer, height: tableHeight)
-            favouritesTableView?.reloadData()
-            addSeparator()
-        }
-
-        // Global groups section (groups with no room)
-        if !globalGroups.isEmpty {
-            let tableHeight = CGFloat(globalGroups.count) * L.rowHeight
-            let tableContainer = createGlobalGroupsTable(height: tableHeight)
-            addView(tableContainer, height: tableHeight)
-            globalGroupsTableView?.reloadData()
-            addSeparator()
-        }
-
-        // Scenes section
-        if !data.scenes.isEmpty {
-            let scenesKey = "scenes"
-            let isHidden = preferences.hideScenesSection
-            let isScenesCollapsed = !expandedSections.contains(scenesKey)
-
-            let header = createScenesHeaderStrip(isHidden: isHidden, isCollapsed: isScenesCollapsed, sceneCount: sceneItems.count)
-            addView(header, height: L.rowHeight)
-
-            if !isScenesCollapsed {
-                let tableHeight = CGFloat(sceneItems.count) * L.rowHeight
-                let tableContainer = createScenesTable(height: tableHeight)
-                addView(tableContainer, height: tableHeight)
-                scenesTableView?.reloadData()
-            }
-            addSeparator()
-        }
-
-        // Rooms section
-        if !roomTableItems.isEmpty {
-            let tableHeight = calculateRoomsTableHeight()
-            let tableContainer = createRoomsTable(height: tableHeight)
-            addView(tableContainer, height: tableHeight)
-            roomsTableView?.reloadData()
-            addSpacer(height: 12)
-        }
-
-        // Other section (no room)
-        if !noRoomServices.isEmpty {
-            buildOtherSection()
-        }
-    }
-
-    private func buildOtherSection() {
-        let L = AccessoryRowLayout.self
-        let otherKey = "other"
-        let isOtherCollapsed = !expandedSections.contains(otherKey)
-
-        let header = createOtherHeaderStrip(isCollapsed: isOtherCollapsed)
-        addView(header, height: L.rowHeight)
-
-        if !isOtherCollapsed {
-            let sorted = noRoomServices.sorted { s1, s2 in
-                let i1 = typeOrder.firstIndex(of: s1.serviceType) ?? Int.max
-                let i2 = typeOrder.firstIndex(of: s2.serviceType) ?? Int.max
-                return i1 != i2 ? i1 < i2 : s1.name < s2.name
-            }
-
-            // All accessories can be pinned to the menu bar
-            for service in sorted {
-                let row = createAccessoryRow(service: service, roomHidden: false)
-                addView(row, height: L.rowHeight)
-            }
-        }
-        addSpacer(height: 12)
-    }
-
-    // MARK: - Layout helpers
-
-    func addHeader(title: String) {
-        let header = AccessorySectionHeader(title: title)
-        addView(header, height: 32)
-    }
-
-    func addView(_ view: NSView, height: CGFloat) {
-        view.translatesAutoresizingMaskIntoConstraints = false
-        stackView.addArrangedSubview(view)
-        view.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        view.heightAnchor.constraint(equalToConstant: height).isActive = true
-    }
-
-    func addSpacer(height: CGFloat) {
-        let spacer = NSView()
-        spacer.translatesAutoresizingMaskIntoConstraints = false
-        stackView.addArrangedSubview(spacer)
-        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
-    }
-
-    func addSeparator() {
-        let container = NSView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        let separator = NSBox()
-        separator.boxType = .separator
-        separator.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(separator)
-
-        NSLayoutConstraint.activate([
-            separator.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
-            separator.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            separator.centerYAnchor.constraint(equalTo: container.centerYAnchor)
-        ])
-
-        stackView.addArrangedSubview(container)
-        container.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        container.heightAnchor.constraint(equalToConstant: 16).isActive = true
-    }
+    // MARK: - Height Calculation
 
     private func calculateRoomsTableHeight() -> CGFloat {
         let L = AccessoryRowLayout.self
@@ -485,7 +634,7 @@ class AccessoriesSettingsView: NSView {
         return height
     }
 
-    // MARK: - Room index helpers
+    // MARK: - Room Index Helpers
 
     func roomIndex(forTableRow row: Int) -> Int? {
         var headerCount = 0
@@ -509,7 +658,7 @@ class AccessoriesSettingsView: NSView {
         return nil
     }
 
-    // MARK: - Group actions
+    // MARK: - Group Actions
 
     @objc func createGroupTapped() {
         showGroupEditor(group: nil)

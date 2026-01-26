@@ -82,6 +82,7 @@
 		6ECD2A8E74161BA10E24C979 /* CloudSyncTranslatorTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BC522AE2A26BA136B9347B /* CloudSyncTranslatorTestHelpers.swift */; };
 		703DBF83A3BBDD5C6A6DB225 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E67C906ECD67B8E10255EFC /* SettingsView.swift */; };
 		721D0C78421B4D27A7722A00 /* SettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB13572FA0DD4098A9721D2 /* SettingsCard.swift */; };
+		1D84B5DCE67B593C00A14A7B /* SettingsSectionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F79992808E7388722658A /* SettingsSectionContainer.swift */; };
 		73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AE776817A51695FBA936B1 /* FanMenuItem.swift */; };
 		76BD3DDF71BC336FC74CB2D3 /* CameraSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF4C9E2A9610BD23BE84E2F9 /* CameraSceneDelegate.swift */; };
 		772EAC65582AA05AFFA09210 /* AirPurifierMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F1F563C08E919FE1477C44 /* AirPurifierMenuItem.swift */; };
@@ -253,6 +254,7 @@
 		D8DAE0D0C65A8D06C17611F3 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		DC234CA03045239CB9D178E6 /* PreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesManager.swift; sourceTree = "<group>"; };
 		DDB13572FA0DD4098A9721D2 /* SettingsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCard.swift; sourceTree = "<group>"; };
+		1B7F79992808E7388722658A /* SettingsSectionContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSectionContainer.swift; sourceTree = "<group>"; };
 		E2D7D48C5DF8A0F64F6CD9B2 /* ActionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionParserTests.swift; sourceTree = "<group>"; };
 		E53529DEB10403CBB276F9AD /* ActionEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionEngineTests.swift; sourceTree = "<group>"; };
 		E5DADAA257C2278B651DA7C1 /* CloudSyncTranslatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTranslatorTests.swift; sourceTree = "<group>"; };
@@ -458,6 +460,7 @@
 				99356FF270E11FD9201F3359 /* AccessoryRowView.swift */,
 				DC234CA03045239CB9D178E6 /* PreferencesManager.swift */,
 				DDB13572FA0DD4098A9721D2 /* SettingsCard.swift */,
+				1B7F79992808E7388722658A /* SettingsSectionContainer.swift */,
 				8E67C906ECD67B8E10255EFC /* SettingsView.swift */,
 				39978B305FBE0EDCA33CCAFB /* SettingsWindowController.swift */,
 				27FD524F8A95299839DDB84A /* Sections */,
@@ -760,6 +763,7 @@
 				680D90D25922D1D80083CFC7 /* SecuritySystemMenuItem.swift in Sources */,
 				F0D475122112E46686ADF3C1 /* SensorSummaryMenuItem.swift in Sources */,
 				721D0C78421B4D27A7722A00 /* SettingsCard.swift in Sources */,
+				1D84B5DCE67B593C00A14A7B /* SettingsSectionContainer.swift in Sources */,
 				703DBF83A3BBDD5C6A6DB225 /* SettingsView.swift in Sources */,
 				21F39E80DC3F5C5543037DD6 /* SettingsWindowController.swift in Sources */,
 				EBD10F700CEFAA9D8C99229F /* ShortcutButton.swift in Sources */,

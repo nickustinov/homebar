@@ -187,14 +187,17 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
 
     private func createGlobalGroupRowView(row: Int) -> NSView {
         let group = globalGroups[row]
-        return createGroupRowView(group: group, roomId: nil, row: row, showDragHandle: true)
+        let canDrag = globalGroups.count > 1
+        return createGroupRowView(group: group, roomId: nil, row: row, showDragHandle: canDrag, reserveDragSpace: true)
     }
 
     private func createRoomGroupRowView(group: DeviceGroup, roomId: String?, row: Int) -> NSView {
-        return createGroupRowView(group: group, roomId: roomId, row: row, showDragHandle: true, indentLevel: 1)
+        let roomGroupCount = roomId.flatMap { groupsByRoom[$0]?.count } ?? 0
+        let canDrag = roomGroupCount > 1
+        return createGroupRowView(group: group, roomId: roomId, row: row, showDragHandle: canDrag, reserveDragSpace: true, indentLevel: 1)
     }
 
-    private func createGroupRowView(group: DeviceGroup, roomId: String?, row: Int, showDragHandle: Bool, indentLevel: Int = 0) -> AccessoryRowView {
+    private func createGroupRowView(group: DeviceGroup, roomId: String?, row: Int, showDragHandle: Bool, reserveDragSpace: Bool = false, indentLevel: Int = 0) -> AccessoryRowView {
         let preferences = PreferencesManager.shared
         let isFav = preferences.isFavouriteGroup(groupId: group.id)
         let isPinned = preferences.isPinnedGroup(groupId: group.id)
@@ -204,6 +207,7 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             icon: NSImage(systemSymbolName: group.icon, accessibilityDescription: group.name),
             count: group.deviceIds.count,
             showDragHandle: showDragHandle,
+            reserveDragHandleSpace: reserveDragSpace && !showDragHandle,
             isFavourite: isFav,
             isPinned: isPinned,
             showEditButton: true,
@@ -246,6 +250,8 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
                 return pb
             case .group(let group, let roomId):
                 guard let roomId = roomId else { return nil }
+                // Only allow drag if there's more than one group in this room
+                guard (groupsByRoom[roomId]?.count ?? 0) > 1 else { return nil }
                 let pb = NSPasteboardItem()
                 pb.setString("\(group.id)|\(roomId)", forType: .roomGroupItem)
                 return pb
@@ -260,6 +266,8 @@ extension AccessoriesSettingsView: NSTableViewDelegate, NSTableViewDataSource {
             return pb
         }
         if tableView === globalGroupsTableView {
+            // Only allow drag if there's more than one global group
+            guard globalGroups.count > 1 else { return nil }
             let group = globalGroups[row]
             let pb = NSPasteboardItem()
             pb.setString(group.id, forType: .globalGroupItem)

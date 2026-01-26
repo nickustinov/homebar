@@ -2,102 +2,10 @@
 //  AccessoriesSettingsView+Tables.swift
 //  macOSBridge
 //
-//  Table creation and header strips for accessories settings
+//  Header strips and toggle actions for accessories settings
 //
 
 import AppKit
-
-// MARK: - Table creation
-
-extension AccessoriesSettingsView {
-
-    func createFavouritesTable(height: CGFloat) -> NSView {
-        let tableView = NSTableView()
-        self.favouritesTableView = tableView
-        configureTableView(tableView, dragType: .favouriteItem)
-
-        let container = NSView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(tableView)
-        pinToEdges(tableView, in: container)
-
-        return container
-    }
-
-    func createRoomsTable(height: CGFloat) -> NSView {
-        let tableView = RoomsTableView()
-        tableView.roomTableItems = { [weak self] in self?.roomTableItems ?? [] }
-        self.roomsTableView = tableView
-        configureTableView(tableView, dragType: .roomItem, intercellSpacing: 4)
-        // Also register for room group drops
-        tableView.registerForDraggedTypes([.roomItem, .roomGroupItem])
-
-        let container = NSView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(tableView)
-        pinToEdges(tableView, in: container)
-
-        return container
-    }
-
-    func createScenesTable(height: CGFloat) -> NSView {
-        let tableView = NSTableView()
-        self.scenesTableView = tableView
-        configureTableView(tableView, dragType: .sceneItem)
-
-        let container = NSView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(tableView)
-        pinToEdges(tableView, in: container)
-
-        return container
-    }
-
-    func createGlobalGroupsTable(height: CGFloat) -> NSView {
-        let tableView = NSTableView()
-        self.globalGroupsTableView = tableView
-        configureTableView(tableView, dragType: .globalGroupItem)
-
-        let container = NSView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(tableView)
-        pinToEdges(tableView, in: container)
-
-        return container
-    }
-
-    private func configureTableView(_ tableView: NSTableView, dragType: NSPasteboard.PasteboardType, intercellSpacing: CGFloat = 0) {
-        tableView.headerView = nil
-        tableView.rowHeight = AccessoryRowLayout.rowHeight
-        tableView.intercellSpacing = NSSize(width: 0, height: intercellSpacing)
-        tableView.backgroundColor = .clear
-        tableView.selectionHighlightStyle = .none
-        tableView.style = .plain
-        tableView.gridStyleMask = []
-        tableView.registerForDraggedTypes([dragType])
-        tableView.draggingDestinationFeedbackStyle = .gap
-        tableView.allowsMultipleSelection = false
-        tableView.usesAutomaticRowHeights = false
-        tableView.focusRingType = .none
-
-        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("main"))
-        column.resizingMask = .autoresizingMask
-        tableView.addTableColumn(column)
-        tableView.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
-
-        tableView.delegate = self
-        tableView.dataSource = self
-    }
-
-    private func pinToEdges(_ view: NSView, in container: NSView) {
-        NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: container.topAnchor),
-            view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            view.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-    }
-}
 
 // MARK: - Header strips using AccessoryRowView
 
@@ -127,7 +35,7 @@ extension AccessoriesSettingsView {
         }
         rowView.onPinToggled = { [weak self] in
             PreferencesManager.shared.togglePinnedScenesSection()
-            self?.rebuild()
+            self?.updateScenesSection()
         }
         return rowView
     }
@@ -178,7 +86,7 @@ extension AccessoriesSettingsView {
         return rowView
     }
 
-    // MARK: - Actions
+    // MARK: - Toggle Actions (targeted updates)
 
     func scenesChevronTapped() {
         let scenesKey = "scenes"
@@ -187,12 +95,12 @@ extension AccessoriesSettingsView {
         } else {
             expandedSections.insert(scenesKey)
         }
-        rebuild()
+        updateScenesSection()
     }
 
     func scenesEyeTapped() {
         PreferencesManager.shared.hideScenesSection.toggle()
-        rebuild()
+        updateScenesSection()
     }
 
     func otherChevronTapped() {
@@ -202,7 +110,7 @@ extension AccessoriesSettingsView {
         } else {
             expandedSections.insert(otherKey)
         }
-        rebuild()
+        updateOtherSection()
     }
 
     private func roomChevronToggled(roomIndex: Int) {
@@ -213,21 +121,21 @@ extension AccessoriesSettingsView {
         } else {
             expandedSections.insert(roomId)
         }
-        rebuild()
+        updateRoomsSection()
     }
 
     private func roomEyeToggled(roomIndex: Int) {
         guard roomIndex < orderedRooms.count else { return }
         let roomId = orderedRooms[roomIndex].uniqueIdentifier
         PreferencesManager.shared.toggleHidden(roomId: roomId)
-        rebuild()
+        updateRoomsSection()
     }
 
     private func roomPinToggled(roomIndex: Int) {
         guard roomIndex < orderedRooms.count else { return }
         let room = orderedRooms[roomIndex]
         PreferencesManager.shared.togglePinnedRoom(roomId: room.uniqueIdentifier)
-        rebuild()
+        updateRoomsSection()
     }
 }
 

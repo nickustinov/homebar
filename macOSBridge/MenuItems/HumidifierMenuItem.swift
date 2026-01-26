@@ -18,6 +18,8 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private var humidityId: UUID?
     private var humidifierThresholdId: UUID?
     private var dehumidifierThresholdId: UUID?
+    private var swingModeId: UUID?
+    private var waterLevelId: UUID?
 
     private var isActive: Bool = false
     private var currentState: Int = 0  // 0=inactive, 1=idle, 2=humidifying, 3=dehumidifying
@@ -25,6 +27,8 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private var currentHumidity: Double = 0
     private var humidifierThreshold: Double = 50
     private var dehumidifierThreshold: Double = 50
+    private var swingMode: Int = 0     // 0=DISABLED, 1=ENABLED
+    private var waterLevel: Double = -1  // -1 = not available
 
     private let containerView: HighlightingMenuItemView
     private let iconView: NSImageView
@@ -32,11 +36,17 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
     private let humidityLabel: NSTextField
     private let powerToggle: ToggleSwitch
 
+    // Swing button (Row 1, before toggle)
+    private var swingButtonGroup: ModeButtonGroup?
+    private var swingButton: ModeButton?
+
     // Controls row (shown when active)
     private let controlsRow: NSView
     private let modeButtonAuto: ModeButton
     private let modeButtonHumidify: ModeButton
     private let modeButtonDehumidify: ModeButton
+    private var waterLevelIconView: NSImageView?
+    private var waterLevelLabel: NSTextField?
 
     private let collapsedHeight: CGFloat = DS.ControlSize.menuItemHeight
     private let expandedHeight: CGFloat = DS.ControlSize.menuItemHeight + 36
@@ -49,6 +59,8 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         if let id = humidityId { ids.append(id) }
         if let id = humidifierThresholdId { ids.append(id) }
         if let id = dehumidifierThresholdId { ids.append(id) }
+        if let id = swingModeId { ids.append(id) }
+        if let id = waterLevelId { ids.append(id) }
         return ids
     }
 
@@ -63,6 +75,8 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.humidityId = serviceData.humidityId.flatMap { UUID(uuidString: $0) }
         self.humidifierThresholdId = serviceData.humidifierThresholdId.flatMap { UUID(uuidString: $0) }
         self.dehumidifierThresholdId = serviceData.dehumidifierThresholdId.flatMap { UUID(uuidString: $0) }
+        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
+        self.waterLevelId = serviceData.waterLevelId.flatMap { UUID(uuidString: $0) }
 
         // Create wrapper view (full width for menu sizing) - start collapsed
         containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: collapsedHeight))
@@ -80,9 +94,13 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         // Power toggle position (calculate first for alignment)
         let switchX = DS.ControlSize.menuItemWidth - DS.Spacing.md - DS.ControlSize.switchWidth
 
-        // Current humidity position (right-aligned before toggle)
+        // Swing button group position (right before toggle, only if present)
+        let swingGroupWidth = ModeButtonGroup.widthForIconButtons(count: 1)
+        let swingGroupX = switchX - (swingModeId != nil ? swingGroupWidth + DS.Spacing.sm : 0)
+
+        // Current humidity position (before swing button or toggle)
         let humidityWidth: CGFloat = 50
-        let humidityX = switchX - humidityWidth - DS.Spacing.sm
+        let humidityX = (swingModeId != nil ? swingGroupX : switchX) - humidityWidth - DS.Spacing.sm
 
         // Name label (fills space up to humidity label)
         let labelX = DS.Spacing.md + DS.ControlSize.iconMedium + DS.Spacing.sm
@@ -99,9 +117,18 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         humidityLabel = NSTextField(labelWithString: "--%")
         humidityLabel.frame = NSRect(x: humidityX, y: labelY, width: humidityWidth, height: 17)
         humidityLabel.font = DS.Typography.labelSmall
-        humidityLabel.textColor = DS.Colors.mutedForeground
+        humidityLabel.textColor = .secondaryLabelColor
         humidityLabel.alignment = .right
         containerView.addSubview(humidityLabel)
+
+        // Swing button group (on Row 1, before toggle)
+        if swingModeId != nil {
+            let swingY = (collapsedHeight - 18) / 2
+            let swingGroup = ModeButtonGroup(frame: NSRect(x: swingGroupX, y: swingY, width: swingGroupWidth, height: 18))
+            swingButton = swingGroup.addButton(icon: "wind", color: DS.Colors.sliderFan)
+            containerView.addSubview(swingGroup)
+            swingButtonGroup = swingGroup
+        }
 
         // Power toggle
         let switchY = (collapsedHeight - DS.ControlSize.switchHeight) / 2
@@ -145,6 +172,31 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
 
         controlsRow.addSubview(modeContainer)
 
+        // Water level icon and label (right side of Row 2, only if present)
+        if waterLevelId != nil {
+            let iconSize: CGFloat = 14
+            let labelWidth: CGFloat = 32
+            let spacing: CGFloat = 2
+            let totalWidth = iconSize + spacing + labelWidth
+            let startX = DS.ControlSize.menuItemWidth - DS.Spacing.md - totalWidth
+
+            // Center vertically with mode buttons (mode container: y=3, h=22, center=14)
+            let waterIcon = NSImageView(frame: NSRect(x: startX, y: 7, width: iconSize, height: iconSize))
+            waterIcon.image = PhosphorIcon.regular("drop-half-bottom")
+            waterIcon.contentTintColor = .secondaryLabelColor
+            waterIcon.imageScaling = .scaleProportionallyUpOrDown
+            controlsRow.addSubview(waterIcon)
+            waterLevelIconView = waterIcon
+
+            let waterLabel = NSTextField(labelWithString: "--%")
+            waterLabel.frame = NSRect(x: startX + iconSize + spacing, y: 4, width: labelWidth, height: 17)
+            waterLabel.font = DS.Typography.labelSmall
+            waterLabel.textColor = .secondaryLabelColor
+            waterLabel.alignment = .right
+            controlsRow.addSubview(waterLabel)
+            waterLevelLabel = waterLabel
+        }
+
         // Set initial selection
         modeButtonAuto.isSelected = true
 
@@ -176,6 +228,9 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         modeButtonHumidify.action = #selector(modeChanged(_:))
         modeButtonDehumidify.target = self
         modeButtonDehumidify.action = #selector(modeChanged(_:))
+
+        swingButton?.target = self
+        swingButton?.action = #selector(swingTapped(_:))
     }
 
     required init(coder: NSCoder) {
@@ -211,6 +266,16 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
             if let threshold = ValueConversion.toDouble(value) {
                 dehumidifierThreshold = threshold
             }
+        } else if characteristicId == swingModeId {
+            if let mode = ValueConversion.toInt(value) {
+                swingMode = mode
+                updateSwingButton()
+            }
+        } else if characteristicId == waterLevelId {
+            if let level = ValueConversion.toDouble(value) {
+                waterLevel = level
+                waterLevelLabel?.stringValue = String(format: "%.0f%%", level)
+            }
         }
     }
 
@@ -231,6 +296,9 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         nameLabel.frame.origin.y = labelY
         humidityLabel.frame.origin.y = labelY
         powerToggle.frame.origin.y = switchY
+        if let swingGroup = swingButtonGroup {
+            swingGroup.frame.origin.y = topAreaY + (collapsedHeight - 18) / 2
+        }
 
         updateStateIcon()
     }
@@ -268,5 +336,18 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
             bridge?.writeCharacteristic(identifier: id, value: targetState)
             notifyLocalChange(characteristicId: id, value: targetState)
         }
+    }
+
+    @objc private func swingTapped(_ sender: NSButton) {
+        swingMode = swingMode == 0 ? 1 : 0
+        if let id = swingModeId {
+            bridge?.writeCharacteristic(identifier: id, value: swingMode)
+            notifyLocalChange(characteristicId: id, value: swingMode)
+        }
+        updateSwingButton()
+    }
+
+    private func updateSwingButton() {
+        swingButton?.isSelected = swingMode == 1
     }
 }

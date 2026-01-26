@@ -28,6 +28,29 @@ enum DebugMockups {
                     // Mock outlet is "in use" (drawing power)
                     switchItem.updateValue(for: outletInUseId, value: true)
                 }
+
+                if let thermostatItem = item as? ThermostatMenuItem,
+                   let currentTempIdStr = service.currentTemperatureId,
+                   let currentTempId = UUID(uuidString: currentTempIdStr) {
+                    thermostatItem.updateValue(for: currentTempId, value: 21.5)
+                }
+
+                if let acItem = item as? ACMenuItem,
+                   let currentTempIdStr = service.currentTemperatureId,
+                   let currentTempId = UUID(uuidString: currentTempIdStr) {
+                    acItem.updateValue(for: currentTempId, value: 23.0)
+                }
+
+                if let humidifierItem = item as? HumidifierMenuItem {
+                    if let humidityIdStr = service.humidityId,
+                       let humidityId = UUID(uuidString: humidityIdStr) {
+                        humidifierItem.updateValue(for: humidityId, value: 45.0)
+                    }
+                    if let waterLevelIdStr = service.waterLevelId,
+                       let waterLevelId = UUID(uuidString: waterLevelIdStr) {
+                        humidifierItem.updateValue(for: waterLevelId, value: 65.0)
+                    }
+                }
             }
         }
         menu.addItem(NSMenuItem.separator())
@@ -97,7 +120,8 @@ enum DebugMockups {
                 currentHeaterCoolerStateId: UUID(),
                 targetHeaterCoolerStateId: UUID(),
                 coolingThresholdTemperatureId: UUID(),
-                heatingThresholdTemperatureId: UUID()
+                heatingThresholdTemperatureId: UUID(),
+                swingModeId: UUID()
             ),
             ServiceData(
                 uniqueIdentifier: UUID(),
@@ -116,6 +140,17 @@ enum DebugMockups {
                 roomIdentifier: nil,
                 currentPositionId: UUID(),
                 targetPositionId: UUID()
+            ),
+            ServiceData(
+                uniqueIdentifier: UUID(),
+                name: "Mock Blind (Tilt)",
+                serviceType: ServiceTypes.windowCovering,
+                accessoryName: "Mock",
+                roomIdentifier: nil,
+                currentPositionId: UUID(),
+                targetPositionId: UUID(),
+                currentHorizontalTiltId: UUID(),
+                targetHorizontalTiltId: UUID()
             ),
             ServiceData(
                 uniqueIdentifier: UUID(),
@@ -148,10 +183,13 @@ enum DebugMockups {
                 serviceType: ServiceTypes.humidifierDehumidifier,
                 accessoryName: "Mock",
                 roomIdentifier: nil,
+                humidityId: UUID(),
                 activeId: UUID(),
+                swingModeId: UUID(),
                 currentHumidifierDehumidifierStateId: UUID(),
                 targetHumidifierDehumidifierStateId: UUID(),
-                humidifierThresholdId: UUID()
+                humidifierThresholdId: UUID(),
+                waterLevelId: UUID()
             ),
             ServiceData(
                 uniqueIdentifier: UUID(),

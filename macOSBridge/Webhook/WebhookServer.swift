@@ -271,10 +271,30 @@ final class WebhookServer {
             sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
 
         case "groups":
-            let groups = PreferencesManager.shared.deviceGroups
+            var groups = PreferencesManager.shared.deviceGroups
+            let roomLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0.name) })
+            let roomIdLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.name.lowercased(), $0.uniqueIdentifier) })
+
+            // Filter by room if specified
+            if let filterRoom = room?.removingPercentEncoding {
+                let filterRoomLower = filterRoom.lowercased()
+                if let roomId = roomIdLookup[filterRoomLower] {
+                    // Include room-scoped groups for this room AND global groups
+                    groups = groups.filter { $0.roomId == roomId || $0.roomId == nil }
+                }
+            }
+
             let items = groups.map { group in
                 let deviceCount = group.deviceIds.count
-                return "{\"name\":\"\(escapeJSON(group.name))\",\"icon\":\"\(escapeJSON(group.icon))\",\"devices\":\(deviceCount)}"
+                var fields = [
+                    "\"name\":\"\(escapeJSON(group.name))\"",
+                    "\"icon\":\"\(escapeJSON(group.icon))\"",
+                    "\"devices\":\(deviceCount)"
+                ]
+                if let roomId = group.roomId, let roomName = roomLookup[roomId] {
+                    fields.append("\"room\":\"\(escapeJSON(roomName))\"")
+                }
+                return "{\(fields.joined(separator: ","))}"
             }
             sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
 

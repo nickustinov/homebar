@@ -26,7 +26,8 @@ class DeeplinksSection: SettingsCard {
 
     private let targetFormats: [(format: String, description: String)] = [
         ("Room/Device", "Device in specific room"),
-        ("group.Name", "All devices in a group")
+        ("Room/group.Name", "Group scoped to a room"),
+        ("group.Name", "Global group (all rooms)")
     ]
 
     override init(frame frameRect: NSRect) {
@@ -158,7 +159,7 @@ class DeeplinksSection: SettingsCard {
             formatLabel.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
             formatLabel.textColor = .labelColor
             formatLabel.translatesAutoresizingMaskIntoConstraints = false
-            formatLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
+            formatLabel.widthAnchor.constraint(equalToConstant: 110).isActive = true
 
             let descLabel = NSTextField(labelWithString: description)
             descLabel.font = .systemFont(ofSize: 11)

@@ -84,11 +84,13 @@ itsyhome://<action>/<target>
 **Target formats:**
 
 - `Room/Device` - Device in specific room (e.g., `Office/Spotlights`)
-- `group.Name` - All devices in a group (e.g., `group.Office%20Lights`)
+- `Room/group.Name` - Group scoped to a room (e.g., `Office/group.All%20Lights`)
+- `group.Name` - Global group (e.g., `group.Office%20Lights`)
 
 **Testing from terminal:**
 ```bash
 open "itsyhome://toggle/Office/Spotlights"
+open "itsyhome://toggle/Office/group.All%20Lights"
 open "itsyhome://toggle/group.Office%20Lights"
 open "itsyhome://scene/Goodnight"
 open "itsyhome://brightness/50/Bedroom/Lamp"
@@ -128,7 +130,8 @@ curl http://localhost:8423/close/Bedroom/Blinds
 | `/list/devices` | List all devices with type and reachability |
 | `/list/devices/<room>` | List devices in a specific room |
 | `/list/scenes` | List all scenes |
-| `/list/groups` | List all device groups |
+| `/list/groups` | List all device groups (includes room info for room-scoped groups) |
+| `/list/groups/<room>` | List groups available in a specific room (room-scoped + global) |
 | `/info/<target>` | Detailed device/room info with current state |
 
 **Response format:**

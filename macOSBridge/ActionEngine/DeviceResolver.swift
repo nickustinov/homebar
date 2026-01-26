@@ -38,8 +38,9 @@ enum DeviceResolver {
     /// Resolve a target string to HomeKit entities
     /// Supported formats:
     /// - Room/Device: "Office/Spotlights", "Bedroom/Lamp"
+    /// - Room/Group: "Office/group.All Lights" (room-scoped group)
     /// - Scene: "scene.Goodnight", "Goodnight"
-    /// - Group: "group.Office Lights"
+    /// - Group: "group.Office Lights" (global group)
     /// - UUID: "ABC123-DEF456-..."
     static func resolve(_ query: String, in data: MenuData, groups: [DeviceGroup] = []) -> ResolveResult {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
@@ -57,12 +58,17 @@ enum DeviceResolver {
             return sceneResult
         }
 
-        // 3. Check for group prefix or group name match
+        // 3. Check for Room/group.Name format (room-scoped groups)
+        if let roomGroupResult = resolveRoomScopedGroup(trimmed, in: data, groups: groups) {
+            return roomGroupResult
+        }
+
+        // 4. Check for group prefix or group name match (global groups)
         if let groupResult = resolveGroup(trimmed, groups: groups, data: data) {
             return groupResult
         }
 
-        // 4. Room/Device format: "Office/Spotlights"
+        // 5. Room/Device format: "Office/Spotlights"
         if let roomDeviceMatch = resolveRoomAndDeviceName(trimmed, in: data) {
             return roomDeviceMatch
         }
@@ -192,6 +198,59 @@ enum DeviceResolver {
         }
 
         return .notFound("group.\(name)")
+    }
+
+    /// Resolve room-scoped group format: "Room/group.Name"
+    private static func resolveRoomScopedGroup(_ query: String, in data: MenuData, groups: [DeviceGroup]) -> ResolveResult? {
+        // Only handle queries with "/" separator that contain "group."
+        guard query.contains("/") else { return nil }
+
+        let parts = query.split(separator: "/", maxSplits: 1)
+        guard parts.count == 2 else { return nil }
+
+        let roomPart = String(parts[0])
+        let targetPart = String(parts[1])
+
+        // Check if target part is a group reference
+        let loweredTarget = targetPart.lowercased()
+        guard loweredTarget.hasPrefix("group.") else { return nil }
+
+        let groupName = String(targetPart.dropFirst(6))
+        let loweredGroupName = groupName.lowercased()
+        let loweredRoom = roomPart.lowercased()
+
+        // Find the room
+        guard let room = data.rooms.first(where: { $0.name.lowercased() == loweredRoom }) else {
+            return .notFound(query)
+        }
+
+        // First try to find a group with matching name AND roomId
+        let roomScopedGroup = groups.first { group in
+            group.name.lowercased() == loweredGroupName && group.roomId == room.uniqueIdentifier
+        }
+
+        if let group = roomScopedGroup {
+            let services = group.resolveServices(in: data)
+            if services.isEmpty {
+                return .notFound(query)
+            }
+            return .services(services)
+        }
+
+        // Fall back to global group (roomId == nil) with matching name
+        let globalGroup = groups.first { group in
+            group.name.lowercased() == loweredGroupName && group.roomId == nil
+        }
+
+        if let group = globalGroup {
+            let services = group.resolveServices(in: data)
+            if services.isEmpty {
+                return .notFound(query)
+            }
+            return .services(services)
+        }
+
+        return .notFound(query)
     }
 
     private static func resolveRoomAndDeviceName(_ query: String, in data: MenuData) -> ResolveResult? {

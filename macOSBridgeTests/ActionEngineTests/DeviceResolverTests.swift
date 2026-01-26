@@ -266,6 +266,181 @@ final class DeviceResolverTests: XCTestCase {
         }
     }
 
+    // MARK: - Room-scoped group resolution tests
+
+    func testResolveRoomScopedGroupByPrefix() {
+        // Create a room-scoped group for Office
+        let officeGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString],
+            roomId: officeRoomId.uuidString
+        )
+
+        let result = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [officeGroup])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].uniqueIdentifier, officeSpotlightsId.uuidString)
+        } else {
+            XCTFail("Expected services result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupCaseInsensitive() {
+        let officeGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString],
+            roomId: officeRoomId.uuidString
+        )
+
+        let result = DeviceResolver.resolve("office/group.all lights", in: testMenuData, groups: [officeGroup])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].uniqueIdentifier, officeSpotlightsId.uuidString)
+        } else {
+            XCTFail("Expected services result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupPrefersRoomScoped() {
+        // Create both a room-scoped and global group with same name
+        let officeGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString],
+            roomId: officeRoomId.uuidString
+        )
+        let globalGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [bedroomLightId.uuidString, kitchenLightId.uuidString],
+            roomId: nil
+        )
+
+        // When requesting Office/group.All Lights, should get the Office-scoped group
+        let result = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [officeGroup, globalGroup])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].uniqueIdentifier, officeSpotlightsId.uuidString)
+        } else {
+            XCTFail("Expected services result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupFallsBackToGlobal() {
+        // Only create a global group (no room-scoped group for Office)
+        let globalGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [bedroomLightId.uuidString, kitchenLightId.uuidString],
+            roomId: nil
+        )
+
+        // When requesting Office/group.All Lights but no Office-scoped group exists,
+        // should fall back to global group
+        let result = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [globalGroup])
+
+        if case .services(let services) = result {
+            XCTAssertEqual(services.count, 2)
+        } else {
+            XCTFail("Expected services result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupDifferentRooms() {
+        // Create room-scoped groups for different rooms with same name
+        let officeGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString],
+            roomId: officeRoomId.uuidString
+        )
+        let bedroomGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [bedroomLightId.uuidString, bedroomSpotlightsId.uuidString],
+            roomId: bedroomRoomId.uuidString
+        )
+
+        // Request Office group
+        let officeResult = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [officeGroup, bedroomGroup])
+        if case .services(let services) = officeResult {
+            XCTAssertEqual(services.count, 1)
+            XCTAssertEqual(services[0].uniqueIdentifier, officeSpotlightsId.uuidString)
+        } else {
+            XCTFail("Expected services result for Office, got \(officeResult)")
+        }
+
+        // Request Bedroom group
+        let bedroomResult = DeviceResolver.resolve("Bedroom/group.All Lights", in: testMenuData, groups: [officeGroup, bedroomGroup])
+        if case .services(let services) = bedroomResult {
+            XCTAssertEqual(services.count, 2)
+        } else {
+            XCTFail("Expected services result for Bedroom, got \(bedroomResult)")
+        }
+    }
+
+    func testResolveRoomScopedGroupNotFoundRoom() {
+        let group = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [officeSpotlightsId.uuidString],
+            roomId: officeRoomId.uuidString
+        )
+
+        // Non-existent room
+        let result = DeviceResolver.resolve("Bathroom/group.All Lights", in: testMenuData, groups: [group])
+
+        if case .notFound = result {
+            // Expected
+        } else {
+            XCTFail("Expected notFound result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupNotFoundGroup() {
+        // No groups defined
+        let result = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [])
+
+        if case .notFound = result {
+            // Expected
+        } else {
+            XCTFail("Expected notFound result, got \(result)")
+        }
+    }
+
+    func testResolveRoomScopedGroupWrongRoom() {
+        // Group exists but for a different room
+        let bedroomGroup = DeviceGroup(
+            id: UUID().uuidString,
+            name: "All Lights",
+            icon: "lightbulb",
+            deviceIds: [bedroomLightId.uuidString],
+            roomId: bedroomRoomId.uuidString
+        )
+
+        // Request for Office but group is for Bedroom, and no global fallback
+        let result = DeviceResolver.resolve("Office/group.All Lights", in: testMenuData, groups: [bedroomGroup])
+
+        if case .notFound = result {
+            // Expected - no Office-scoped or global group exists
+        } else {
+            XCTFail("Expected notFound result, got \(result)")
+        }
+    }
+
     // MARK: - Room/device name resolution tests
 
     func testResolveRoomSlashDevice() {

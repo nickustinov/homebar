@@ -265,9 +265,11 @@ final class WebhookServer {
             }
 
             let items = services.map { service, roomName, reachable in
+                let iconName = IconResolver.iconName(for: service)
                 var fields = [
                     "\"name\":\"\(escapeJSON(service.name))\"",
                     "\"type\":\"\(escapeJSON(serviceTypeLabel(service.serviceType)))\"",
+                    "\"icon\":\"\(escapeJSON(iconName))\"",
                     "\"reachable\":\(reachable)"
                 ]
                 if let room = roomName {
@@ -278,7 +280,10 @@ final class WebhookServer {
             sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
 
         case "scenes":
-            let items = data.scenes.map { "{\"name\":\"\(escapeJSON($0.name))\"}" }
+            let items = data.scenes.map { scene in
+                let iconName = IconResolver.iconName(for: scene)
+                return "{\"name\":\"\(escapeJSON(scene.name))\",\"icon\":\"\(escapeJSON(iconName))\"}"
+            }
             sendResponse(connection: connection, status: 200, body: "[\(items.joined(separator: ","))]")
 
         case "groups":
@@ -348,7 +353,8 @@ final class WebhookServer {
             sendServiceInfoResponse(services, data: data, engine: engine, connection: connection)
 
         case .scene(let scene):
-            let json = "{\"name\":\"\(escapeJSON(scene.name))\",\"type\":\"scene\"}"
+            let iconName = IconResolver.iconName(for: scene)
+            let json = "{\"name\":\"\(escapeJSON(scene.name))\",\"type\":\"scene\",\"icon\":\"\(escapeJSON(iconName))\"}"
             sendResponse(connection: connection, status: 200, body: json)
 
         case .notFound, .ambiguous:
@@ -589,10 +595,12 @@ final class WebhookServer {
         let roomLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0.name) })
         let accessory = data.accessories.first { $0.services.contains(where: { $0.uniqueIdentifier == service.uniqueIdentifier }) }
         let roomName = accessory?.roomIdentifier.flatMap { roomLookup[String(describing: $0)] }
+        let iconName = IconResolver.iconName(for: service)
 
         var fields: [String] = [
             "\"name\":\"\(escapeJSON(service.name))\"",
             "\"type\":\"\(escapeJSON(serviceTypeLabel(service.serviceType)))\"",
+            "\"icon\":\"\(escapeJSON(iconName))\"",
             "\"reachable\":\(accessory?.isReachable ?? false)"
         ]
 

@@ -9,7 +9,7 @@
 import AppKit
 
 /// Set to true to show mock accessories in the menu for UI testing.
-let DebugShowMockAccessories = false
+let DebugShowMockAccessories = true
 
 enum DebugMockups {
 
@@ -234,6 +234,33 @@ enum DebugMockups {
                 roomIdentifier: nil,
                 securitySystemCurrentStateId: UUID(),
                 securitySystemTargetStateId: UUID()
+            ),
+            ServiceData(
+                uniqueIdentifier: UUID(),
+                name: "Mock Door",
+                serviceType: ServiceTypes.door,
+                accessoryName: "Mock",
+                roomIdentifier: nil,
+                currentPositionId: UUID(),
+                targetPositionId: UUID()
+            ),
+            ServiceData(
+                uniqueIdentifier: UUID(),
+                name: "Mock Window",
+                serviceType: ServiceTypes.window,
+                accessoryName: "Mock",
+                roomIdentifier: nil,
+                currentPositionId: UUID(),
+                targetPositionId: UUID()
+            ),
+            ServiceData(
+                uniqueIdentifier: UUID(),
+                name: "Mock Faucet",
+                serviceType: ServiceTypes.faucet,
+                accessoryName: "Mock",
+                roomIdentifier: nil,
+                activeId: UUID(),
+                inUseId: UUID()
             ),
         ]
     }

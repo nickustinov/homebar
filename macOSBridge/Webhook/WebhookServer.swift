@@ -732,6 +732,7 @@ final class WebhookServer {
         case ServiceTypes.temperatureSensor: return "temperature-sensor"
         case ServiceTypes.humiditySensor: return "humidity-sensor"
         case ServiceTypes.securitySystem: return "security-system"
+        case ServiceTypes.faucet: return "faucet"
         default: return type
         }
     }

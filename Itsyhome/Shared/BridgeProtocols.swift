@@ -425,6 +425,7 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let humidifierDehumidifier = "000000BD-0000-1000-8000-0026BB765291"
     @objc public static let airPurifier = "000000BB-0000-1000-8000-0026BB765291"
     @objc public static let valve = "000000D0-0000-1000-8000-0026BB765291"
+    @objc public static let faucet = "000000D7-0000-1000-8000-0026BB765291"
     @objc public static let securitySystem = "0000007E-0000-1000-8000-0026BB765291"
 }
 

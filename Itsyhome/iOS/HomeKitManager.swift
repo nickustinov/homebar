@@ -112,6 +112,7 @@ class HomeKitManager: NSObject, Mac2iOS, HMHomeManagerDelegate {
             ServiceTypes.humidifierDehumidifier,
             ServiceTypes.airPurifier,
             ServiceTypes.valve,
+            ServiceTypes.faucet,
             ServiceTypes.securitySystem
         ]
 

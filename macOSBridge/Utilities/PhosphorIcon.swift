@@ -237,6 +237,12 @@ extension PhosphorIcon {
             suggestedIcons: ["pipe", "shower", "drop"]
         ),
 
+        // Faucets
+        ServiceTypes.faucet: AccessoryIconConfig(
+            defaultIcon: "drop",
+            suggestedIcons: ["drop", "drop-half", "pipe", "shower"]
+        ),
+
         // Security Systems
         ServiceTypes.securitySystem: AccessoryIconConfig(
             defaultIcon: "shield",

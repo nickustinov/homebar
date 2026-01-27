@@ -268,6 +268,7 @@ class MenuBuilder {
             ServiceTypes.lock,
             ServiceTypes.garageDoorOpener,
             ServiceTypes.valve,
+            ServiceTypes.faucet,
             ServiceTypes.securitySystem
         ]
 
@@ -416,7 +417,7 @@ class MenuBuilder {
         case ServiceTypes.airPurifier:
             menuItem = AirPurifierMenuItem(serviceData: service, bridge: bridge)
 
-        case ServiceTypes.valve:
+        case ServiceTypes.valve, ServiceTypes.faucet:
             menuItem = ValveMenuItem(serviceData: service, bridge: bridge)
 
         case ServiceTypes.securitySystem:

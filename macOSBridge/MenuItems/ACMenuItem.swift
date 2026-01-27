@@ -79,13 +79,13 @@ class ACMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshable
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
-        self.currentTempId = serviceData.currentTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.currentStateId = serviceData.currentHeaterCoolerStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateId = serviceData.targetHeaterCoolerStateId.flatMap { UUID(uuidString: $0) }
-        self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
+        self.activeId = serviceData.activeId?.uuid
+        self.currentTempId = serviceData.currentTemperatureId?.uuid
+        self.currentStateId = serviceData.currentHeaterCoolerStateId?.uuid
+        self.targetStateId = serviceData.targetHeaterCoolerStateId?.uuid
+        self.coolingThresholdId = serviceData.coolingThresholdTemperatureId?.uuid
+        self.heatingThresholdId = serviceData.heatingThresholdTemperatureId?.uuid
+        self.swingModeId = serviceData.swingModeId?.uuid
         self.hasThresholds = coolingThresholdId != nil && heatingThresholdId != nil
 
         // Create wrapper view (full width for menu sizing) - start collapsed

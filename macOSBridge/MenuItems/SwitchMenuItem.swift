@@ -35,8 +35,8 @@ class SwitchMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresh
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
-        self.outletInUseId = serviceData.outletInUseId.flatMap { UUID(uuidString: $0) }
+        self.powerCharacteristicId = serviceData.powerStateId?.uuid
+        self.outletInUseId = serviceData.outletInUseId?.uuid
 
         let isOutlet = serviceData.serviceType == ServiceTypes.outlet
 

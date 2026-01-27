@@ -67,13 +67,13 @@ class FanMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshabl
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
-        self.powerStateId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
-        self.rotationSpeedId = serviceData.rotationSpeedId.flatMap { UUID(uuidString: $0) }
-        self.targetFanStateId = serviceData.targetFanStateId.flatMap { UUID(uuidString: $0) }
-        self.currentFanStateId = serviceData.currentFanStateId.flatMap { UUID(uuidString: $0) }
-        self.rotationDirectionId = serviceData.rotationDirectionId.flatMap { UUID(uuidString: $0) }
-        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
+        self.activeId = serviceData.activeId?.uuid
+        self.powerStateId = serviceData.powerStateId?.uuid
+        self.rotationSpeedId = serviceData.rotationSpeedId?.uuid
+        self.targetFanStateId = serviceData.targetFanStateId?.uuid
+        self.currentFanStateId = serviceData.currentFanStateId?.uuid
+        self.rotationDirectionId = serviceData.rotationDirectionId?.uuid
+        self.swingModeId = serviceData.swingModeId?.uuid
 
         self.hasSpeed = rotationSpeedId != nil
         self.speedMin = serviceData.rotationSpeedMin ?? 0

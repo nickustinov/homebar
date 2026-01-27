@@ -46,8 +46,8 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.currentPositionId = serviceData.currentPositionId.flatMap { UUID(uuidString: $0) }
-        self.targetPositionId = serviceData.targetPositionId.flatMap { UUID(uuidString: $0) }
+        self.currentPositionId = serviceData.currentPositionId?.uuid
+        self.targetPositionId = serviceData.targetPositionId?.uuid
 
         // Check for tilt - prefer horizontal, fall back to vertical
         if let horizCurrent = serviceData.currentHorizontalTiltId.flatMap({ UUID(uuidString: $0) }),

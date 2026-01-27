@@ -2313,6 +2313,7 @@
 		B4F4E37069B6FFE75871E864 /* ph.microsoft-excel-logo.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = D61D07E115CE10084838697D /* ph.microsoft-excel-logo.fill.svg */; };
 		B566CC475228AFE7B8FBD031 /* ph.smiley-sticker.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = B7C65B6E993A39E1C4715CEF /* ph.smiley-sticker.fill.svg */; };
 		B569B2CA1D12C799AA5806AB /* ph.share-network.svg in Resources */ = {isa = PBXBuildFile; fileRef = 258F282DA5D2E1D2C39CAC64 /* ph.share-network.svg */; };
+		B587311D735AA9ED42CD2AFC /* FlowLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1136A484342545250BD5354C /* FlowLayoutView.swift */; };
 		B590636C6395434E0DC7C0DF /* ph.funnel-x.svg in Resources */ = {isa = PBXBuildFile; fileRef = 605C458CAE84EB97A44573B4 /* ph.funnel-x.svg */; };
 		B593B6FDB06697F5CF9461BD /* ph.amazon-logo.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 73D31F499F5C35179F161D9A /* ph.amazon-logo.fill.svg */; };
 		B5990AF1E4401ABACD2F89F5 /* ph.hand-swipe-right.svg in Resources */ = {isa = PBXBuildFile; fileRef = A62E9010A6F2029BBD9939F8 /* ph.hand-swipe-right.svg */; };
@@ -3032,6 +3033,7 @@
 		F1331F09C7C4AFB09AA94224 /* ph.crop.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 92427C26C8AA4BF2473FB4ED /* ph.crop.fill.svg */; };
 		F137149E2D3AAB259AD44FD2 /* ph.brackets-square.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5E4B01E0EC973D301E53241D /* ph.brackets-square.fill.svg */; };
 		F15C61F6479628724ADB816F /* ph.steps.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 500A761DABE4E975C17BAF3C /* ph.steps.fill.svg */; };
+		F16D8A6F08317DD456A24D2E /* FlowLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1136A484342545250BD5354C /* FlowLayoutView.swift */; };
 		F176E32675845670A497E7FC /* ph.not-member-of.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 8F79DEEE208968F6E8DE22B2 /* ph.not-member-of.fill.svg */; };
 		F1795C886C7733F3CB8CD249 /* ph.dots-three-vertical.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = D2C6D6034F8AE82D50D3C13D /* ph.dots-three-vertical.fill.svg */; };
 		F17A026A09B89AEDEEFE3B9E /* ph.cheese.svg in Resources */ = {isa = PBXBuildFile; fileRef = 95B7AF49E8FE9BA68B681C2B /* ph.cheese.svg */; };
@@ -3469,6 +3471,7 @@
 		1100C52294B136BAAED6EB88 /* ph.skip-back.svg */ = {isa = PBXFileReference; path = "ph.skip-back.svg"; sourceTree = "<group>"; };
 		11066F62CB510DD0CD6DC304 /* ph.thermometer-simple.svg */ = {isa = PBXFileReference; path = "ph.thermometer-simple.svg"; sourceTree = "<group>"; };
 		111B4A944A9B0834499169DF /* ph.layout.svg */ = {isa = PBXFileReference; path = ph.layout.svg; sourceTree = "<group>"; };
+		1136A484342545250BD5354C /* FlowLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayoutView.swift; sourceTree = "<group>"; };
 		113E78ECB1A5FF5BCF3830FF /* PreferencesManager+Pinned.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Pinned.swift"; sourceTree = "<group>"; };
 		117549B5BED7ADDFB473C53C /* SensorSummaryMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSummaryMenuItem.swift; sourceTree = "<group>"; };
 		11A7A3ABB05416688A422A80 /* ph.subtract.svg */ = {isa = PBXFileReference; path = ph.subtract.svg; sourceTree = "<group>"; };
@@ -9737,6 +9740,7 @@
 			children = (
 				969ADECEBC8D55A1B08144AD /* ColorPickerViews.swift */,
 				181D73D7B6680B4F8CD37D4E /* DesignSystem.swift */,
+				1136A484342545250BD5354C /* FlowLayoutView.swift */,
 				AA816D16806C49F55E7E09BD /* HighlightingMenuItemView.swift */,
 				EA517D9CAF4A470166D8C402 /* ModernSlider.swift */,
 				9CD9AB0F2E79886D06C197E2 /* ToggleSwitch.swift */,
@@ -13009,6 +13013,7 @@
 				F6E1CB4E74F98A6A40307F4F /* DeviceGroup.swift in Sources */,
 				7BB119B671B3D114D30396B0 /* DeviceResolver.swift in Sources */,
 				80BA4CBB1ADDA67E5A9ABB5A /* FanMenuItem.swift in Sources */,
+				F16D8A6F08317DD456A24D2E /* FlowLayoutView.swift in Sources */,
 				259E77A4CA92FB96D11ECD4C /* GarageDoorMenuItem.swift in Sources */,
 				13CAC53E00A58CDF49407098 /* GeneralSection.swift in Sources */,
 				ED027DAB764D6BD656E4F586 /* GroupEditorPanel.swift in Sources */,
@@ -13106,6 +13111,7 @@
 				0A005DFA734D5F67E70BA99A /* DeviceResolverTests.swift in Sources */,
 				73574BD61159AC8923B414F8 /* FanMenuItem.swift in Sources */,
 				4E696B26D7F1842CB2AEA9B6 /* FanMenuItemTests.swift in Sources */,
+				B587311D735AA9ED42CD2AFC /* FlowLayoutView.swift in Sources */,
 				530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */,
 				13736DAF6F660C482265B9FA /* GarageDoorMenuItemTests.swift in Sources */,
 				0D4605C5CA172E7D1AB5CDBC /* GroupMenuItem+Actions.swift in Sources */,

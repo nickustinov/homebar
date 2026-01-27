@@ -37,8 +37,8 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
-        self.inUseId = serviceData.inUseId.flatMap { UUID(uuidString: $0) }
+        self.activeId = serviceData.activeId?.uuid
+        self.inUseId = serviceData.inUseId?.uuid
         self.valveType = serviceData.valveTypeValue ?? 0
 
         // Create the custom view

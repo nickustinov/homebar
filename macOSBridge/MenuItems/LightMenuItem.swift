@@ -57,11 +57,11 @@ class LightMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         self.serviceData = serviceData
         self.bridge = bridge
 
-        self.powerCharacteristicId = serviceData.powerStateId.flatMap { UUID(uuidString: $0) }
-        self.brightnessCharacteristicId = serviceData.brightnessId.flatMap { UUID(uuidString: $0) }
-        self.hueCharacteristicId = serviceData.hueId.flatMap { UUID(uuidString: $0) }
-        self.saturationCharacteristicId = serviceData.saturationId.flatMap { UUID(uuidString: $0) }
-        self.colorTempCharacteristicId = serviceData.colorTemperatureId.flatMap { UUID(uuidString: $0) }
+        self.powerCharacteristicId = serviceData.powerStateId?.uuid
+        self.brightnessCharacteristicId = serviceData.brightnessId?.uuid
+        self.hueCharacteristicId = serviceData.hueId?.uuid
+        self.saturationCharacteristicId = serviceData.saturationId?.uuid
+        self.colorTempCharacteristicId = serviceData.colorTemperatureId?.uuid
         if let min = serviceData.colorTemperatureMin { self.colorTempMin = min }
         if let max = serviceData.colorTemperatureMax { self.colorTempMax = max }
         self.colorTemp = (self.colorTempMin + self.colorTempMax) / 2

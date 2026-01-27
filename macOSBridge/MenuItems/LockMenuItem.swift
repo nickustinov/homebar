@@ -34,8 +34,8 @@ class LockMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.lockStateCharacteristicId = serviceData.lockCurrentStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateCharacteristicId = serviceData.lockTargetStateId.flatMap { UUID(uuidString: $0) }
+        self.lockStateCharacteristicId = serviceData.lockCurrentStateId?.uuid
+        self.targetStateCharacteristicId = serviceData.lockTargetStateId?.uuid
 
         let height = DS.ControlSize.menuItemHeight
 

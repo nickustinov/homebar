@@ -515,3 +515,10 @@ public protocol iOS2Mac: NSObjectProtocol {
     @objc public static let slatType = "000000C0-0000-1000-8000-0026BB765291"
     @objc public static let currentSlatState = "000000AA-0000-1000-8000-0026BB765291"
 }
+
+// MARK: - String UUID conversion
+
+public extension String {
+    /// Converts string to UUID if valid UUID format
+    var uuid: UUID? { UUID(uuidString: self) }
+}

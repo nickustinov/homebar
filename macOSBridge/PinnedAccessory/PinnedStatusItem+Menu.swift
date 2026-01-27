@@ -130,7 +130,7 @@ extension PinnedStatusItem {
             AccessoryData(
                 uniqueIdentifier: UUID(uuidString: service.uniqueIdentifier)!,
                 name: service.accessoryName,
-                roomIdentifier: service.roomIdentifier.flatMap { UUID(uuidString: $0) },
+                roomIdentifier: service.roomIdentifier?.uuid,
                 services: [service],
                 isReachable: service.isReachable
             )

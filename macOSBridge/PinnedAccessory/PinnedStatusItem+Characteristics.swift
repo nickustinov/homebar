@@ -98,6 +98,6 @@ extension PinnedStatusItem {
             service.securitySystemCurrentStateId
         ]
 
-        return displayIds.compactMap { $0.flatMap { UUID(uuidString: $0) } }.contains(characteristicId)
+        return displayIds.compactMap { $0?.uuid }.contains(characteristicId)
     }
 }

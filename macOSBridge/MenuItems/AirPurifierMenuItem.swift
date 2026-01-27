@@ -61,11 +61,11 @@ class AirPurifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRe
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
-        self.currentStateId = serviceData.currentAirPurifierStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateId = serviceData.targetAirPurifierStateId.flatMap { UUID(uuidString: $0) }
-        self.rotationSpeedId = serviceData.rotationSpeedId.flatMap { UUID(uuidString: $0) }
-        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
+        self.activeId = serviceData.activeId?.uuid
+        self.currentStateId = serviceData.currentAirPurifierStateId?.uuid
+        self.targetStateId = serviceData.targetAirPurifierStateId?.uuid
+        self.rotationSpeedId = serviceData.rotationSpeedId?.uuid
+        self.swingModeId = serviceData.swingModeId?.uuid
 
         self.hasSpeed = rotationSpeedId != nil
         self.speedMin = serviceData.rotationSpeedMin ?? 0

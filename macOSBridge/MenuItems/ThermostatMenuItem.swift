@@ -77,12 +77,12 @@ class ThermostatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.currentTempId = serviceData.currentTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.targetTempId = serviceData.targetTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.currentStateId = serviceData.heatingCoolingStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateId = serviceData.targetHeatingCoolingStateId.flatMap { UUID(uuidString: $0) }
-        self.coolingThresholdId = serviceData.coolingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
-        self.heatingThresholdId = serviceData.heatingThresholdTemperatureId.flatMap { UUID(uuidString: $0) }
+        self.currentTempId = serviceData.currentTemperatureId?.uuid
+        self.targetTempId = serviceData.targetTemperatureId?.uuid
+        self.currentStateId = serviceData.heatingCoolingStateId?.uuid
+        self.targetStateId = serviceData.targetHeatingCoolingStateId?.uuid
+        self.coolingThresholdId = serviceData.coolingThresholdTemperatureId?.uuid
+        self.heatingThresholdId = serviceData.heatingThresholdTemperatureId?.uuid
         self.hasThresholds = coolingThresholdId != nil && heatingThresholdId != nil
 
         // Create wrapper view - start collapsed

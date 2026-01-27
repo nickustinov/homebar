@@ -451,7 +451,7 @@ class MenuBuilder {
             return AccessoryData(
                 uniqueIdentifier: UUID(uuidString: accessory.uniqueIdentifier)!,
                 name: accessory.name,
-                roomIdentifier: accessory.roomIdentifier.flatMap { UUID(uuidString: $0) },
+                roomIdentifier: accessory.roomIdentifier?.uuid,
                 services: filteredServices,
                 isReachable: accessory.isReachable
             )

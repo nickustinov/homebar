@@ -42,10 +42,10 @@ class SlatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.currentTiltAngleId = serviceData.currentTiltAngleId.flatMap { UUID(uuidString: $0) }
-        self.targetTiltAngleId = serviceData.targetTiltAngleId.flatMap { UUID(uuidString: $0) }
-        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
-        self.currentSlatStateId = serviceData.currentSlatStateId.flatMap { UUID(uuidString: $0) }
+        self.currentTiltAngleId = serviceData.currentTiltAngleId?.uuid
+        self.targetTiltAngleId = serviceData.targetTiltAngleId?.uuid
+        self.swingModeId = serviceData.swingModeId?.uuid
+        self.currentSlatStateId = serviceData.currentSlatStateId?.uuid
 
         let height = DS.ControlSize.menuItemHeight
 

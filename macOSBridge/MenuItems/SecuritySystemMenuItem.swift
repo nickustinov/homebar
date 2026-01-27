@@ -45,8 +45,8 @@ class SecuritySystemMenuItem: NSMenuItem, CharacteristicUpdatable, Characteristi
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.currentStateId = serviceData.securitySystemCurrentStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateId = serviceData.securitySystemTargetStateId.flatMap { UUID(uuidString: $0) }
+        self.currentStateId = serviceData.securitySystemCurrentStateId?.uuid
+        self.targetStateId = serviceData.securitySystemTargetStateId?.uuid
 
         // Create wrapper view
         containerView = HighlightingMenuItemView(frame: NSRect(x: 0, y: 0, width: DS.ControlSize.menuItemWidth, height: rowHeight))

@@ -39,9 +39,9 @@ class GarageDoorMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.currentDoorStateId = serviceData.currentDoorStateId.flatMap { UUID(uuidString: $0) }
-        self.targetDoorStateId = serviceData.targetDoorStateId.flatMap { UUID(uuidString: $0) }
-        self.obstructionDetectedId = serviceData.obstructionDetectedId.flatMap { UUID(uuidString: $0) }
+        self.currentDoorStateId = serviceData.currentDoorStateId?.uuid
+        self.targetDoorStateId = serviceData.targetDoorStateId?.uuid
+        self.obstructionDetectedId = serviceData.obstructionDetectedId?.uuid
 
         let height = DS.ControlSize.menuItemHeight
 

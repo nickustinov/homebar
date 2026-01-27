@@ -75,13 +75,13 @@ class HumidifierMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRef
         self.bridge = bridge
 
         // Extract characteristic UUIDs from ServiceData
-        self.activeId = serviceData.activeId.flatMap { UUID(uuidString: $0) }
-        self.currentStateId = serviceData.currentHumidifierDehumidifierStateId.flatMap { UUID(uuidString: $0) }
-        self.targetStateId = serviceData.targetHumidifierDehumidifierStateId.flatMap { UUID(uuidString: $0) }
-        self.humidityId = serviceData.humidityId.flatMap { UUID(uuidString: $0) }
-        self.humidifierThresholdId = serviceData.humidifierThresholdId.flatMap { UUID(uuidString: $0) }
-        self.dehumidifierThresholdId = serviceData.dehumidifierThresholdId.flatMap { UUID(uuidString: $0) }
-        self.swingModeId = serviceData.swingModeId.flatMap { UUID(uuidString: $0) }
+        self.activeId = serviceData.activeId?.uuid
+        self.currentStateId = serviceData.currentHumidifierDehumidifierStateId?.uuid
+        self.targetStateId = serviceData.targetHumidifierDehumidifierStateId?.uuid
+        self.humidityId = serviceData.humidityId?.uuid
+        self.humidifierThresholdId = serviceData.humidifierThresholdId?.uuid
+        self.dehumidifierThresholdId = serviceData.dehumidifierThresholdId?.uuid
+        self.swingModeId = serviceData.swingModeId?.uuid
         self.hasThresholds = humidifierThresholdId != nil || dehumidifierThresholdId != nil
         self.canHumidify = humidifierThresholdId != nil
         self.canDehumidify = dehumidifierThresholdId != nil

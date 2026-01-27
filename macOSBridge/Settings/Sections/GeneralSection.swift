@@ -392,6 +392,9 @@ class GeneralSection: SettingsCard {
         if let product = ProManager.shared.lifetimeProduct {
             buyButton.attributedTitle = NSAttributedString(string: "Get Pro \u{2013} \(product.displayPrice)", attributes: attrs)
             buyButton.isEnabled = true
+        } else {
+            buyButton.attributedTitle = NSAttributedString(string: "Get Pro", attributes: attrs)
+            buyButton.isEnabled = false
         }
     }
 

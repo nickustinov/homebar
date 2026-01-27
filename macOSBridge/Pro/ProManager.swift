@@ -144,8 +144,11 @@ enum StoreError: Error {
 final class ProStatusCache: @unchecked Sendable {
     static let shared = ProStatusCache()
 
-    // Set to true for testing Pro features during development
-    static let debugOverride: Bool = false
+    // Auto-unlock Pro for TestFlight builds
+    static var debugOverride: Bool {
+        guard let receiptURL = Bundle.main.appStoreReceiptURL else { return false }
+        return receiptURL.lastPathComponent == "sandboxReceipt"
+    }
 
     private let lock = NSLock()
     private var _isPro: Bool = false

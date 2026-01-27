@@ -6,7 +6,7 @@ This folder contains the HAP specification and a tool to query it.
 
 - `homekit-spec.md` - HomeKit Accessory Protocol specification (markdown format)
 - `hap-spec.py` - Script to query service and characteristic definitions
-- `ACCESSORIES.md` - Supported accessories and their characteristics
+- `accessories.md` - Supported accessories and their characteristics
 
 ## HAP spec lookup
 
@@ -16,21 +16,21 @@ The `hap-spec.py` script queries service and characteristic definitions from the
 
 ```bash
 # Look up a service definition (chapter 8)
-./docs/hap-spec.py --service Lightbulb      # Handles "Light Bulb" variation
-./docs/hap-spec.py --service Thermostat
-./docs/hap-spec.py --service Faucet
+./docs-homekit/hap-spec.py --service Lightbulb      # Handles "Light Bulb" variation
+./docs-homekit/hap-spec.py --service Thermostat
+./docs-homekit/hap-spec.py --service Faucet
 
 # Look up a characteristic definition (chapter 9)
-./docs/hap-spec.py --char Brightness
-./docs/hap-spec.py --char On
-./docs/hap-spec.py --char "Target Temperature"
+./docs-homekit/hap-spec.py --char Brightness
+./docs-homekit/hap-spec.py --char On
+./docs-homekit/hap-spec.py --char "Target Temperature"
 
 # List all services or characteristics
-./docs/hap-spec.py --list-services
-./docs/hap-spec.py --list-characteristics
+./docs-homekit/hap-spec.py --list-services
+./docs-homekit/hap-spec.py --list-characteristics
 
 # General search
-./docs/hap-spec.py "Active"
+./docs-homekit/hap-spec.py "Active"
 ```
 
 ### Output
@@ -51,7 +51,7 @@ For characteristics, output includes:
 ### Example
 
 ```bash
-$ ./docs/hap-spec.py --service Thermostat
+$ ./docs-homekit/hap-spec.py --service Thermostat
 ```
 
 ```

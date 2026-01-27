@@ -208,7 +208,7 @@ class GroupEditorPanel: NSViewController {
         var result: [String: [ServiceData]] = [:]
 
         // Get room name lookup
-        let roomLookup = Dictionary(uniqueKeysWithValues: menuData.rooms.map { ($0.uniqueIdentifier, $0.name) })
+        let roomLookup = menuData.roomLookup()
 
         // Excluded types (sensors, etc.)
         let excludedTypes: Set<String> = [ServiceTypes.temperatureSensor, ServiceTypes.humiditySensor]

@@ -458,7 +458,7 @@ class CamerasSection: NSView {
 
         // Collect eligible services grouped by room
         var servicesByRoom: [String: [(service: ServiceData, roomName: String)]] = [:]
-        let roomNames = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0.name) })
+        let roomNames = data.roomLookup()
 
         for accessory in data.accessories {
             for service in accessory.services {

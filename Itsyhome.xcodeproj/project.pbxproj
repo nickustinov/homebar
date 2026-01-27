@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -166,6 +166,7 @@
 		0C2A45C15C7B64DBA5F591B7 /* ph.waveform-slash.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 86196F07B145FFAF64C38EEC /* ph.waveform-slash.fill.svg */; };
 		0C4448B10302E2569C98D9A4 /* ph.folder-minus.svg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0133C8384D16A75F80C068 /* ph.folder-minus.svg */; };
 		0C50A9F7E4B39D3073FCB0C2 /* BridgeProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88919649EAF34363518DE9FF /* BridgeProtocols.swift */; };
+		0C57D09568CED9F45FD2EBE7 /* WebhookResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89601E207FEBA59AF221472 /* WebhookResponses.swift */; };
 		0C7B0ADD84E7AC4D6FBCED2E /* ph.moon-stars.svg in Resources */ = {isa = PBXBuildFile; fileRef = BCEBD5BE12E74288CCE9B3DF /* ph.moon-stars.svg */; };
 		0C875A0AF50B31BA2C60F5EC /* ph.folder-plus.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 6252727CF61A7A4050A12198 /* ph.folder-plus.fill.svg */; };
 		0C899DA097E70B609ABD5D1C /* ph.currency-krw.svg in Resources */ = {isa = PBXBuildFile; fileRef = B7840B7076F1B39FCF9D3F19 /* ph.currency-krw.svg */; };
@@ -802,6 +803,7 @@
 		3E2EA0E14DF916FDB2F2F235 /* ph.plus-square.svg in Resources */ = {isa = PBXBuildFile; fileRef = DF1F199578294CFEF25D937A /* ph.plus-square.svg */; };
 		3E3D793468AF0124D1844809 /* ph.microphone-slash.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5667CB9E7B61EDD8652CE04D /* ph.microphone-slash.fill.svg */; };
 		3E4267CF41BA60E285D060E1 /* ph.funnel-simple-x.svg in Resources */ = {isa = PBXBuildFile; fileRef = F88487092A298A7CFAFA2DD6 /* ph.funnel-simple-x.svg */; };
+		3E904AA6D16A4527717E6874 /* HomeKitStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F905F4EDD22D9B508D8257 /* HomeKitStates.swift */; };
 		3EDFF718EA2EEAF0CA9FB1C1 /* ph.dog.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 4A5552900ABE89A30E423595 /* ph.dog.fill.svg */; };
 		3F162B7257DA931A55067F4B /* ph.user-circle-dashed.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 15C0C9E1DAE8AC7F5619D9FF /* ph.user-circle-dashed.fill.svg */; };
 		3F230A11731192155E402E47 /* ph.toilet-paper.svg in Resources */ = {isa = PBXBuildFile; fileRef = E497D75D2E7A5A027B7BB620 /* ph.toilet-paper.svg */; };
@@ -1054,6 +1056,7 @@
 		52FA197A2BB4FB79101B0498 /* ph.mouse-middle-click.svg in Resources */ = {isa = PBXBuildFile; fileRef = F559042C9F88A1E6C136FD2B /* ph.mouse-middle-click.svg */; };
 		530B7958DAC64B1723E66A79 /* GarageDoorMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0F3944EC8821BD1947AA8C /* GarageDoorMenuItem.swift */; };
 		531AEF7E708CDFB238033AD9 /* ph.moped.svg in Resources */ = {isa = PBXBuildFile; fileRef = 42AA218D931DD36A856985C5 /* ph.moped.svg */; };
+		5356F633677BBC4303ACA417 /* WebhookServer+Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1852A78644B4B1C92FE7EA2 /* WebhookServer+Endpoints.swift */; };
 		5357139B0E49D9D43CBD80F0 /* ph.intersection.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 2CE3506C818CB76C8AF2912C /* ph.intersection.fill.svg */; };
 		5374878D36877A1527066AC7 /* ph.matrix-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = 531932B942EB0279834470A9 /* ph.matrix-logo.svg */; };
 		537DCBE7E5AA533FB72BB572 /* ph.list-magnifying-glass.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 75CFE238374CF3AD21428055 /* ph.list-magnifying-glass.fill.svg */; };
@@ -1097,6 +1100,7 @@
 		568605FEF096063432E1BA75 /* ph.church.svg in Resources */ = {isa = PBXBuildFile; fileRef = 43D1E89C900EE7D95EF29FE5 /* ph.church.svg */; };
 		5692A516E35AC99BD4D3BE9B /* ph.arrows-left-right.svg in Resources */ = {isa = PBXBuildFile; fileRef = 0FDE59AB95D8068893B3345B /* ph.arrows-left-right.svg */; };
 		569381183B9F2C4A8896EAAC /* ph.television-simple.svg in Resources */ = {isa = PBXBuildFile; fileRef = BC6E2919B7E488C0B08A541E /* ph.television-simple.svg */; };
+		56966DAD1F7822B3F00291AE /* WebhookResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89601E207FEBA59AF221472 /* WebhookResponses.swift */; };
 		569B1FFAD4D2765CD2B0C85F /* ph.arrow-circle-right.svg in Resources */ = {isa = PBXBuildFile; fileRef = A61468FAA7F30A75E2DD9F6F /* ph.arrow-circle-right.svg */; };
 		573295249A8C33F613E60EDC /* ph.bowling-ball.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 7AB537AEEC74905668FA2CE5 /* ph.bowling-ball.fill.svg */; };
 		5734F7DFEFBBB647EFF58071 /* ph.scales.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 31C33FA3CC629E041AF88B62 /* ph.scales.fill.svg */; };
@@ -1480,6 +1484,7 @@
 		7484F99D39641F116C6F4B15 /* ph.arrow-circle-left.svg in Resources */ = {isa = PBXBuildFile; fileRef = 08DD624FFF7E449739888A0D /* ph.arrow-circle-left.svg */; };
 		749BB0D580435ED962468736 /* ph.drone.svg in Resources */ = {isa = PBXBuildFile; fileRef = C32B32ECAD200887A05AE02B /* ph.drone.svg */; };
 		74A6C7041D028599C2D05154 /* ph.film-reel.svg in Resources */ = {isa = PBXBuildFile; fileRef = 29C41CE891FBDE14D8A03B51 /* ph.film-reel.svg */; };
+		74C6D156EF4A0EF696E83996 /* WebhookServer+Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1852A78644B4B1C92FE7EA2 /* WebhookServer+Endpoints.swift */; };
 		74F064230EA447D8313C3B3C /* ph.planet.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = E80ECAEF2996A27EED42AD63 /* ph.planet.fill.svg */; };
 		74F6A9B74003871E112CF1BD /* ph.gauge.svg in Resources */ = {isa = PBXBuildFile; fileRef = 402EBA960460F6C5DFAFFF90 /* ph.gauge.svg */; };
 		74FFFDCEB235151C75031CA9 /* ph.windmill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 711665B5BB013C59FF98571E /* ph.windmill.svg */; };
@@ -3205,6 +3210,7 @@
 		FEC92869629B5BB98D633649 /* ph.eye-closed.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 361BB45A3C3208A6BA25BEB0 /* ph.eye-closed.fill.svg */; };
 		FECA2AF8461754BDE1C64A3A /* ph.notches.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 93E8AC09A1F25C88B4B8EF82 /* ph.notches.fill.svg */; };
 		FEEF8D2AFFF08878D3DACA14 /* ph.number-circle-four.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = 98B2B1919E90CC2724BD5011 /* ph.number-circle-four.fill.svg */; };
+		FF0012DB814406E8B62C17A7 /* HomeKitStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F905F4EDD22D9B508D8257 /* HomeKitStates.swift */; };
 		FF01CF9366844BD9A1FCED1E /* ph.sort-ascending.fill.svg in Resources */ = {isa = PBXBuildFile; fileRef = EAC20E24B96804CF093D9A4B /* ph.sort-ascending.fill.svg */; };
 		FF25CD8B209592B505CF8D1F /* ph.dots-six-vertical.svg in Resources */ = {isa = PBXBuildFile; fileRef = C8B1BEA7DCB20C62D4EB59F4 /* ph.dots-six-vertical.svg */; };
 		FF36E975460C9DED20F58DA9 /* ph.number-circle-nine.svg in Resources */ = {isa = PBXBuildFile; fileRef = 477C50074303ED7076E0A238 /* ph.number-circle-nine.svg */; };
@@ -5144,6 +5150,7 @@
 		99CA51F9C591B7170DB1C8C9 /* ph.file-c-sharp.fill.svg */ = {isa = PBXFileReference; path = "ph.file-c-sharp.fill.svg"; sourceTree = "<group>"; };
 		99DC1291FE6F040A1673F599 /* URLSchemeHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandlerTests.swift; sourceTree = "<group>"; };
 		99E43500A1E5F2F18C79A99A /* ph.paint-roller.fill.svg */ = {isa = PBXFileReference; path = "ph.paint-roller.fill.svg"; sourceTree = "<group>"; };
+		99F905F4EDD22D9B508D8257 /* HomeKitStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKitStates.swift; sourceTree = "<group>"; };
 		9A340FC1F6A1200E53DD5374 /* ph.whatsapp-logo.svg */ = {isa = PBXFileReference; path = "ph.whatsapp-logo.svg"; sourceTree = "<group>"; };
 		9A3F0C857A01E91DBCB30C57 /* ph.wave-sine.fill.svg */ = {isa = PBXFileReference; path = "ph.wave-sine.fill.svg"; sourceTree = "<group>"; };
 		9A4726BF0DD1372C7DFFE39D /* ph.file-tsx.svg */ = {isa = PBXFileReference; path = "ph.file-tsx.svg"; sourceTree = "<group>"; };
@@ -5729,6 +5736,7 @@
 		C873127B27E416ED46192A7F /* ph.person.svg */ = {isa = PBXFileReference; path = ph.person.svg; sourceTree = "<group>"; };
 		C87E5B7FC408A2B07CC4CCB1 /* ph.line-vertical.svg */ = {isa = PBXFileReference; path = "ph.line-vertical.svg"; sourceTree = "<group>"; };
 		C88E21904D7D4D5CC69C3EBD /* ph.globe-x.svg */ = {isa = PBXFileReference; path = "ph.globe-x.svg"; sourceTree = "<group>"; };
+		C89601E207FEBA59AF221472 /* WebhookResponses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebhookResponses.swift; sourceTree = "<group>"; };
 		C8A3A2F180675D8F3D7DCF8C /* ph.castle-turret.fill.svg */ = {isa = PBXFileReference; path = "ph.castle-turret.fill.svg"; sourceTree = "<group>"; };
 		C8B1BEA7DCB20C62D4EB59F4 /* ph.dots-six-vertical.svg */ = {isa = PBXFileReference; path = "ph.dots-six-vertical.svg"; sourceTree = "<group>"; };
 		C8B8EC66CCC4FFDEA62DEFC2 /* ph.map-pin.fill.svg */ = {isa = PBXFileReference; path = "ph.map-pin.fill.svg"; sourceTree = "<group>"; };
@@ -6024,6 +6032,7 @@
 		E15398449AADCE77CED3B6E4 /* ph.disco-ball.fill.svg */ = {isa = PBXFileReference; path = "ph.disco-ball.fill.svg"; sourceTree = "<group>"; };
 		E16D784C114B823EDDD7A9CB /* ph.microsoft-excel-logo.svg */ = {isa = PBXFileReference; path = "ph.microsoft-excel-logo.svg"; sourceTree = "<group>"; };
 		E18347A709F424AEE781FD9A /* ph.parallelogram.fill.svg */ = {isa = PBXFileReference; path = ph.parallelogram.fill.svg; sourceTree = "<group>"; };
+		E1852A78644B4B1C92FE7EA2 /* WebhookServer+Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebhookServer+Endpoints.swift"; sourceTree = "<group>"; };
 		E18682E0976FE78D47720307 /* ph.currency-kzt.svg */ = {isa = PBXFileReference; path = "ph.currency-kzt.svg"; sourceTree = "<group>"; };
 		E1885F6D9D5D8C8336FE574C /* ph.letter-circle-v.fill.svg */ = {isa = PBXFileReference; path = "ph.letter-circle-v.fill.svg"; sourceTree = "<group>"; };
 		E198D11F2BF020820B61F59B /* ph.hand-fist.svg */ = {isa = PBXFileReference; path = "ph.hand-fist.svg"; sourceTree = "<group>"; };
@@ -6517,7 +6526,10 @@
 		36CD3B99DB0861416CF68E0A /* Webhook */ = {
 			isa = PBXGroup;
 			children = (
+				99F905F4EDD22D9B508D8257 /* HomeKitStates.swift */,
+				C89601E207FEBA59AF221472 /* WebhookResponses.swift */,
 				CE0096925C98FD6B955AB016 /* WebhookServer.swift */,
+				E1852A78644B4B1C92FE7EA2 /* WebhookServer+Endpoints.swift */,
 			);
 			path = Webhook;
 			sourceTree = "<group>";
@@ -9856,7 +9868,7 @@
 			);
 			mainGroup = E4D0AC95AB41872138D6349D;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -12981,6 +12993,7 @@
 				928B430CE987288FFB32D1C5 /* GroupMenuItem+StateManagement.swift in Sources */,
 				5400908F7EA3B99BACF94081 /* GroupMenuItem.swift in Sources */,
 				823ABDFECC4D6E3E63AC3E02 /* HighlightingMenuItemView.swift in Sources */,
+				FF0012DB814406E8B62C17A7 /* HomeKitStates.swift in Sources */,
 				B6E0BA859343F2AC750C12D5 /* HotkeyManager.swift in Sources */,
 				2FA906D09DF2D10CD127C5EB /* HumidifierMenuItem.swift in Sources */,
 				243C3F0D744EDDE9D9608B3C /* IconMapping.swift in Sources */,
@@ -13028,6 +13041,8 @@
 				1F40AE6DB3424BCC0EC82C42 /* URLSchemeHandler.swift in Sources */,
 				93F37AF55F715D6075134E69 /* ValueConversion.swift in Sources */,
 				CCFB8C68628CB06195CD5CBB /* ValveMenuItem.swift in Sources */,
+				0C57D09568CED9F45FD2EBE7 /* WebhookResponses.swift in Sources */,
+				5356F633677BBC4303ACA417 /* WebhookServer+Endpoints.swift in Sources */,
 				6E332413D206C25EBCCC03DF /* WebhookServer.swift in Sources */,
 				13236318334A338D80E0C741 /* WebhooksSection.swift in Sources */,
 			);
@@ -13074,6 +13089,7 @@
 				D52FC9FF60F9BDCB530C7763 /* GroupMenuItem+StateManagement.swift in Sources */,
 				38F444AACFBC37487F3A5204 /* GroupMenuItem.swift in Sources */,
 				610C502AF5144D05B01A8278 /* HighlightingMenuItemView.swift in Sources */,
+				3E904AA6D16A4527717E6874 /* HomeKitStates.swift in Sources */,
 				550336C45D91454C7E897346 /* HumidifierMenuItem.swift in Sources */,
 				94273944DF857DAB8033C945 /* HumidifierMenuItemTests.swift in Sources */,
 				6C54534AB061917B6EB6D307 /* IconMapping.swift in Sources */,
@@ -13120,6 +13136,8 @@
 				069D686EF497B4BE291ED8F9 /* ValueConversionTests.swift in Sources */,
 				1539311789FA41246C3F438C /* ValveMenuItem.swift in Sources */,
 				21E1F6CE76E069D99FB6F811 /* ValveMenuItemTests.swift in Sources */,
+				56966DAD1F7822B3F00291AE /* WebhookResponses.swift in Sources */,
+				74C6D156EF4A0EF696E83996 /* WebhookServer+Endpoints.swift in Sources */,
 				91DC242EDBAC2B3ADF8BE6B3 /* WebhookServer.swift in Sources */,
 				0554ECE0D0F5808206BF4215 /* WebhookServerTests.swift in Sources */,
 			);

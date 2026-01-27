@@ -313,6 +313,11 @@ public struct MenuData: Codable {
         self.hasCameras = hasCameras
         self.cameras = cameras
     }
+
+    /// Creates a lookup dictionary mapping room unique identifiers to room names
+    public func roomLookup() -> [String: String] {
+        Dictionary(uniqueKeysWithValues: rooms.map { ($0.uniqueIdentifier, $0.name) })
+    }
 }
 
 // MARK: - Legacy Obj-C classes (for protocol compatibility)

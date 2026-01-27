@@ -38,7 +38,7 @@ struct CloudSyncTranslator {
     }
 
     mutating func updateMenuData(_ data: MenuData) {
-        let roomLookup = Dictionary(uniqueKeysWithValues: data.rooms.map { ($0.uniqueIdentifier, $0.name) })
+        let roomLookup = data.roomLookup()
 
         serviceIdToStable.removeAll()
         stableToServiceId.removeAll()

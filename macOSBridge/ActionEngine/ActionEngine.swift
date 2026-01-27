@@ -273,6 +273,13 @@ class ActionEngine {
             return false
         }
         let clampedValue = max(0, min(100, value))
+
+        // Explicitly set power state to ensure light turns on/off with brightness
+        // HomeKit spec leaves this behavior to the accessory, so we be explicit
+        if let powerIdString = service.powerStateId, let powerId = UUID(uuidString: powerIdString) {
+            bridge.writeCharacteristic(identifier: powerId, value: clampedValue > 0)
+        }
+
         bridge.writeCharacteristic(identifier: id, value: clampedValue)
         return true
     }

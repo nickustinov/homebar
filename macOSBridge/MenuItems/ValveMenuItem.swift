@@ -60,7 +60,7 @@ class ValveMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
         containerView.addSubview(toggleSwitch)
 
         // In Use indicator (small dot before toggle)
-        let indicatorSize: CGFloat = 8
+        let indicatorSize: CGFloat = 6
         let indicatorX = switchX - indicatorSize - DS.Spacing.sm
         let indicatorY = (DS.ControlSize.menuItemHeight - indicatorSize) / 2
         inUseIndicator = NSView(frame: NSRect(x: indicatorX, y: indicatorY, width: indicatorSize, height: indicatorSize))

@@ -2,7 +2,7 @@
 //  HumidifierMenuItemTests.swift
 //  macOSBridgeTests
 //
-//  Tests for HumidifierMenuItem including swing mode and water level
+//  Tests for HumidifierMenuItem
 //
 
 import XCTest
@@ -20,8 +20,7 @@ final class HumidifierMenuItemTests: XCTestCase {
         humidityId: UUID? = UUID(),
         humidifierThresholdId: UUID? = nil,
         dehumidifierThresholdId: UUID? = nil,
-        swingModeId: UUID? = nil,
-        waterLevelId: UUID? = nil
+        swingModeId: UUID? = nil
     ) -> ServiceData {
         ServiceData(
             uniqueIdentifier: UUID(),
@@ -35,8 +34,7 @@ final class HumidifierMenuItemTests: XCTestCase {
             currentHumidifierDehumidifierStateId: currentHumidifierDehumidifierStateId,
             targetHumidifierDehumidifierStateId: targetHumidifierDehumidifierStateId,
             humidifierThresholdId: humidifierThresholdId,
-            dehumidifierThresholdId: dehumidifierThresholdId,
-            waterLevelId: waterLevelId
+            dehumidifierThresholdId: dehumidifierThresholdId
         )
     }
 
@@ -99,14 +97,6 @@ final class HumidifierMenuItemTests: XCTestCase {
         XCTAssertTrue(menuItem.characteristicIdentifiers.contains(swingId))
     }
 
-    func testCharacteristicIdentifiersContainsWaterLevelId() {
-        let waterLevelId = UUID()
-        let serviceData = createTestServiceData(waterLevelId: waterLevelId)
-        let menuItem = HumidifierMenuItem(serviceData: serviceData, bridge: nil)
-
-        XCTAssertTrue(menuItem.characteristicIdentifiers.contains(waterLevelId))
-    }
-
     func testCharacteristicIdentifiersContainsAllWhenAllPresent() {
         let activeId = UUID()
         let humidityId = UUID()
@@ -115,7 +105,6 @@ final class HumidifierMenuItemTests: XCTestCase {
         let humidifierThresholdId = UUID()
         let dehumidifierThresholdId = UUID()
         let swingId = UUID()
-        let waterLevelId = UUID()
 
         let serviceData = createTestServiceData(
             activeId: activeId,
@@ -124,8 +113,7 @@ final class HumidifierMenuItemTests: XCTestCase {
             humidityId: humidityId,
             humidifierThresholdId: humidifierThresholdId,
             dehumidifierThresholdId: dehumidifierThresholdId,
-            swingModeId: swingId,
-            waterLevelId: waterLevelId
+            swingModeId: swingId
         )
         let menuItem = HumidifierMenuItem(serviceData: serviceData, bridge: nil)
 
@@ -136,7 +124,6 @@ final class HumidifierMenuItemTests: XCTestCase {
         XCTAssertTrue(menuItem.characteristicIdentifiers.contains(humidifierThresholdId))
         XCTAssertTrue(menuItem.characteristicIdentifiers.contains(dehumidifierThresholdId))
         XCTAssertTrue(menuItem.characteristicIdentifiers.contains(swingId))
-        XCTAssertTrue(menuItem.characteristicIdentifiers.contains(waterLevelId))
     }
 
     // MARK: - Value update tests
@@ -179,16 +166,6 @@ final class HumidifierMenuItemTests: XCTestCase {
 
         // 0 = DISABLED, 1 = ENABLED
         menuItem.updateValue(for: swingId, value: 1)
-
-        XCTAssertNotNil(menuItem.view)
-    }
-
-    func testUpdateWaterLevelValue() {
-        let waterLevelId = UUID()
-        let serviceData = createTestServiceData(waterLevelId: waterLevelId)
-        let menuItem = HumidifierMenuItem(serviceData: serviceData, bridge: nil)
-
-        menuItem.updateValue(for: waterLevelId, value: 65.0)
 
         XCTAssertNotNil(menuItem.view)
     }

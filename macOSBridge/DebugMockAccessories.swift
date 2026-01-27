@@ -59,6 +59,13 @@ enum DebugMockups {
                         humidifierItem.updateValue(for: humidityId, value: 45.0)
                     }
                 }
+
+                if let valveItem = item as? ValveMenuItem,
+                   let inUseIdStr = service.inUseId,
+                   let inUseId = UUID(uuidString: inUseIdStr) {
+                    // Mock valve is "in use" (water flowing)
+                    valveItem.updateValue(for: inUseId, value: true)
+                }
             }
         }
         menu.addItem(NSMenuItem.separator())

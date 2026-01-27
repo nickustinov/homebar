@@ -94,7 +94,8 @@ class SlatMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefreshab
         tiltSlider.frame = NSRect(x: sliderX, y: sliderY, width: sliderWidth, height: 12)
         tiltSlider.doubleValue = 0
         tiltSlider.isContinuous = false
-        tiltSlider.progressTintColor = DS.Colors.sliderFan
+        tiltSlider.progressTintColor = .systemGreen
+        tiltSlider.centeredMode = true
         containerView.addSubview(tiltSlider)
 
         super.init(title: serviceData.name, action: nil, keyEquivalent: "")

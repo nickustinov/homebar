@@ -119,12 +119,13 @@ class BlindMenuItem: NSMenuItem, CharacteristicUpdatable, CharacteristicRefresha
             containerView.addSubview(tiltLabelView)
             tiltLabel = tiltLabelView
 
-            // Tilt slider (-90 to 90, but we use 0-100 for display where 50 = 0°)
+            // Tilt slider (-90 to 90, centered mode fills from center outward)
             let tiltSliderView = ModernSlider(minValue: -90, maxValue: 90)
             tiltSliderView.frame = NSRect(x: sliderX, y: row2Y, width: sliderWidth, height: 12)
             tiltSliderView.doubleValue = 0
             tiltSliderView.isContinuous = false
-            tiltSliderView.progressTintColor = DS.Colors.sliderFan
+            tiltSliderView.progressTintColor = .systemGreen
+            tiltSliderView.centeredMode = true
             containerView.addSubview(tiltSliderView)
             tiltSlider = tiltSliderView
         }

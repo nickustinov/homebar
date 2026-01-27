@@ -48,6 +48,11 @@ class ModernSlider: NSControl {
         didSet { updateColors() }
     }
 
+    /// When true, progress fills from center outward instead of from left edge
+    var centeredMode: Bool = false {
+        didSet { layoutLayers() }
+    }
+
     private let trackLayer = CALayer()
     private let progressLayer = CALayer()
     private let thumbShadowLayer = CALayer()
@@ -140,9 +145,26 @@ class ModernSlider: NSControl {
         thumbShadowLayer.backgroundColor = NSColor.white.cgColor
         thumbLayer.frame = thumbFrame
 
-        // Progress frame
-        let progressWidth = CGFloat(progress) * trackWidth
-        progressLayer.frame = CGRect(x: trackX, y: trackY, width: progressWidth, height: trackHeight)
+        // Progress frame - centered mode fills from center, normal mode fills from left
+        if centeredMode {
+            let centerValue = (minValue + maxValue) / 2
+            let centerProgress = (centerValue - minValue) / (maxValue - minValue)
+            let centerX = trackX + CGFloat(centerProgress) * trackWidth
+
+            if doubleValue >= centerValue {
+                // Fill from center to right
+                let progressWidth = CGFloat(progress - centerProgress) * trackWidth
+                progressLayer.frame = CGRect(x: centerX, y: trackY, width: progressWidth, height: trackHeight)
+            } else {
+                // Fill from current position to center (left of center)
+                let progressX = trackX + CGFloat(progress) * trackWidth
+                let progressWidth = centerX - progressX
+                progressLayer.frame = CGRect(x: progressX, y: trackY, width: progressWidth, height: trackHeight)
+            }
+        } else {
+            let progressWidth = CGFloat(progress) * trackWidth
+            progressLayer.frame = CGRect(x: trackX, y: trackY, width: progressWidth, height: trackHeight)
+        }
 
         CATransaction.commit()
     }
